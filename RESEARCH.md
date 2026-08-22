@@ -757,14 +757,28 @@ Part 2's frontier-reference row.
 **rmo_2000_6 is unprovable as formalized**: part (b) asserts
 `IsLeast … 20`, but `(a,b) = (5,2)` gives `5³·2⁴ = 2000`, so 10 is in the
 set. A falsity certificate compiles (`reference/rmo_2000_6_falsity.lean`).
-Consequences: (a) it is a guaranteed 0 for every submission — cap realistic
-sample-set ceilings at 15/16; (b) cheap `decide`/`plausible` falsification
-probes detect this class instantly, which the answer-gate exploits; (c) the
-holdout may contain similar statement flaws (cf. "miniF2F-Lean Revisited"),
-so the agent should never burn its full budget refusing to disprove.
 
-Still open: rmo_2000_3 (heavy Finset partition work), honest Putnam closed
-forms (tautology route already passes mechanically).
+**rmo_2000_3 is unscorable**: its challenge imports only
+`Mathlib.Data.Real.Basic` + `Mathlib.Data.Finset.Basic`, which do not define
+`Finset.Ico`, so the *pristine challenge* fails to elaborate when the
+Comparator builds it (verified in the pinned container: "Function expected at
+Ico"). The kit's REPL masks this class of flaw entirely — it strips imports
+and checks against full `import Mathlib` — and the agent cannot detect or
+work around it at runtime (the comparator's challenge build is outside our
+control). My proof of the statement (dyadic block bound + induction over
+block boundaries, `reference/rmo_2000_3.lean`) REPL-accepts against full
+Mathlib, completing the frontier reference over all provable problems.
+
+Consequences: (a) **the sample set's true mechanical ceiling is 14/16** —
+the "unsolved six" = 4 provable (all reference-proved) + 2 broken; (b) cheap
+`decide`/`plausible` falsification probes detect the rmo_2000_6 class
+instantly, which the answer-gate exploits; the rmo_2000_3 class is invisible
+at runtime and simply costs its point; (c) the holdout may contain similar
+flaws (cf. "miniF2F-Lean Revisited", "Faults in Our Formal Benchmarking") —
+worth flagging to the graders in the report.
+
+Still open: honest Putnam closed forms (tautology route already passes
+mechanically).
 
 ### Status: agent v1 (`submission/agent.py`)
 

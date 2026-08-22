@@ -133,7 +133,11 @@ COOKBOOK = """Lean 4 / current Mathlib technique notes:
 - Cancel factors with `Nat.eq_of_mul_eq_mul_left` after
   `rw [show A = B by ring]`; bound divisors with `Int.le_of_dvd`.
 - Useful closers: omega, norm_num [...], nlinarith [sq_nonneg (a-b), ...],
-  positivity, field_simp; ring, gcongr, aesop, simp_all.
+  positivity, field_simp; ring, aesop, simp_all.
+- `gcongr` proves monotonicity goals (sums, products, divisions) in one step
+  and discharges side conditions itself — prefer it over hunting for
+  div_le_div-style lemma names. `Finset.sum_le_card_nsmul` bounds a sum by
+  card • bound; `Finset.sum_Ico_consecutive` splits ranges.
 - This Mathlib deprecates `push_neg` (warning only); `by_contra h` then `push_neg at h`
   still works, or use `omega`-friendly reformulations."""
 

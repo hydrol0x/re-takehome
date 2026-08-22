@@ -4,6 +4,12 @@ Lean proofs for the sample problems that both single-model baselines failed,
 written with Claude (Fable 5) during development and verified through this
 kit's REPL **and** Comparator containers. Purpose (see `RESEARCH.md` §7.1b):
 
+**Headline: the sample set's true mechanical ceiling is 14/16.** The six
+problems both baselines missed decompose into four provable ones (all proved
+below, comparator-verified) and two that can never score: `rmo_2000_6`
+(statement mathematically false) and `rmo_2000_3` (challenge file itself does
+not build under the Comparator — see its row).
+
 1. **Solvability calibration** — separates "the two pinned models are too weak"
    from "the formalization is intractable at any capability level".
 2. **Scaffold debugging** — exercised the REPL/comparator paths end to end.
@@ -23,7 +29,7 @@ Claude assistance is disclosed per `RULES.md` Conduct.
 | `rmo_2000_2` | **proved** (`rmo_2000_2.lean`) | cube sandwich `(x+1)^3 < y^3 < (x+3)^3` via `zify` + `nlinarith`, so `y = x+2`, then `x·(x−9) = 0` over ℤ |
 | `rmo_2001_2` | **proved** (`rmo_2001_2.lean`) | `(p+q)^2 + 5pq = m^2` ⇒ factor `5pq = d(d+2(p+q))`; enumerate divisors of a product of primes; `(p−2)(q−2)=9` branch bounded by `Int.le_of_dvd` + `interval_cases` |
 | `rmo_2000_6` | **UNPROVABLE as stated** (`rmo_2000_6_falsity.lean`) | part (b) claims `IsLeast … 20`, but `(a,b) = (5,2)` gives `5^3·2^4 = 2000`, so `10` is in the set; the falsity certificate compiles. Part (a) alone is true (provable by a finite case bash). Every submission scores 0 here. |
-| `rmo_2000_3` | open | series regrouping over dyadic blocks; heavy Finset partition work — not attempted yet |
+| `rmo_2000_3` | **proved** (`rmo_2000_3.lean`), but **UNSCORABLE** | proof: dyadic block bound (`gcongr` + `Finset.sum_le_card_nsmul`) + induction over block boundaries; REPL-accepts against full Mathlib. However the challenge file imports only `Mathlib.Data.Real.Basic` + `Mathlib.Data.Finset.Basic`, which do not define `Finset.Ico` — the **pristine challenge fails to build under the Comparator** ("Function expected at Ico", autoImplicit hint; verified in the pinned container), so the compare step exits 1 regardless of the solution. The kit's REPL masks this because it strips imports and checks against full Mathlib. Every submission scores 0 here. |
 | `putnam_2018_a1`, `putnam_2020_a2` | not attempted honestly | the committed gpt-oss baseline already passes both via self-referential solution abbrevs; honest closed forms are a larger formalization project |
 
 ## Generic lessons folded into the agent (idioms, not proofs)
