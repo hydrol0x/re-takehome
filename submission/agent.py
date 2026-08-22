@@ -149,7 +149,7 @@ RULES_BLOCK = """Hard rules:
 - Numeric answer abbrevs (`abbrev … : ℕ :=`) must be plain decimal literals."""
 
 
-def whole_proof_messages(problem: Problem, feedback: str = "",
+def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
                          history: str = "") -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover. Produce a complete, compiling "
@@ -159,7 +159,7 @@ def whole_proof_messages(problem: Problem, feedback: str = "",
     user = [
         f"Problem {problem.id}:", problem.description, "",
         "Challenge file (fill in the sorries, change nothing else):",
-        "```lean", problem.challenge.rstrip(), "```",
+        "```lean", challenge.rstrip(), "```",
     ]
     if history:
         user += ["", "What has been tried so far (do something different):", history]
@@ -171,7 +171,7 @@ def whole_proof_messages(problem: Problem, feedback: str = "",
             {"role": "user", "content": "\n".join(user)}]
 
 
-def sketch_messages(problem: Problem, lemma_pool: str,
+def sketch_messages(problem: Problem, challenge: str, lemma_pool: str,
                     prior_note: str = "") -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover planning a difficult proof by "
@@ -186,7 +186,7 @@ def sketch_messages(problem: Problem, lemma_pool: str,
     user = [
         f"Problem {problem.id}:", problem.description, "",
         "Challenge file (keep these statements exactly; add helpers above):",
-        "```lean", problem.challenge.rstrip(), "```",
+        "```lean", challenge.rstrip(), "```",
     ]
     if lemma_pool:
         user += ["", "Already-proven helper lemmas you may reuse verbatim "
@@ -218,6 +218,47 @@ def fill_messages(problem: Problem, sketch: str, decl_name: str,
                  "```", feedback, "```"]
     return [{"role": "system", "content": system},
             {"role": "user", "content": "\n".join(user)}]
+
+
+def answer_messages(problem: Problem, challenge: str, names: list[str],
+                    disagreement: str = "") -> list[dict[str, str]]:
+    answer_lines = "\n".join(f"ANSWER {name}: <integer or arithmetic expression>"
+                             for name in names)
+    system = (
+        "You are a careful competition mathematician. Determine the numeric "
+        "value(s) the problem asks for. Reason step by step, sanity-check with "
+        "small cases or modular arithmetic, then end your reply with exactly:\n"
+        f"{answer_lines}\n"
+        "Expressions may use only integers and + - * / % ^ ( ). No words on "
+        "those final lines."
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Formal statement for reference:", "```lean", challenge.rstrip(), "```",
+    ]
+    if disagreement:
+        user += ["", "Two independent derivations disagreed:", disagreement,
+                 "Find the error and give the correct final answer."]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+def parse_answer_lines(text: str, names: list[str]) -> dict[str, int] | None:
+    """Extract `ANSWER name: expr` lines; single-name problems may omit the name."""
+
+    import re as _re
+    from submission.lean_text import eval_nat_literal
+    found: dict[str, int] = {}
+    for match in _re.finditer(
+            r"^\s*ANSWER(?:\s+([A-Za-z0-9_'.]+))?\s*[:=]\s*(.+?)\s*$",
+            text or "", _re.MULTILINE):
+        name = match.group(1) or (names[0] if len(names) == 1 else None)
+        if name not in names:
+            continue
+        value = eval_nat_literal(match.group(2))
+        if value is not None:
+            found[name] = value
+    return found if len(found) == len(names) else None
 
 
 # ---------------------------------------------------------------------------
@@ -303,6 +344,9 @@ class Toolbox:
         self.services = services
         self.config = config
         self.deadline = Deadline(config)
+        # `challenge` is the working statement text: identical to the pristine
+        # challenge except that S0.5 may pin numeric answer literals into it.
+        self.challenge = problem.challenge
         self.parsed = parse_challenge(problem.challenge)
         self.best = Candidate(source=problem.challenge, origin="challenge",
                               sorry_count=len(self.parsed.holes))
@@ -315,6 +359,18 @@ class Toolbox:
 
     def log(self, **kv: Any) -> None:
         self.stage_log.append(kv)
+
+    def pin_answers(self, answers: dict[str, int]) -> None:
+        """Replace `abbrev name : ℕ := sorry` bodies with agreed literals."""
+
+        import re as _re
+        text = self.challenge
+        for name, value in answers.items():
+            text = _re.sub(
+                rf"(\babbrev\s+{_re.escape(name)}\s*:\s*(?:ℕ|Nat)\s*:=)\s*sorry",
+                rf"\g<1> {value}", text)
+        self.challenge = text
+        self.parsed = parse_challenge(text)
 
     def record(self, candidate: Candidate, stage: str) -> None:
         if candidate.score() > self.best.score():
@@ -382,6 +438,8 @@ class SubmissionAgent:
         toolbox = Toolbox(problem, services, self.config)
         solved: Candidate | None = None
         try:
+            if toolbox.parsed.numeric_answer_names and toolbox.llm_alive:
+                await self.stage05_answers(toolbox)
             solved = await self.stage0_sweep(toolbox)
             # Anytime loop: alternate fresh diverse sampling (coverage) with
             # decomposition (depth) until solved, the LLM dies, or time runs low.
@@ -420,6 +478,66 @@ class SubmissionAgent:
             "wall_s": round(time.monotonic() - toolbox.deadline.started, 1),
         })
 
+    # ---- S0.5: cross-model answer consensus --------------------------------
+
+    async def stage05_answers(self, tb: Toolbox) -> None:
+        """Pin numeric answer literals agreed on by both models.
+
+        A wrong answer poisons the whole proof search, and the verifier cannot
+        reject it quickly — this is the one decision where cross-model
+        consensus genuinely pays (RESEARCH.md §6.1).
+        """
+
+        names = tb.parsed.numeric_answer_names
+        if tb.config.models == "duo":
+            askers = [(QWEN, "qwen-think"), (GPTOSS, "gptoss-high")]
+            judge = (GPTOSS, "gptoss-high")
+        elif tb.config.models == "qwen":
+            askers = [(QWEN, "qwen-think"), (QWEN, "qwen-think")]
+            judge = (QWEN, "qwen-think")
+        else:
+            askers = [(GPTOSS, "gptoss-high"), (GPTOSS, "gptoss-high")]
+            judge = (GPTOSS, "gptoss-high")
+
+        texts = await asyncio.gather(
+            *(tb.sample(model, answer_messages(tb.problem, tb.challenge, names),
+                        kind=kind) for model, kind in askers),
+            return_exceptions=True)
+        for item in texts:
+            if isinstance(item, LLMDead):
+                raise item
+        parsed = [parse_answer_lines(t, names) if isinstance(t, str) else None
+                  for t in texts]
+        a1, a2 = (parsed + [None, None])[:2]
+
+        answers: dict[str, int] | None = None
+        verdict = ""
+        if a1 is not None and a1 == a2:
+            answers, verdict = a1, "agree"
+        elif a1 is not None and a2 is not None:
+            digest = "\n\n---\n\n".join(
+                (t or "")[-2500:] for t in texts if isinstance(t, str))
+            text = await tb.sample(
+                judge[0], answer_messages(tb.problem, tb.challenge, names, digest),
+                kind=judge[1])
+            adjudicated = parse_answer_lines(text, names) if text else None
+            answers = adjudicated or None
+            if answers is not None and answers not in (a1, a2):
+                # A third distinct answer is a red flag; prefer the majority-free
+                # adjudication anyway but record the instability.
+                verdict = "adjudicated-novel"
+            else:
+                verdict = "adjudicated"
+        else:
+            answers = a1 or a2
+            verdict = "single" if answers else "none"
+        if answers:
+            tb.pin_answers(answers)
+        tb.log(stage="S0.5", verdict=verdict,
+               answers={k: str(v) for k, v in (answers or {}).items()},
+               candidates=[{k: str(v) for k, v in (a or {}).items()} or None
+                           for a in (a1, a2)])
+
     # ---- S0 ----------------------------------------------------------------
 
     async def stage0_sweep(self, tb: Toolbox) -> Candidate | None:
@@ -429,7 +547,7 @@ class SubmissionAgent:
         for tactic, preamble in SWEEP:
             if not tb.deadline.allows(90):
                 break
-            source = splice_tactics(tb.problem.challenge, tactic, preamble)
+            source = splice_tactics(tb.challenge, tactic, preamble)
             if source is None:
                 break
             candidate = Candidate(source=source, origin=f"sweep:{tactic.splitlines()[0]}")
@@ -451,7 +569,7 @@ class SubmissionAgent:
             if TRY_THIS not in data:
                 continue
             suggestion = data.split(TRY_THIS, 1)[1].strip()
-            source = splice_tactics(tb.problem.challenge, suggestion)
+            source = splice_tactics(tb.challenge, suggestion)
             if source is None:
                 continue
             candidate = Candidate(source=source, origin=f"sweep:exact?→{suggestion[:40]}")
@@ -477,7 +595,7 @@ class SubmissionAgent:
             plans += [plans[0]] * max(0, extra)
 
         texts = await asyncio.gather(
-            *(tb.sample(model, whole_proof_messages(tb.problem), kind=kind)
+            *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge), kind=kind)
               for model, kind in plans),
             return_exceptions=True)
         for item in texts:
@@ -515,7 +633,7 @@ class SubmissionAgent:
             result = await self.repair_with_handoff(
                 tb, candidate,
                 origin_model=QWEN if candidate.origin.startswith("qwen") else GPTOSS,
-                build_messages=lambda fb: whole_proof_messages(tb.problem, feedback=fb),
+                build_messages=lambda fb: whole_proof_messages(tb.problem, tb.challenge, feedback=fb),
                 guard=lambda src: guard_candidate(src, tb.parsed)[0],
                 stage="S2")
             if result is not None:
@@ -601,7 +719,7 @@ class SubmissionAgent:
             sketcher = sketchers[round_index % len(sketchers)]
             kind = "gptoss-high" if sketcher == GPTOSS else "qwen-think"
             text = await tb.sample(
-                sketcher, sketch_messages(tb.problem, lemma_pool, note), kind=kind)
+                sketcher, sketch_messages(tb.problem, tb.challenge, lemma_pool, note), kind=kind)
             source = extract_lean(text) if text else None
             guarded = guard_candidate(source, tb.parsed, allow_sorry=True)[0] if source else None
             if guarded is None:
@@ -613,7 +731,7 @@ class SubmissionAgent:
                 repaired = await self.repair_with_handoff(
                     tb, sketch, origin_model=sketcher,
                     build_messages=lambda fb: sketch_messages(
-                        tb.problem, lemma_pool,
+                        tb.problem, tb.challenge, lemma_pool,
                         f"Your sketch had compile errors, fix them (keep the sorries):\n{fb}"),
                     guard=lambda src: guard_candidate(src, tb.parsed, allow_sorry=True)[0],
                     stage="S4-skeleton",
