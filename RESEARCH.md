@@ -732,6 +732,48 @@ interval_cases"), never keyed to specific problems.
 
 ---
 
+## 10. Experiment log
+
+### 2026-08-22 — S0 deterministic sweep, full sample set (zero LLM cost)
+
+`SUBMISSION_DISABLE_LLM=1`, 900 s cap, 2 workers. **6/16 passed, $0.000000,
+~45 s/problem**: p01–p05, p08. Winning tactics: `linarith` (p01, p02),
+`nlinarith [sq_nonneg …]` generic hints (p03, p08), plain `nlinarith` (p04),
+plain `norm_num` (p05 — which the qwen baseline failed in 25 paid turns).
+`judge_check.sh` passes end-to-end on the S0 path alone.
+Implication: the free tier already covers the easy third of a holdout-like
+mix; every LLM dollar goes to the middle and hard tiers.
+
+### 2026-08-22 — Frontier reference proofs (Claude-written, comparator-verified)
+
+Four of the six both-baselines-failed problems are now **proved** and pass the
+Comparator on the pinned image (see `reference/`): p09 (mod-cycle lemma +
+omega case bash), p10 (answer 6 + `Nat.le_induction` bound), rmo_2000_2
+(cube sandwich via zify/nlinarith), rmo_2001_2 (divisor-pair analysis with a
+reusable `dvd_prime_mul_prime` helper). Each took 1–3 REPL iterations —
+evidence that the S4 sketch shapes are right, and a measured ceiling for
+Part 2's frontier-reference row.
+
+**rmo_2000_6 is unprovable as formalized**: part (b) asserts
+`IsLeast … 20`, but `(a,b) = (5,2)` gives `5³·2⁴ = 2000`, so 10 is in the
+set. A falsity certificate compiles (`reference/rmo_2000_6_falsity.lean`).
+Consequences: (a) it is a guaranteed 0 for every submission — cap realistic
+sample-set ceilings at 15/16; (b) cheap `decide`/`plausible` falsification
+probes detect this class instantly, which the answer-gate exploits; (c) the
+holdout may contain similar statement flaws (cf. "miniF2F-Lean Revisited"),
+so the agent should never burn its full budget refusing to disprove.
+
+Still open: rmo_2000_3 (heavy Finset partition work), honest Putnam closed
+forms (tautology route already passes mechanically).
+
+### Status: agent v1 (`submission/agent.py`)
+
+Rails + S0 sweep + S1 pooled sampling + S2 repair with deterministic
+error→fix rules implemented; arm switch (`SUBMISSION_MODELS=duo|qwen|gptoss`)
+for Part-2 experiments; `scripts/calibrate.py` ready for the first keyed run.
+S1/S2/S3/S4 live validation blocked on OpenRouter key availability in the
+execution environment.
+
 ## Appendix A: source-of-truth pointers (repo)
 
 - Landmines: `src/re_harness/llm.py:134-186` (reservation, mark_unknown),
