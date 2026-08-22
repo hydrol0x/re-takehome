@@ -780,13 +780,21 @@ worth flagging to the graders in the report.
 Still open: honest Putnam closed forms (tautology route already passes
 mechanically).
 
-### Status: agent v1 (`submission/agent.py`)
+### Status: agent v2 (`submission/agent.py` + `submission/lean_text.py`)
 
-Rails + S0 sweep + S1 pooled sampling + S2 repair with deterministic
-error→fix rules implemented; arm switch (`SUBMISSION_MODELS=duo|qwen|gptoss`)
-for Part-2 experiments; `scripts/calibrate.py` ready for the first keyed run.
-S1/S2/S3/S4 live validation blocked on OpenRouter key availability in the
-execution environment.
+Implemented and offline-verified against the live REPL/Comparator containers:
+rails (self-deadline, ledger-death degradation, checkpointing), statement
+splicing + lexical guards + `#print axioms` audit gate (catches
+`native_decide` — verified live), S0 sweep, **S0.5 cross-model answer
+consensus with literal pinning** (verified end-to-end on p06: two answer
+calls + free `decide`), S1 pooled sampling, S2 capped repair with
+deterministic error→fix rules, S3 plateau handoff (error-signature
+fingerprints), S4 sketch/fill with per-problem lemma pool and restart
+heuristic, anytime outer loop, arm switch for Part-2
+(`SUBMISSION_MODELS=duo|qwen|gptoss`). 13 offline unit tests + mock-LLM
+end-to-end tests; `judge_check.sh` green on the free path ($0.00).
+Live S1–S4 validation blocked only on OpenRouter key availability in the
+execution environment (see RUNBOOK.md for the keyed-run sequence).
 
 ## Appendix A: source-of-truth pointers (repo)
 
