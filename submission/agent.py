@@ -1,42 +1,56 @@
-"""Two-model coordination agent (v1: rails + deterministic sweep + pooled sampling + repair).
+"""Two-model coordination agent: escalating ladder with cross-model interfaces.
 
-Design rationale, evidence, and the staged-ladder plan live in RESEARCH.md.
-This file implements stages S0 (deterministic tactic sweep), S1 (pooled diverse
-sampling from both models), and S2 (short compiler-feedback repair), plus the
-safety rails the harness mechanics demand:
+Stages (design and evidence in RESEARCH.md §6):
+  S0  deterministic tactic sweep (zero LLM cost)
+  S1  pooled diverse whole-proof sampling from both models
+  S2  capped compiler-feedback repair on nearest misses
+  S3  plateau-triggered cross-model handoff (inside the repair loop)
+  S4  sketch/fill decomposition with a per-problem proven-lemma pool
+  S5  finalize: re-verify best, guard, checkpoint, return
 
-- self-managed deadline (the worker's cancel mid-LLM-call would void the score),
-- one-way LLM degradation (any transport error closes the budget ledger, so we
-  fall back to LLM-free mode instead of retrying),
-- statement safety (S0 candidates are spliced into the pristine challenge, so
-  statements are unchanged by construction; LLM candidates are verified against
-  the pristine signatures),
-- lexical bans (sorry/admit/native_decide/axiom never reach the final file),
-- numeric answers normalized to decimal literals,
-- checkpoint on every improvement, finalize before the worker's clock runs out.
+Safety rails (harness mechanics, RESEARCH.md §1):
+  - self-managed soft deadline: the worker's cancel mid-LLM-call zeroes the
+    problem, so no call may outlive our own clock;
+  - one transport error closes the budget ledger for good: LLM failures
+    degrade to LLM-free mode instead of retrying;
+  - statements are never editable: S0/S4 splice into pristine text, model
+    files are checked against pristine signatures;
+  - sorry/admit/native_decide/axiom are lexically banned from final output;
+  - numeric answers are normalized to decimal literals.
 
-Environment knobs (all optional; defaults are the submission configuration):
-  SUBMISSION_MODELS        duo | qwen | gptoss   (part-2 arms; default duo)
-  SUBMISSION_DISABLE_LLM   1 to run S0 only
-  SUBMISSION_QWEN_SAMPLES  int, S1 samples from qwen (default 8)
-  SUBMISSION_GPTOSS_SAMPLES int, S1 samples from gpt-oss (default 2)
-  SUBMISSION_REPAIR_ROUNDS int, S2 rounds per candidate (default 2)
+Environment knobs (defaults are the submission configuration):
+  SUBMISSION_MODELS         duo | qwen | gptoss   (part-2 arms; default duo)
+  SUBMISSION_DISABLE_LLM    1 to run S0 only
+  SUBMISSION_QWEN_SAMPLES   S1 samples from qwen (default 8)
+  SUBMISSION_GPTOSS_SAMPLES S1 samples from gpt-oss (default 2)
+  SUBMISSION_REPAIR_ROUNDS  repair rounds per candidate incl. handoff (default 4)
+  SUBMISSION_SKETCH_ROUNDS  S4 sketch attempts (default 4)
 """
 
 from __future__ import annotations
 
-import ast
 import asyncio
 import os
-import re
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 from re_harness import AgentResult, Problem, Services
 from re_harness.budget import BudgetAccountingError, BudgetExceeded
 from re_harness.llm import LLMCallError, LLMPolicyError
 from re_harness.models import MODEL_A as QWEN, MODEL_B as GPTOSS
+
+from submission.lean_text import (
+    Parsed,
+    error_signature,
+    extract_lean,
+    format_messages,
+    guard_candidate,
+    insert_preamble,
+    parse_challenge,
+    splice_holes,
+    splice_tactics,
+)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -56,14 +70,14 @@ def _env_int(name: str, default: int, lo: int, hi: int) -> int:
 class Config:
     time_limit_s: float
     verify_reserve_s: float
-    models: str  # duo | qwen | gptoss
+    models: str
     disable_llm: bool
     qwen_samples: int
     gptoss_samples: int
     repair_rounds: int
+    sketch_rounds: int
 
-    # Worst-case single-call wall clock; no call starts unless this fits
-    # before the soft deadline (observed: gpt-oss up to ~8 min on hard prompts).
+    # Worst-case single-call wall clock (observed: gpt-oss ~8 min on hard prompts).
     qwen_call_s: float = 300.0
     gptoss_call_s: float = 960.0
     llm_concurrency: int = 3
@@ -79,7 +93,8 @@ class Config:
             disable_llm=os.environ.get("SUBMISSION_DISABLE_LLM", "").strip() == "1",
             qwen_samples=_env_int("SUBMISSION_QWEN_SAMPLES", 8, 0, 64),
             gptoss_samples=_env_int("SUBMISSION_GPTOSS_SAMPLES", 2, 0, 64),
-            repair_rounds=_env_int("SUBMISSION_REPAIR_ROUNDS", 2, 0, 8),
+            repair_rounds=_env_int("SUBMISSION_REPAIR_ROUNDS", 4, 0, 12),
+            sketch_rounds=_env_int("SUBMISSION_SKETCH_ROUNDS", 4, 0, 12),
         )
 
     @property
@@ -89,207 +104,119 @@ class Config:
 
     @property
     def margin_s(self) -> float:
-        # Safety margin before the worker's own cancel fires.
         return min(600.0, max(20.0, self.agent_time_s * 0.12))
 
-
-# ---------------------------------------------------------------------------
-# Challenge parsing and candidate construction
-
-DECL_RE = re.compile(
-    r"^(?P<indent>[ \t]*)(?P<kw>theorem|lemma|abbrev|def|instance)\s+(?P<name>[A-Za-z0-9_'.]+)",
-    re.MULTILINE,
-)
-SORRY_RE = re.compile(r"(?<![A-Za-z0-9_'])sorry(?![A-Za-z0-9_'])")
-BANNED_RE = re.compile(
-    r"(?<![A-Za-z0-9_'])(sorry|admit|native_decide|sorryAx)(?![A-Za-z0-9_'])|^\s*axiom\s",
-    re.MULTILINE,
-)
-FENCE_RE = re.compile(r"```(?:lean4?|Lean4?)?\s*\n(.*?)```", re.DOTALL)
-
-
-@dataclass
-class Hole:
-    """One `sorry` in the pristine challenge."""
-
-    start: int
-    end: int
-    indent: str
-    is_tactic: bool  # preceded (modulo whitespace) by `by`; else a term hole
-
-
-@dataclass
-class Parsed:
-    imports: list[str]
-    holes: list[Hole]
-    decl_names: list[str]
-    signatures: list[str]  # normalized "kw name ... :=" text per sorry-decl
-    numeric_answer_names: list[str]
-
-    @property
-    def has_term_holes(self) -> bool:
-        return any(not hole.is_tactic for hole in self.holes)
-
-
-def parse_challenge(challenge: str) -> Parsed:
-    imports = [line for line in challenge.splitlines() if line.startswith("import ")]
-    holes: list[Hole] = []
-    for match in SORRY_RE.finditer(challenge):
-        before = challenge[: match.start()]
-        line_start = before.rfind("\n") + 1
-        indent = re.match(r"[ \t]*", challenge[line_start:]).group(0)
-        # `... := by\n  sorry` and `... := by sorry` -> tactic; `... := sorry` -> term.
-        # A sorry in any other position (for example inside calc) counts as tactic,
-        # the safest substitution target.
-        stripped = before.rstrip()
-        is_tactic = bool(re.search(r"\bby\b\s*$", stripped)) or not stripped.endswith(":=")
-        holes.append(Hole(match.start(), match.end(), indent, is_tactic))
-    decl_names = [m.group("name") for m in DECL_RE.finditer(challenge)]
-    signatures = []
-    numeric_answers = []
-    decls = list(DECL_RE.finditer(challenge))
-    for i, m in enumerate(decls):
-        seg_end = decls[i + 1].start() if i + 1 < len(decls) else len(challenge)
-        segment = challenge[m.start(): seg_end]
-        assign_at = segment.find(":=")
-        if assign_at >= 0:
-            signatures.append(normalize_ws(segment[: assign_at + 2]))
-        if m.group("kw") == "abbrev" and re.search(r":\s*(ℕ|Nat)\s*:=", segment):
-            numeric_answers.append(m.group("name"))
-    return Parsed(imports, holes, decl_names, signatures, numeric_answers)
-
-
-def normalize_ws(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def splice_tactics(challenge: str, tactic: str, preamble: str = "") -> str | None:
-    """Replace every tactic hole with `tactic`; None if any term hole exists.
-
-    Statements are untouched by construction, which is what makes S0 safe.
-    """
-
-    parsed = parse_challenge(challenge)
-    if not parsed.holes or parsed.has_term_holes:
-        return None
-    out: list[str] = []
-    cursor = 0
-    for hole in parsed.holes:
-        out.append(challenge[cursor: hole.start])
-        lines = tactic.splitlines() or [tactic]
-        block = ("\n" + hole.indent).join(lines)
-        out.append(block)
-        cursor = hole.end
-    out.append(challenge[cursor:])
-    result = "".join(out)
-    if preamble:
-        result = insert_preamble(result, preamble)
-    return result
-
-
-def insert_preamble(source: str, preamble: str) -> str:
-    """Insert set_option lines after the import block."""
-
-    lines = source.splitlines()
-    last_import = -1
-    for i, line in enumerate(lines):
-        if line.startswith("import "):
-            last_import = i
-    lines[last_import + 1: last_import + 1] = ["", preamble.rstrip()]
-    return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
-
-
-def extract_lean(text: str) -> str | None:
-    blocks = FENCE_RE.findall(text or "")
-    if blocks:
-        return blocks[-1].strip() + "\n"
-    stripped = (text or "").strip()
-    at = stripped.find("import ")
-    if at >= 0:
-        return stripped[at:] + "\n"
-    return None
-
-
-SAFE_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.FloorDiv, ast.Mod, ast.Pow)
-
-
-def eval_nat_literal(expr: str) -> int | None:
-    """Safely evaluate an arithmetic ℕ expression (e.g. `2^11 - 1`) to an int."""
-
-    expr = expr.strip().rstrip(";").replace("^", "**")
-    if not re.fullmatch(r"[0-9+\-*/%() \t*]{1,200}", expr):
-        return None
-    try:
-        tree = ast.parse(expr, mode="eval")
-    except SyntaxError:
-        return None
-
-    def walk(node: ast.AST) -> int:
-        if isinstance(node, ast.Expression):
-            return walk(node.body)
-        if isinstance(node, ast.Constant) and isinstance(node.value, int):
-            return node.value
-        if isinstance(node, ast.BinOp) and isinstance(node.op, SAFE_BINOPS):
-            left, right = walk(node.left), walk(node.right)
-            if isinstance(node.op, ast.Pow) and (right > 10_000 or left > 10**6):
-                raise ValueError("power too large")
-            return {
-                ast.Add: lambda: left + right,
-                ast.Sub: lambda: left - right,
-                ast.Mult: lambda: left * right,
-                ast.FloorDiv: lambda: left // right,
-                ast.Mod: lambda: left % right,
-                ast.Pow: lambda: left ** right,
-            }[type(node.op)]()
-        raise ValueError("unsupported")
-
-    try:
-        value = walk(tree)
-    except (ValueError, ZeroDivisionError, OverflowError, KeyError):
-        return None
-    return value if value >= 0 else None
-
-
-def normalize_numeric_answers(source: str, names: list[str]) -> str:
-    """Rewrite `abbrev name : ℕ := <expr>` bodies into decimal literals."""
-
-    for name in names:
-        pattern = re.compile(
-            rf"(\babbrev\s+{re.escape(name)}\s*:\s*(?:ℕ|Nat)\s*:=)\s*([^\n]+)"
-        )
-        match = pattern.search(source)
-        if not match:
-            continue
-        body = match.group(2).strip()
-        if re.fullmatch(r"[0-9]+", body):
-            continue
-        value = eval_nat_literal(body)
-        if value is not None:
-            source = source[: match.start()] + f"{match.group(1)} {value}" + source[match.end():]
-    return source
-
-
-def guard_candidate(candidate: str, parsed: Parsed, pristine_imports: list[str]) -> tuple[str | None, str]:
-    """Validate/normalize an LLM-written file. Returns (source, reason-if-rejected)."""
-
-    if BANNED_RE.search(candidate):
-        return None, "contains sorry/admit/native_decide/axiom"
-    if "import " not in candidate:
-        candidate = "\n".join(pristine_imports) + "\n\n" + candidate
-    normalized = normalize_ws(candidate)
-    for signature in parsed.signatures:
-        if signature not in normalized:
-            return None, f"statement altered or missing: {signature[:80]}"
-    candidate = normalize_numeric_answers(candidate, parsed.numeric_answer_names)
-    for name in parsed.numeric_answer_names:
-        if not re.search(rf"\babbrev\s+{re.escape(name)}\s*:\s*(?:ℕ|Nat)\s*:=\s*[0-9]+\s*$",
-                         candidate, re.MULTILINE):
-            return None, f"numeric answer {name} is not a decimal literal"
-    return candidate, ""
+    def other(self, model: str) -> str:
+        if self.models == "qwen":
+            return QWEN
+        if self.models == "gptoss":
+            return GPTOSS
+        return GPTOSS if model == QWEN else QWEN
 
 
 # ---------------------------------------------------------------------------
-# Deterministic stage S0: tactic cocktail sweep (zero LLM cost)
+# Prompt material (generic technique guidance only — no per-problem content)
+
+COOKBOOK = """Lean 4 / current Mathlib technique notes:
+- ℕ subtraction truncates: prefer `omega` for linear goals; `zify [h]` with the
+  needed `≤` side conditions to move to ℤ, and `push_cast` after `subst`.
+- Modular arithmetic cycles: `conv_lhs => rw [← Nat.div_add_mod n k, pow_add,
+  pow_mul]` then `Nat.mul_mod, Nat.pow_mod` and finish by cases on `n % k`
+  with `omega`.
+- `∀ n ≥ k` goals: `induction n, hn using Nat.le_induction`.
+- Finite checks: derive bounds first (e.g. `a ≤ a * b` when `0 < b`), then
+  `interval_cases a <;> omega` or `<;> decide`.
+- Heavy computation: add `set_option maxHeartbeats 1000000`,
+  `set_option exponentiation.threshold 10000`, `set_option maxRecDepth 8000`
+  above the theorem. `decide` is allowed; `native_decide` is FORBIDDEN.
+- Cancel factors with `Nat.eq_of_mul_eq_mul_left` after
+  `rw [show A = B by ring]`; bound divisors with `Int.le_of_dvd`.
+- Useful closers: omega, norm_num [...], nlinarith [sq_nonneg (a-b), ...],
+  positivity, field_simp; ring, gcongr, aesop, simp_all.
+- This Mathlib deprecates `push_neg` (warning only); `by_contra h` then `push_neg at h`
+  still works, or use `omega`-friendly reformulations."""
+
+RULES_BLOCK = """Hard rules:
+- Return ONE complete Lean file in a single ```lean code block.
+- Keep every theorem/abbrev statement byte-for-byte identical to the challenge;
+  you may add helper lemmas ABOVE the theorems.
+- Never use admit, axiom, native_decide, or Lean 3 syntax.
+- Numeric answer abbrevs (`abbrev … : ℕ :=`) must be plain decimal literals."""
+
+
+def whole_proof_messages(problem: Problem, feedback: str = "",
+                         history: str = "") -> list[dict[str, str]]:
+    system = (
+        "You are an expert Lean 4 / Mathlib prover. Produce a complete, compiling "
+        "Lean file that proves the challenge theorem(s), replacing every `sorry`.\n"
+        + RULES_BLOCK + "\n- Do not use sorry.\n\n" + COOKBOOK
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Challenge file (fill in the sorries, change nothing else):",
+        "```lean", problem.challenge.rstrip(), "```",
+    ]
+    if history:
+        user += ["", "What has been tried so far (do something different):", history]
+    if feedback:
+        user += ["", "Lean compiler feedback on the previous attempt:",
+                 "```", feedback, "```",
+                 "Fix the reported problems. Return the full corrected file."]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+def sketch_messages(problem: Problem, lemma_pool: str,
+                    prior_note: str = "") -> list[dict[str, str]]:
+    system = (
+        "You are an expert Lean 4 / Mathlib prover planning a difficult proof by "
+        "decomposition. Write a PROOF SKELETON: a complete Lean file where\n"
+        "- helper lemmas are fully STATED with `:= by sorry` bodies (choose helper "
+        "statements that are individually easy to prove and together imply the goal),\n"
+        "- the main theorem(s) are proved USING those helpers, with `sorry` only "
+        "where genuinely unavoidable,\n"
+        "- every helper you state must be precise and true.\n"
+        + RULES_BLOCK + "\n\n" + COOKBOOK
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Challenge file (keep these statements exactly; add helpers above):",
+        "```lean", problem.challenge.rstrip(), "```",
+    ]
+    if lemma_pool:
+        user += ["", "Already-proven helper lemmas you may reuse verbatim "
+                 "(include them in your file with their proofs):",
+                 "```lean", lemma_pool, "```"]
+    if prior_note:
+        user += ["", "Notes from previous attempts:", prior_note]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+def fill_messages(problem: Problem, sketch: str, decl_name: str,
+                  feedback: str = "") -> list[dict[str, str]]:
+    system = (
+        "You are an expert Lean 4 / Mathlib prover. The file below compiles except "
+        "for `sorry` placeholders. Replace ONLY the sorry inside the declaration "
+        f"`{decl_name}` with a real proof. Keep everything else byte-for-byte "
+        "identical (other sorries stay).\n"
+        + RULES_BLOCK + "\n\n" + COOKBOOK
+    )
+    user = [
+        f"Problem {problem.id} — current file:",
+        "```lean", sketch.rstrip(), "```",
+        "",
+        f"Prove the `sorry` in `{decl_name}`. Return the complete updated file.",
+    ]
+    if feedback:
+        user += ["", "Lean feedback on the previous attempt at this hole:",
+                 "```", feedback, "```"]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+# ---------------------------------------------------------------------------
+# Deterministic sweep (S0) — generic tactic cocktail, cheap-to-expensive
 
 OPTIONS_PREAMBLE = (
     "set_option maxHeartbeats 1000000\n"
@@ -297,9 +224,6 @@ OPTIONS_PREAMBLE = (
     "set_option exponentiation.threshold 10000"
 )
 
-# Ordered cheap-to-expensive; every entry is generic (rules: generic tactic
-# libraries are explicitly allowed). Entries referencing hypothesis/variable
-# names common in competition statements simply fail fast when absent.
 SWEEP: list[tuple[str, str]] = [
     ("linarith", ""),
     ("norm_num", ""),
@@ -325,23 +249,29 @@ SWEEP: list[tuple[str, str]] = [
     ("exact?", ""),
 ]
 
-TRY_THIS_RE = re.compile(r"Try this:\s*(.+)", re.DOTALL)
+# Shorter cascade used on individual S4 holes before any LLM call.
+FILL_SWEEP = ["linarith", "norm_num", "omega", "simp", "simp_all", "positivity",
+              "nlinarith", "ring", "aesop", "norm_num [Nat.factorial]", "decide",
+              "exact?"]
+
+TRY_THIS = "Try this:"
 
 
 # ---------------------------------------------------------------------------
-# Candidate bookkeeping
+# Bookkeeping
 
 
 @dataclass
 class Candidate:
     source: str
-    origin: str  # e.g. "sweep:linarith", "qwen:s1:3", "gptoss:s2:r1"
+    origin: str
     accepted: bool = False
     error_count: int = 10**6
+    sorry_count: int = 0
     messages: list[dict[str, Any]] = field(default_factory=list)
 
     def score(self) -> tuple:
-        return (self.accepted, -self.error_count, -len(self.source))
+        return (self.accepted, -self.error_count, -self.sorry_count, -len(self.source))
 
 
 class Deadline:
@@ -356,6 +286,85 @@ class Deadline:
         return self.remaining() > seconds
 
 
+class LLMDead(Exception):
+    """LLM budget/transport is gone; deterministic work may continue."""
+
+
+class Toolbox:
+    """Shared plumbing for all stages: checking, sampling, best-candidate."""
+
+    def __init__(self, problem: Problem, services: Services, config: Config):
+        self.problem = problem
+        self.services = services
+        self.config = config
+        self.deadline = Deadline(config)
+        self.parsed = parse_challenge(problem.challenge)
+        self.best = Candidate(source=problem.challenge, origin="challenge",
+                              sorry_count=len(self.parsed.holes))
+        self.semaphore = asyncio.Semaphore(config.llm_concurrency)
+        self.stage_log: list[dict[str, Any]] = []
+        self.llm_alive = not config.disable_llm
+        self.lemma_pool = ""  # proven helper lemmas, persistent across S4 cycles
+        self.models_arm: list[str] = {
+            "qwen": [QWEN], "gptoss": [GPTOSS]}.get(config.models, [QWEN, GPTOSS])
+
+    def log(self, **kv: Any) -> None:
+        self.stage_log.append(kv)
+
+    def record(self, candidate: Candidate, stage: str) -> None:
+        if candidate.score() > self.best.score():
+            self.best = candidate
+            self.services.checkpoint(candidate.source, {
+                "stage": stage, "origin": candidate.origin,
+                "accepted": candidate.accepted, "errors": candidate.error_count,
+                "sorries": candidate.sorry_count,
+            })
+
+    async def check(self, candidate: Candidate, timeout_s: int = 90) -> Candidate:
+        result = await self.services.lean.check_file(candidate.source, timeout_s=timeout_s)
+        candidate.messages = result.messages
+        candidate.error_count = sum(
+            1 for m in result.messages if m.get("severity") == "error"
+        ) + (10**6 if result.timed_out else 0)
+        candidate.sorry_count = (
+            len(parse_challenge(candidate.source).holes) if result.has_sorry else 0)
+        candidate.accepted = result.accepted
+        return candidate
+
+    async def sample(self, model: str, messages: list[dict[str, str]], *,
+                     kind: str) -> str | None:
+        """One guarded LLM call. kind: qwen-fast | qwen-think | gptoss-med | gptoss-high."""
+
+        if not self.llm_alive:
+            raise LLMDead
+        params: dict[str, Any] = {
+            "qwen-fast": dict(max_tokens=16000, temperature=0.8, reasoning=None,
+                              timeout_s=int(self.config.qwen_call_s)),
+            "qwen-think": dict(max_tokens=24000, temperature=0.7,
+                               reasoning={"enabled": True, "max_tokens": 12000},
+                               timeout_s=int(self.config.qwen_call_s) + 300),
+            "gptoss-med": dict(max_tokens=24000, temperature=1.0,
+                               reasoning={"effort": "medium"},
+                               timeout_s=int(self.config.gptoss_call_s)),
+            "gptoss-high": dict(max_tokens=28000, temperature=1.0,
+                                reasoning={"effort": "high"},
+                                timeout_s=int(self.config.gptoss_call_s) + 300),
+        }[kind]
+        async with self.semaphore:
+            if not self.deadline.allows(params["timeout_s"] + 60):
+                return None
+            try:
+                response = await self.services.llm.complete(
+                    model=model, messages=messages, **params)
+            except (LLMCallError, BudgetAccountingError, BudgetExceeded, LLMPolicyError) as exc:
+                self.llm_alive = False
+                self.log(stage="llm", died=type(exc).__name__)
+                raise LLMDead from exc
+        if response.finish_reason == "error" or not response.content:
+            return None  # provider hiccup (content filter etc.) — sample wasted
+        return response.content
+
+
 # ---------------------------------------------------------------------------
 # The agent
 
@@ -365,275 +374,348 @@ class SubmissionAgent:
         self.config = config or Config.from_env()
 
     async def solve(self, problem: Problem, services: Services) -> AgentResult:
-        config = self.config
-        deadline = Deadline(config)
-        parsed = parse_challenge(problem.challenge)
-        best = Candidate(source=problem.challenge, origin="challenge")
-        llm_alive = not config.disable_llm
-        stage_log: list[dict[str, Any]] = []
+        toolbox = Toolbox(problem, services, self.config)
+        solved: Candidate | None = None
+        try:
+            solved = await self.stage0_sweep(toolbox)
+            # Anytime loop: alternate fresh diverse sampling (coverage) with
+            # decomposition (depth) until solved, the LLM dies, or time runs low.
+            cycle = 0
+            while solved is None and toolbox.llm_alive and cycle < 8 \
+                    and toolbox.deadline.allows(1200):
+                cycle += 1
+                solved = await self.stage1_and_2(toolbox)
+                if solved is None and toolbox.deadline.allows(1800):
+                    solved = await self.stage4_decompose(toolbox)
+        except LLMDead:
+            pass  # deterministic results stand; finalize below
 
-        def better(candidate: Candidate) -> bool:
-            return candidate.score() > best.score()
-
-        def record(candidate: Candidate, stage: str) -> None:
-            nonlocal best
-            if better(candidate):
-                best = candidate
-                services.checkpoint(best.source, {
-                    "stage": stage, "origin": best.origin,
-                    "accepted": best.accepted, "errors": best.error_count,
-                })
-
-        async def check(candidate: Candidate, timeout_s: int) -> Candidate:
-            result = await services.lean.check_file(candidate.source, timeout_s=timeout_s)
-            candidate.accepted = result.accepted
-            candidate.messages = result.messages
-            candidate.error_count = sum(
-                1 for m in result.messages if m.get("severity") == "error"
-            ) + (10**6 if result.timed_out else 0)
-            if result.has_sorry:
-                candidate.accepted = False
-                candidate.error_count += 10**6
-            return candidate
-
-        # ---- S0: deterministic sweep -------------------------------------
-        solved = None
-        if parsed.holes and not parsed.has_term_holes:
-            for tactic, preamble in SWEEP:
-                if not deadline.allows(90):
-                    break
-                source = splice_tactics(problem.challenge, tactic, preamble)
-                if source is None:
-                    break
-                candidate = Candidate(source=source, origin=f"sweep:{tactic.splitlines()[0]}")
-                await check(candidate, timeout_s=60)
-                record(candidate, "S0")
-                if candidate.accepted:
-                    solved = candidate
-                    # `exact?` found a proof: prefer the concrete suggestion so
-                    # the comparator does not re-run the search.
-                    if tactic == "exact?":
-                        solved = await self._concretize_exact(
-                            problem.challenge, candidate, check, record
-                        ) or candidate
-                    break
-        stage_log.append({"stage": "S0", "solved": bool(solved),
-                          "ran": parsed.holes != [] and not parsed.has_term_holes})
-
-        # ---- S1/S2: LLM stages -------------------------------------------
-        if solved is None and llm_alive:
-            try:
-                solved = await self._llm_stages(
-                    problem, services, parsed, config, deadline, check, record, stage_log
-                )
-            except (LLMCallError, BudgetAccountingError):
-                # Transport failure: the ledger is closed for good. Continue
-                # without LLM rather than crashing the problem.
-                llm_alive = False
-                stage_log.append({"stage": "llm", "died": "transport"})
-            except BudgetExceeded:
-                llm_alive = False
-                stage_log.append({"stage": "llm", "died": "budget"})
-            except LLMPolicyError as exc:
-                llm_alive = False
-                stage_log.append({"stage": "llm", "died": f"policy: {exc}"})
-
-        # ---- S5: finalize -------------------------------------------------
-        final = solved or best
-        if final.accepted and deadline.allows(90):
+        final = solved or toolbox.best
+        if final.accepted and toolbox.deadline.allows(90):
             confirm = Candidate(source=final.source, origin=final.origin)
-            await check(confirm, timeout_s=60)
-            if not confirm.accepted:
-                final.accepted = False  # trust the fresh verdict
+            await toolbox.check(confirm, timeout_s=60)
+            final = confirm if confirm.accepted else final
         services.checkpoint(final.source, {
             "stage": "final", "origin": final.origin, "accepted": final.accepted,
         })
         return AgentResult(final.source, {
-            "agent": "coordination-v1",
-            "arm": config.models,
+            "agent": "coordination-v2",
+            "arm": self.config.models,
             "origin": final.origin,
             "accepted_by_repl": final.accepted,
-            "stages": stage_log,
-            "wall_s": round(time.monotonic() - deadline.started, 1),
+            "stages": toolbox.stage_log,
+            "wall_s": round(time.monotonic() - toolbox.deadline.started, 1),
         })
 
-    async def _concretize_exact(self, challenge, accepted_candidate, check, record):
-        """Replace a successful `exact?` with its concrete `Try this` suggestion."""
+    # ---- S0 ----------------------------------------------------------------
 
-        for message in accepted_candidate.messages:
-            match = TRY_THIS_RE.search(str(message.get("data", "")))
-            if not match:
+    async def stage0_sweep(self, tb: Toolbox) -> Candidate | None:
+        if not tb.parsed.holes or tb.parsed.has_term_holes:
+            tb.log(stage="S0", ran=False)
+            return None
+        for tactic, preamble in SWEEP:
+            if not tb.deadline.allows(90):
+                break
+            source = splice_tactics(tb.problem.challenge, tactic, preamble)
+            if source is None:
+                break
+            candidate = Candidate(source=source, origin=f"sweep:{tactic.splitlines()[0]}")
+            await tb.check(candidate, timeout_s=60)
+            tb.record(candidate, "S0")
+            if candidate.accepted:
+                tb.log(stage="S0", solved=candidate.origin)
+                if tactic == "exact?":
+                    concrete = await self._concretize_exact(tb, candidate)
+                    if concrete is not None:
+                        return concrete
+                return candidate
+        tb.log(stage="S0", solved=False)
+        return None
+
+    async def _concretize_exact(self, tb: Toolbox, accepted: Candidate) -> Candidate | None:
+        for message in accepted.messages:
+            data = str(message.get("data", ""))
+            if TRY_THIS not in data:
                 continue
-            suggestion = match.group(1).strip()
-            source = splice_tactics(challenge, suggestion)
+            suggestion = data.split(TRY_THIS, 1)[1].strip()
+            source = splice_tactics(tb.problem.challenge, suggestion)
             if source is None:
                 continue
             candidate = Candidate(source=source, origin=f"sweep:exact?→{suggestion[:40]}")
-            await check(candidate, timeout_s=60)
-            record(candidate, "S0")
+            await tb.check(candidate, timeout_s=60)
+            tb.record(candidate, "S0")
             if candidate.accepted:
                 return candidate
         return None
 
-    # ------------------------------------------------------------------
-    # S1: pooled diverse sampling; S2: short error-informed repair
+    # ---- S1 + S2/S3 --------------------------------------------------------
 
-    async def _llm_stages(self, problem, services, parsed, config, deadline,
-                          check, record, stage_log):
-        semaphore = asyncio.Semaphore(config.llm_concurrency)
-
-        async def sample(model: str, prompt_messages, *, max_tokens, temperature,
-                         reasoning, timeout_s) -> str | None:
-            async with semaphore:
-                if not deadline.allows(timeout_s + 30):
-                    return None
-                response = await services.llm.complete(
-                    model=model, messages=prompt_messages, max_tokens=max_tokens,
-                    temperature=temperature, reasoning=reasoning, timeout_s=timeout_s,
-                )
-                if response.finish_reason == "error" or not response.content:
-                    return None  # provider hiccup (for example content filter); one sample wasted
-                return response.content
-
-        def build_messages(feedback: str = "") -> list[dict[str, str]]:
-            system = (
-                "You are an expert in Lean 4 and Mathlib writing a complete, compiling Lean file.\n"
-                "Rules:\n"
-                "- Return ONE complete Lean file in a single ```lean code block.\n"
-                "- Start from the exact challenge below. Keep every theorem/abbrev statement "
-                "byte-for-byte identical; only replace each `sorry`.\n"
-                "- Never use sorry, admit, axiom, or native_decide (plain decide is fine).\n"
-                "- Numeric answer abbrevs (`abbrev … : ℕ :=`) must be plain decimal literals.\n"
-                "- Use Lean 4 / current Mathlib syntax (omega, norm_num, nlinarith, simp, "
-                "interval_cases, Nat.pow_mod, push_cast…). Helper lemmas above the theorem are fine.\n"
-                "- Prefer short robust tactic proofs. If a computation is heavy, consider "
-                "`set_option maxHeartbeats 1000000` / `set_option exponentiation.threshold 10000`."
-            )
-            user_parts = [
-                f"Problem {problem.id}:", problem.description, "",
-                "Challenge file (fill in the sorries, change nothing else):",
-                "```lean", problem.challenge.rstrip(), "```",
-            ]
-            if feedback:
-                user_parts += ["", "Lean compiler feedback on the previous attempt:",
-                               "```", feedback, "```",
-                               "Fix the reported problems. Return the full corrected file."]
-            return [{"role": "system", "content": system},
-                    {"role": "user", "content": "\n".join(user_parts)}]
-
-        arm = config.models
-        plans: list[tuple[str, dict]] = []
-        if arm in ("duo", "qwen"):
-            count = config.qwen_samples if arm == "duo" else config.qwen_samples + config.gptoss_samples
-            plans += [(QWEN, dict(max_tokens=16000, temperature=0.8, reasoning=None,
-                                  timeout_s=int(config.qwen_call_s)))] * count
-        if arm in ("duo", "gptoss"):
-            count = config.gptoss_samples if arm == "duo" else config.qwen_samples + config.gptoss_samples
-            plans += [(GPTOSS, dict(max_tokens=24000, temperature=1.0,
-                                    reasoning={"effort": "medium"},
-                                    timeout_s=int(config.gptoss_call_s)))] * count
+    async def stage1_and_2(self, tb: Toolbox) -> Candidate | None:
+        plans: list[tuple[str, str]] = []
+        for model in tb.models_arm:
+            if model == QWEN:
+                plans += [(QWEN, "qwen-fast")] * self.config.qwen_samples
+                plans += [(QWEN, "qwen-think")] * (1 if len(tb.models_arm) == 1 else 1)
+            else:
+                plans += [(GPTOSS, "gptoss-med")] * self.config.gptoss_samples
+        if len(tb.models_arm) == 1 and plans:  # solo arms get matched sample counts
+            extra = (self.config.qwen_samples + self.config.gptoss_samples
+                     + 1 - len(plans))
+            plans += [plans[0]] * max(0, extra)
 
         texts = await asyncio.gather(
-            *(sample(model, build_messages(), **kwargs) for model, kwargs in plans),
-            return_exceptions=True,
-        )
-        for exc in (t for t in texts if isinstance(t, BaseException)):
-            raise exc
+            *(tb.sample(model, whole_proof_messages(tb.problem), kind=kind)
+              for model, kind in plans),
+            return_exceptions=True)
+        for item in texts:
+            if isinstance(item, LLMDead):
+                raise item
 
         candidates: list[Candidate] = []
         seen: set[str] = set()
-        for (model, _), text in zip(plans, texts):
+        rejected = 0
+        for (model, kind), text in zip(plans, texts):
             source = extract_lean(text) if isinstance(text, str) else None
             if not source:
                 continue
-            guarded, _reason = guard_candidate(source, parsed, parsed.imports)
-            if not guarded or guarded in seen:
+            guarded, _reason = guard_candidate(source, tb.parsed)
+            if not guarded:
+                rejected += 1
+                continue
+            if guarded in seen:
                 continue
             seen.add(guarded)
-            tag = "qwen" if model == QWEN else "gptoss"
-            candidates.append(Candidate(source=guarded, origin=f"{tag}:s1"))
-        stage_log.append({"stage": "S1", "planned": len(plans), "usable": len(candidates)})
+            candidates.append(Candidate(source=guarded, origin=f"{kind}:s1"))
+        tb.log(stage="S1", planned=len(plans), usable=len(candidates), rejected=rejected)
 
         for candidate in candidates:
-            if not deadline.allows(120):
+            if not tb.deadline.allows(120):
                 return None
-            await check(candidate, timeout_s=90)
-            record(candidate, "S1")
+            await tb.check(candidate)
+            tb.record(candidate, "S1")
             if candidate.accepted:
+                tb.log(stage="S1", solved=candidate.origin)
                 return candidate
 
-        # ---- S2: short repair on the nearest misses ----------------------
         candidates.sort(key=lambda c: c.error_count)
         for candidate in candidates[:2]:
-            feedback_source = candidate
-            model = QWEN if candidate.origin.startswith("qwen") else GPTOSS
-            if arm == "qwen":
-                model = QWEN
-            if arm == "gptoss":
-                model = GPTOSS
-            for round_index in range(config.repair_rounds):
-                fixed = self._deterministic_fixes(feedback_source)
-                if fixed is not None:
-                    await check(fixed, timeout_s=90)
-                    record(fixed, "S2")
-                    if fixed.accepted:
-                        return fixed
-                    feedback_source = min(feedback_source, fixed, key=lambda c: c.error_count)
-                call_s = config.qwen_call_s if model == QWEN else config.gptoss_call_s
-                if not deadline.allows(call_s + 150):
-                    return None
-                feedback = format_messages(feedback_source.messages)
-                text = await sample(
-                    model, build_messages(feedback),
-                    max_tokens=16000 if model == QWEN else 24000,
-                    temperature=0.3 if model == QWEN else 1.0,
-                    reasoning=None if model == QWEN else {"effort": "medium"},
-                    timeout_s=int(call_s),
-                )
-                source = extract_lean(text) if text else None
-                guarded = guard_candidate(source, parsed, parsed.imports)[0] if source else None
-                if not guarded:
-                    continue
+            result = await self.repair_with_handoff(
+                tb, candidate,
+                origin_model=QWEN if candidate.origin.startswith("qwen") else GPTOSS,
+                build_messages=lambda fb: whole_proof_messages(tb.problem, feedback=fb),
+                guard=lambda src: guard_candidate(src, tb.parsed)[0],
+                stage="S2")
+            if result is not None:
+                return result
+        tb.log(stage="S2", solved=False)
+        return None
+
+    # ---- S2/S3 core: capped repair with plateau handoff --------------------
+
+    async def repair_with_handoff(
+        self, tb: Toolbox, candidate: Candidate, *, origin_model: str,
+        build_messages: Callable[[str], list[dict[str, str]]],
+        guard: Callable[[str], str | None], stage: str,
+        success: Callable[[Candidate], bool] | None = None,
+    ) -> Candidate | None:
+        """Deterministic fixes, then error-informed rounds; alternate model on plateau."""
+
+        success = success or (lambda c: c.accepted)
+        fixed = self._deterministic_fixes(candidate)
+        if fixed is not None:
+            await tb.check(fixed)
+            tb.record(fixed, stage)
+            if success(fixed):
+                return fixed
+            if fixed.score() > candidate.score():
+                candidate = fixed
+
+        model = origin_model if origin_model in tb.models_arm else tb.models_arm[0]
+        last_signature = error_signature(candidate.messages)
+        for round_index in range(self.config.repair_rounds):
+            call_kind = ("qwen-think" if model == QWEN else "gptoss-med")
+            call_s = tb.config.qwen_call_s if model == QWEN else tb.config.gptoss_call_s
+            if not tb.deadline.allows(call_s + 180):
+                return None
+            text = await tb.sample(model, build_messages(format_messages(candidate.messages)),
+                                   kind=call_kind)
+            source = extract_lean(text) if text else None
+            guarded = guard(source) if source else None
+            if guarded is not None:
                 repaired = Candidate(
                     source=guarded,
-                    origin=f"{'qwen' if model == QWEN else 'gptoss'}:s2:r{round_index + 1}",
-                )
-                await check(repaired, timeout_s=90)
-                record(repaired, "S2")
-                if repaired.accepted:
+                    origin=f"{'qwen' if model == QWEN else 'gptoss'}:{stage.lower()}:r{round_index + 1}")
+                await tb.check(repaired)
+                tb.record(repaired, stage)
+                if success(repaired):
+                    tb.log(stage=stage, solved=repaired.origin)
                     return repaired
-                feedback_source = repaired
-        stage_log.append({"stage": "S2", "solved": False})
+                signature = error_signature(repaired.messages)
+                plateau = signature == last_signature
+                last_signature = signature
+                if repaired.score() > candidate.score():
+                    candidate = repaired
+            else:
+                plateau = True  # unusable output: treat as no progress
+            if plateau:
+                model = tb.config.other(model)  # S3: fresh priors + error history
         return None
 
     def _deterministic_fixes(self, candidate: Candidate) -> Candidate | None:
-        """Free error->fix rules: kernel limits show up as specific messages."""
-
         text = " ".join(str(m.get("data", "")) for m in candidate.messages)
-        preamble_lines = []
+        lines = []
         if "exceeds the threshold" in text and "exponentiation.threshold" not in candidate.source:
-            preamble_lines.append("set_option exponentiation.threshold 10000")
+            lines.append("set_option exponentiation.threshold 10000")
         if "maximum recursion depth" in text and "maxRecDepth" not in candidate.source:
-            preamble_lines.append("set_option maxRecDepth 8000")
+            lines.append("set_option maxRecDepth 8000")
         if ("maximum number of heartbeats" in text or "deterministic) timeout" in text) \
                 and "maxHeartbeats" not in candidate.source:
-            preamble_lines.append("set_option maxHeartbeats 1000000")
-        if not preamble_lines:
+            lines.append("set_option maxHeartbeats 1000000")
+        if not lines:
             return None
-        return Candidate(
-            source=insert_preamble(candidate.source, "\n".join(preamble_lines)),
-            origin=candidate.origin + "+setopt",
-        )
+        return Candidate(source=insert_preamble(candidate.source, "\n".join(lines)),
+                         origin=candidate.origin + "+setopt")
 
+    # ---- S4: sketch / fill -------------------------------------------------
 
-def format_messages(messages: list[dict[str, Any]], limit: int = 5000) -> str:
-    chunks = []
-    for message in messages:
-        if message.get("severity") not in ("error", "warning"):
-            continue
-        chunks.append(f"{message.get('severity')} at {message.get('pos')}: "
-                      f"{str(message.get('data', '')).strip()}")
-    return "\n\n".join(chunks)[-limit:]
+    async def stage4_decompose(self, tb: Toolbox) -> Candidate | None:
+        lemma_pool = tb.lemma_pool
+        note = ""
+        sketchers = [m for m in (GPTOSS, QWEN) if m in tb.models_arm] or tb.models_arm
+        for round_index in range(self.config.sketch_rounds):
+            if not tb.deadline.allows(tb.config.gptoss_call_s + 600):
+                break
+            sketcher = sketchers[round_index % len(sketchers)]
+            kind = "gptoss-high" if sketcher == GPTOSS else "qwen-think"
+            text = await tb.sample(
+                sketcher, sketch_messages(tb.problem, lemma_pool, note), kind=kind)
+            source = extract_lean(text) if text else None
+            guarded = guard_candidate(source, tb.parsed, allow_sorry=True)[0] if source else None
+            if guarded is None:
+                note = "The previous sketch was rejected (statement altered or banned token)."
+                continue
+            sketch = Candidate(source=guarded, origin=f"sketch:{kind}:{round_index}")
+            await tb.check(sketch)
+            if sketch.error_count > 0:
+                repaired = await self.repair_with_handoff(
+                    tb, sketch, origin_model=sketcher,
+                    build_messages=lambda fb: sketch_messages(
+                        tb.problem, lemma_pool,
+                        f"Your sketch had compile errors, fix them (keep the sorries):\n{fb}"),
+                    guard=lambda src: guard_candidate(src, tb.parsed, allow_sorry=True)[0],
+                    stage="S4-skeleton",
+                    success=lambda c: c.error_count == 0)
+                if repaired is None:
+                    note = "The previous sketch did not compile; use simpler helper statements."
+                    continue
+                sketch = repaired
+            tb.record(sketch, "S4")
+            tb.log(stage="S4", sketch=sketch.origin, holes=len(parse_challenge(sketch.source).holes))
+
+            filled = await self._fill_holes(tb, sketch)
+            if filled is not None and filled.accepted:
+                tb.log(stage="S4", solved=filled.origin)
+                return filled
+            # harvest proven helper lemmas (error-free file: sorry-free decls compiled)
+            if filled is not None:
+                lemma_pool = self._harvest_lemmas(tb, filled.source) or lemma_pool
+                tb.lemma_pool = lemma_pool
+                note = "A previous decomposition proved some helpers (reuse them) but stalled."
+            else:
+                note = "The previous decomposition stalled; try a different lemma structure."
+        tb.log(stage="S4", solved=False)
+        return None
+
+    async def _fill_holes(self, tb: Toolbox, sketch: Candidate) -> Candidate | None:
+        current = sketch.source
+        progressed = True
+        while progressed:
+            holes = parse_challenge(current).holes
+            if not holes:
+                final = Candidate(source=current, origin=sketch.origin + ":filled")
+                guarded = guard_candidate(current, tb.parsed)[0]
+                if guarded is None:
+                    return None
+                final.source = guarded
+                await tb.check(final)
+                tb.record(final, "S4")
+                return final
+            progressed = False
+            for index, hole in enumerate(holes):
+                if not tb.deadline.allows(240):
+                    break
+                fill = await self._fill_one_hole(tb, current, index, hole.decl_name,
+                                                 tactic_only=hole.is_tactic)
+                if fill is not None:
+                    current = fill
+                    progressed = True
+                    partial = Candidate(source=current, origin=sketch.origin + ":partial")
+                    await tb.check(partial)
+                    tb.record(partial, "S4")
+                    break  # re-parse: hole indices shifted
+        remaining = len(parse_challenge(current).holes)
+        tb.log(stage="S4", unfilled=remaining, sketch=sketch.origin)
+        partial = Candidate(source=current, origin=sketch.origin + ":stalled")
+        await tb.check(partial)
+        tb.record(partial, "S4")
+        return partial
+
+    async def _fill_one_hole(self, tb: Toolbox, current: str, index: int,
+                             decl_name: str, *, tactic_only: bool) -> str | None:
+        """Return the file with hole `index` filled and no new errors, else None."""
+
+        holes_before = len(parse_challenge(current).holes)
+        if tactic_only:
+            for tactic in FILL_SWEEP:
+                if not tb.deadline.allows(90):
+                    return None
+                spliced = splice_holes(current, {index: tactic})
+                attempt = Candidate(source=spliced,
+                                    origin=f"fill:{decl_name}:{tactic.splitlines()[0]}")
+                await tb.check(attempt, timeout_s=60)
+                if attempt.error_count == 0 \
+                        and len(parse_challenge(spliced).holes) < holes_before:
+                    return spliced
+        # LLM fills: cheap qwen first, escalate once to gpt-oss high. A dead LLM
+        # leaves the hole unfilled but lets the cascade keep working other holes.
+        attempts = [(QWEN, "qwen-think"), (QWEN, "qwen-think"), (GPTOSS, "gptoss-high")]
+        feedback = ""
+        for model, kind in attempts:
+            if model not in tb.models_arm:
+                continue
+            try:
+                text = await tb.sample(
+                    model, fill_messages(tb.problem, current, decl_name, feedback), kind=kind)
+            except LLMDead:
+                return None
+            source = extract_lean(text) if text else None
+            guarded = guard_candidate(source, tb.parsed, allow_sorry=True)[0] if source else None
+            if guarded is None:
+                continue
+            attempt = Candidate(source=guarded, origin=f"fill:{decl_name}:{kind}")
+            await tb.check(attempt)
+            before = len(parse_challenge(current).holes)
+            after = len(parse_challenge(guarded).holes)
+            if attempt.error_count == 0 and after < before:
+                return guarded
+            feedback = format_messages(attempt.messages)
+        return None
+
+    def _harvest_lemmas(self, tb: Toolbox, source: str) -> str:
+        """Extract sorry-free helper declarations from an error-free partial file."""
+
+        from submission.lean_text import DECL_RE, SORRY_RE
+        decls = list(DECL_RE.finditer(source))
+        blocks: list[str] = []
+        for i, decl in enumerate(decls):
+            end = decls[i + 1].start() if i + 1 < len(decls) else len(source)
+            segment = source[decl.start(): end].rstrip()
+            if decl.group("name") in tb.parsed.decl_names:
+                continue  # only helpers, never challenge declarations
+            if SORRY_RE.search(segment):
+                continue
+            blocks.append(segment)
+        return "\n\n".join(blocks)
 
 
 def create_agent() -> SubmissionAgent:
