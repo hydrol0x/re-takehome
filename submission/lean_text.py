@@ -16,12 +16,13 @@ DECL_RE = re.compile(
     re.MULTILINE,
 )
 SORRY_RE = re.compile(r"(?<![A-Za-z0-9_'])sorry(?![A-Za-z0-9_'])")
+_AXIOM_DECL = r"^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+|unsafe\s+|scoped\s+)*axiom\s"
 BANNED_RE = re.compile(
-    r"(?<![A-Za-z0-9_'])(sorry|admit|native_decide|sorryAx)(?![A-Za-z0-9_'])|^\s*axiom\s",
+    r"(?<![A-Za-z0-9_'])(sorry|admit|native_decide|sorryAx)(?![A-Za-z0-9_'])|" + _AXIOM_DECL,
     re.MULTILINE,
 )
 SKETCH_BANNED_RE = re.compile(  # sorry allowed in sketches, escapes still banned
-    r"(?<![A-Za-z0-9_'])(admit|native_decide|sorryAx)(?![A-Za-z0-9_'])|^\s*axiom\s",
+    r"(?<![A-Za-z0-9_'])(admit|native_decide|sorryAx)(?![A-Za-z0-9_'])|" + _AXIOM_DECL,
     re.MULTILINE,
 )
 FENCE_RE = re.compile(r"```(?:lean4?|Lean4?)?\s*\n(.*?)```", re.DOTALL)
@@ -229,6 +230,22 @@ def format_messages(messages: list[dict[str, Any]], limit: int = 5000) -> str:
             continue  # noise for repair purposes
         chunks.append(f"{message.get('severity')} at {message.get('pos')}: {data}")
     return "\n\n".join(chunks)[-limit:]
+
+
+PERMITTED_AXIOMS = {"propext", "Classical.choice", "Quot.sound"}
+
+
+def axiom_violations(messages: list[dict[str, Any]]) -> list[str]:
+    """Parse `#print axioms` info output; return any non-permitted axioms."""
+
+    bad: list[str] = []
+    for message in messages:
+        data = str(message.get("data", ""))
+        if "depends on axioms:" not in data:
+            continue
+        listed = re.findall(r"[\[,]\s*([A-Za-z0-9_'.]+)", data.split("depends on axioms:", 1)[1])
+        bad.extend(name for name in listed if name not in PERMITTED_AXIOMS)
+    return bad
 
 
 def error_signature(messages: list[dict[str, Any]]) -> str:

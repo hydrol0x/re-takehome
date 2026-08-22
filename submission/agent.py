@@ -42,6 +42,7 @@ from re_harness.models import MODEL_A as QWEN, MODEL_B as GPTOSS
 
 from submission.lean_text import (
     Parsed,
+    axiom_violations,
     error_signature,
     extract_lean,
     format_messages,
@@ -391,10 +392,18 @@ class SubmissionAgent:
             pass  # deterministic results stand; finalize below
 
         final = solved or toolbox.best
-        if final.accepted and toolbox.deadline.allows(90):
-            confirm = Candidate(source=final.source, origin=final.origin)
-            await toolbox.check(confirm, timeout_s=60)
-            final = confirm if confirm.accepted else final
+        if final.accepted and toolbox.deadline.allows(120):
+            # Re-verify and audit axioms in one pass: `#print axioms` reports the
+            # dependency set the Comparator will enforce (catches native_decide).
+            audit_source = final.source.rstrip() + "\n\n" + "\n".join(
+                f"#print axioms {name}" for name in toolbox.parsed.decl_names) + "\n"
+            audit = Candidate(source=audit_source, origin=final.origin)
+            await toolbox.check(audit, timeout_s=90)
+            violations = axiom_violations(audit.messages)
+            if audit.error_count > 0 or violations:
+                final.accepted = False
+                toolbox.log(stage="S5", reverify_errors=audit.error_count,
+                            axiom_violations=violations)
         services.checkpoint(final.source, {
             "stage": "final", "origin": final.origin, "accepted": final.accepted,
         })
