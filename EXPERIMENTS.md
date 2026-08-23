@@ -99,6 +99,29 @@ three sketch rounds each, ending on compiling qwen-repaired skeletons with
 
 Cumulative dev spend across calibration + five runs: ≈ $0.95 of the $50 key.
 
+## 2026-08-23 · v5 fill loop and the first hard-tier solve
+
+After a direct-read research pass over Delta Prover, APOLLO, MechMath, DSP+
+and Prover Agent (fill-stage specifics), v5 rebuilt the hole-filling loop:
+depth-first repair dialogues seeded from the best failure (failed script +
+located errors in the prompt), model handoff on error-signature plateau,
+MechMath-style sorrify salvage of failed scaffolding, Delta-style unsolved-
+subgoal feedback into re-sketches, DSP+ granularity prompts, and APOLLO
+chained cascade entries. (A first v4 attempt was lost to a Docker/container-
+restart race — $0.002, diagnosed, launches now bootstrap-check.)
+
+Hard4 at 2-h caps with v5 (run `20260823T142958Z`): **1/4 —
+`p10_factorial_pow` comparator-PASSED** ($0.0497, 64 min) via sketch round 3
+→ qwen-repaired skeleton → depth-first fills closing every hole. First
+hard-tier solve by the model pair across all baselines and agent versions.
+p09 and rmo_2001_2 died `cost_unknown` to gpt-oss sketch-call transport
+kills (every ledger death in every run remains gpt-oss-channel);
+rmo_2000_2 iterated its full 99-min window without closing.
+
+v6 (committed): qwen is now the primary sketcher — its skeleton produced the
+solve while gpt-oss sketch calls produced the deaths; gpt-oss alternates in
+from round 2 and keeps its S1/answer-gate/fill-escalation roles.
+
 ## Where this leaves the system
 
 At matched 30-min caps: duo 9/16 > solo-best 8/16, duo = union of solos at
