@@ -122,7 +122,27 @@ v6 (committed): qwen is now the primary sketcher — its skeleton produced the
 solve while gpt-oss sketch calls produced the deaths; gpt-oss alternates in
 from round 2 and keeps its S1/answer-gate/fill-escalation roles.
 
-## Where this leaves the system
+## 2026-08-23 · Arms seed-2 (matched 30-min caps): duo leads both seeds
+
+| arm | seed-1 | seed-2 | spend (s1/s2) |
+| --- | --- | --- | --- |
+| duo | 9/16 | **10/16** | $0.16 / $0.17 |
+| solo-qwen | 8/16 | 9/16 | $0.45 / $0.40 |
+| solo-gptoss | 8/16 | 9/16 | $0.04 / $0.01 |
+
+Runs: duo2 `20260823T162449Z`, qwen2 `20260823T171620Z`,
+gptoss2 `20260823T194338Z`. Seed-2 was run with the v5/v6 agent.
+
+Readings: (1) **the duo beats the best solo by +1 on both seeds** at
+one-half to one-third of solo-qwen's cost; (2) seed-to-seed variance is
++1 for every arm (better provider health in seed-2); (3) **solo-qwen seed-2
+solved p10_factorial_pow at a 30-minute cap** via the v5/v6 sketch/fill
+loop — the hard-tier breakthrough reproduced, in a solo arm, at short caps
+(duo2's attempt on p10 died to a gpt-oss ledger kill instead: coordination's
+one cost is exposure to the risky channel, cured by the upstream kit fix
+when it lands); (4) ledger-mortality census across all eight runs: every
+death is gpt-oss-channel; solo-qwen arms have lost zero ledgers ever.
+Six-run union: 11 distinct problems solved.
 
 At matched 30-min caps: duo 9/16 > solo-best 8/16, duo = union of solos at
 one-third of solo-qwen's cost. Baseline comparison: the kit's single-model
