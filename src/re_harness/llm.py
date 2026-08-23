@@ -100,10 +100,13 @@ class LLMClient:
             "messages": [dict(message) for message in messages],
             "max_tokens": max_tokens,
             "stream": False,
-            # Applicants cannot opt into alternate endpoints, provider/model
-            # fallbacks, or providers that silently ignore requested fields.
+            # Provider fallbacks are allowed (kit PR #3): routing may move to
+            # another provider serving the SAME model when one is down or
+            # rate-limited, but stays inside the price ceiling below and
+            # require_parameters. Alternate endpoints and providers that
+            # silently ignore requested fields remain excluded.
             "provider": {
-                "allow_fallbacks": False,
+                "allow_fallbacks": True,
                 "require_parameters": True,
                 "max_price": {
                     "prompt": price.input_per_million,
@@ -169,20 +172,26 @@ class LLMClient:
 
         latency_ms = round((time.monotonic() - started) * 1000)
         if response.status_code >= 400:
-            snapshot = self._budget.mark_unknown(reservation)
+            # A complete HTTP error response is a refusal issued before any
+            # generation was billed (kit PR #5): release the reservation and
+            # keep the ledger open. Mid-flight transport failures and
+            # malformed 200s still close the ledger — spend there is
+            # genuinely uncertain.
+            self._budget.release(reservation)
+            snapshot = self._budget.snapshot()
             error_body = response.text[:4000]
             self._events.emit(
                 "llm_error",
                 call_id=call_id,
                 status_code=response.status_code,
                 message=error_body,
-                cost_status="unknown",
+                cost_status="released",
                 budget=snapshot.__dict__,
                 latency_ms=latency_ms,
             )
             raise LLMCallError(
-                f"OpenRouter returned HTTP {response.status_code}; spend is uncertain: "
-                f"{error_body[:500]}"
+                f"OpenRouter returned HTTP {response.status_code}; no spend was "
+                f"recorded: {error_body[:500]}"
             )
 
         try:

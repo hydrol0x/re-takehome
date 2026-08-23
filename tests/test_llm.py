@@ -22,7 +22,7 @@ async def test_logged_openrouter_call_uses_actual_cost_and_no_secret(tmp_path):
         body = json.loads(request.content)
         assert "plugins" not in body
         assert body["provider"] == {
-            "allow_fallbacks": False,
+            "allow_fallbacks": True,
             "require_parameters": True,
             "max_price": {"prompt": 0.15, "completion": 0.60},
         }
@@ -112,17 +112,40 @@ async def test_missing_cost_disables_future_calls(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_http_error_fails_budget_closed(tmp_path):
+async def test_http_error_releases_budget_and_allows_retry(tmp_path):
+    calls = []
+
+    def handler(_request):
+        calls.append(1)
+        if len(calls) == 1:
+            return httpx.Response(429, text="limited")
+        return httpx.Response(200, json={
+            "id": "gen-2",
+            "model": MODEL_A,
+            "choices": [{"finish_reason": "stop", "message": {"content": "ok"}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1, "cost": 0.001},
+        })
+
+    ledger = BudgetLedger(1)
     client = LLMClient(
         api_key="key",
-        budget=BudgetLedger(1),
+        budget=ledger,
         events=EventLogger(tmp_path / "events", problem_id="p"),
-        transport=httpx.MockTransport(lambda _request: httpx.Response(429, text="limited")),
+        transport=httpx.MockTransport(handler),
     )
-    with pytest.raises(LLMCallError, match="spend is uncertain"):
+    # Kit PR #5 semantics: an HTTP error status is a zero-cost refusal, so the
+    # reservation is released, the ledger stays open, and a retry can settle.
+    with pytest.raises(LLMCallError, match="no spend was recorded"):
         await client.complete(model=MODEL_A, messages=[{"role": "user", "content": "x"}])
-    with pytest.raises(BudgetAccountingError):
-        await client.complete(model=MODEL_A, messages=[{"role": "user", "content": "x"}])
+    snapshot = ledger.snapshot()
+    assert snapshot.accounting_complete
+    assert snapshot.reserved_usd == 0
+    assert snapshot.spent_usd == 0
+    response = await client.complete(
+        model=MODEL_A, messages=[{"role": "user", "content": "x"}]
+    )
+    assert response.content == "ok"
+    assert ledger.snapshot().spent_usd == pytest.approx(0.001)
     await client.aclose()
 
 

@@ -516,9 +516,12 @@ class SubmissionAgent:
             solved = await self.stage0_sweep(toolbox)
             # Anytime loop: alternate fresh diverse sampling (coverage) with
             # decomposition (depth) until solved, the LLM dies, or time runs low.
+            # Eight cycles fill a 30–120 min window, but would strand hours at
+            # the judge's 8-hour cap; scale the cap with the window instead.
+            max_cycles = max(8, int(self.config.agent_time_s // 1500))
             cycle = 0
             while solved is None and toolbox.llm_alive and toolbox.lean_alive \
-                    and cycle < 8 and toolbox.deadline.allows(600):
+                    and cycle < max_cycles and toolbox.deadline.allows(600):
                 cycle += 1
                 toolbox.cycle = cycle
                 # Sampling banks coverage; decomposition gets the next slice of

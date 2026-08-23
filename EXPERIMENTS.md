@@ -153,3 +153,24 @@ coverage in S1, and the cascade's cost discipline. The hard tier requires
 full-cap runs: next validations are a full-sample run at judge settings
 (VM_TIME_LIMIT_S=28800), a real-key `judge_check.sh`, and the Part-2
 writeup from these arms.
+
+## 2026-08-23 · Kit fix mirrored ahead of merge; full-cap validation
+
+The upstream kit PRs (#3 `allow_fallbacks` under `max_price`, #5 release
+the ledger on zero-cost HTTP refusals) were approved by the maintainer but
+still unmerged. Judging clones **our** repo, so waiting gains nothing:
+mirrored the approved semantics into `src/re_harness/llm.py` (details:
+RESEARCH.md §1.3 update note; tests updated in `tests/test_llm.py`, suite
+37 passed / 4 docker-skips). Every 429/502 refusal that killed a ledger in
+the eight runs above becomes a wasted sample the v5 agent already absorbs;
+mid-flight transport failures and malformed 200s stay fatal by design, so
+the agent's pacing/call-cap insurance stays.
+
+Also scaled the agent's anytime-loop cycle cap with the window
+(`max(8, agent_time/1500)`): eight cycles fill 30–120 min runs (behavior
+unchanged there) but would have stranded ~5 h at the judge's 8-hour cap.
+
+Launched with these in place: **hard4 at full judge caps**
+(`VM_TIME_LIMIT_S=28800 VM_BUDGET_USD=1.00`, duo, 4 workers,
+`SUBMISSION_GPTOSS_CALL_CAP=24`) — the first run at exactly the judged
+time/budget settings. Results appended here when it lands.

@@ -109,6 +109,19 @@ holds *by construction*; (b) lexical ban on `sorry`/`admit`/`native_decide`/
   providers. For gpt-oss this excludes the fast expensive hosts (Cerebras
   ~$0.69/M out, Groq $0.60/M): expect the **cheap, slow tier** (~25–40 tok/s
   observed).
+- **Update (2026-08-23): landmine partially defused in our tree.** Another
+  applicant hit the same 429 mortality and filed it upstream; the kit
+  maintainer approved two fixes (kit PRs #3 and #5) but had not merged them
+  by submission time. Since judging clones *this* repo (`RULES.md`), we
+  mirrored the approved semantics into `src/re_harness/llm.py`: (a)
+  `allow_fallbacks: true` under the unchanged `max_price` ceiling and
+  `require_parameters`, so routing can avoid a rate-limited provider of the
+  same model; (b) a complete HTTP ≥ 400 response now *releases* its
+  reservation (a refusal bills nothing) instead of closing the ledger.
+  Mid-flight transport failures, cancels, and malformed 200s still close it,
+  deliberately — spend there is genuinely unknown. Tests:
+  `tests/test_llm.py`. The agent's ordering/pacing/call-cap mitigations stay
+  as cheap insurance for the still-fatal classes.
 
 ### 1.4 Time mechanics — the second landmine
 
