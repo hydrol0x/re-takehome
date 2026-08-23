@@ -142,7 +142,12 @@ COOKBOOK = """Lean 4 / current Mathlib technique notes:
   div_le_div-style lemma names. `Finset.sum_le_card_nsmul` bounds a sum by
   card • bound; `Finset.sum_Ico_consecutive` splits ranges.
 - This Mathlib deprecates `push_neg` (warning only); `by_contra h` then `push_neg at h`
-  still works, or use `omega`-friendly reformulations."""
+  still works, or use `omega`-friendly reformulations.
+- If an identifier was reported unknown, it DOES NOT EXIST in this Mathlib —
+  never use it again; reach the fact another way (different lemma, omega,
+  explicit have-chain). Pay attention to mistakes already made and avoid
+  repeating them; when the same error resists two fixes, change approach
+  entirely rather than patching again."""
 
 RULES_BLOCK = """Hard rules:
 - Return ONE complete Lean file in a single ```lean code block.
@@ -179,6 +184,9 @@ def sketch_messages(problem: Problem, challenge: str, lemma_pool: str,
     system = (
         "You are an expert Lean 4 / Mathlib prover planning a difficult proof by "
         "decomposition. Write a PROOF SKELETON: a complete Lean file where\n"
+        "- prefer MANY SMALL lemmas over few large ones: every helper must be "
+        "individually easy to prove (one induction, one case split, one "
+        "computation each),\n"
         "- helper lemmas are fully STATED with `:= by sorry` bodies (choose helper "
         "statements that are individually easy to prove and together imply the goal),\n"
         "- the main theorem(s) are proved USING those helpers, with `sorry` only "
@@ -307,6 +315,8 @@ SWEEP: list[tuple[str, str]] = [
 # Shorter cascade used on individual S4 holes before any LLM call.
 FILL_SWEEP = ["linarith", "norm_num", "omega", "simp", "simp_all", "positivity",
               "nlinarith", "ring", "aesop", "norm_num [Nat.factorial]", "decide",
+              "try norm_cast\ntry norm_num\ntry simp_all\nnlinarith",
+              "try push_cast\ntry field_simp\ntry ring_nf\nnlinarith",
               "exact?"]
 
 TRY_THIS = "Try this:"
@@ -373,6 +383,9 @@ class Toolbox:
         self.gptoss_calls = 0
         self.cycle = 0
         self.history_notes: list[str] = []  # compact per-cycle failure digest
+        self.sorrify_seen: set = set()
+        self.sorrify_used = 0
+        self.last_unfilled: list[str] = []
         # A flaky REPL (container death, cold-boot import timeout) must degrade
         # the search, not crash the problem: after two consecutive failures we
         # stop checking and submit the best unverified candidate instead.
@@ -853,7 +866,10 @@ class SubmissionAgent:
             if filled is not None:
                 lemma_pool = self._harvest_lemmas(tb, filled.source) or lemma_pool
                 tb.lemma_pool = lemma_pool
-                note = "A previous decomposition proved some helpers (reuse them) but stalled."
+                note = ("A previous decomposition proved some helpers (reuse them) but "
+                        "stalled on these subgoals, which were evidently too hard as "
+                        "stated — replace them with smaller or different lemmas: "
+                        + ", ".join(tb.last_unfilled or ["(unknown)"]))
             else:
                 note = "The previous decomposition stalled; try a different lemma structure."
         tb.log(stage="S4", solved=False)
@@ -886,8 +902,10 @@ class SubmissionAgent:
                     await tb.check(partial)
                     tb.record(partial, "S4")
                     break  # re-parse: hole indices shifted
-        remaining = len(parse_challenge(current).holes)
-        tb.log(stage="S4", unfilled=remaining, sketch=sketch.origin)
+        remaining_holes = parse_challenge(current).holes
+        tb.last_unfilled = sorted({h.decl_name for h in remaining_holes if h.decl_name})
+        tb.log(stage="S4", unfilled=len(remaining_holes), sketch=sketch.origin,
+               unfilled_decls=tb.last_unfilled)
         partial = Candidate(source=current, origin=sketch.origin + ":stalled")
         await tb.check(partial)
         tb.record(partial, "S4")
@@ -895,7 +913,17 @@ class SubmissionAgent:
 
     async def _fill_one_hole(self, tb: Toolbox, current: str, index: int,
                              decl_name: str, *, tactic_only: bool) -> str | None:
-        """Return the file with hole `index` filled and no new errors, else None."""
+        """Return the file with hole `index` filled (or sorrify-progressed).
+
+        Depth over breadth (Delta Prover / Prover Agent / MechMath evidence):
+        one burst of up to three candidate scripts seeds a sequential repair
+        dialogue on the best failure, alternating models on plateau; a failed
+        script's scaffolding is preserved by truncating at the first error and
+        recursing on the smaller hole (MechMath sorrifier) rather than being
+        discarded.
+        """
+
+        from submission.lean_text import BANNED_RE, extract_all_blocks
 
         holes_before = len(parse_challenge(current).holes)
         if tactic_only:
@@ -909,37 +937,94 @@ class SubmissionAgent:
                 if attempt.error_count == 0 \
                         and len(parse_challenge(spliced).holes) < holes_before:
                     return spliced
-        # LLM fills: each call returns up to three alternative tactic scripts
-        # for THIS hole, spliced into the file (statements untouchable by
-        # construction). qwen first, escalate once to gpt-oss high. A dead LLM
-        # leaves the hole unfilled but lets the cascade keep working others.
-        from submission.lean_text import BANNED_RE, extract_all_blocks
-        attempts = [(QWEN, "qwen-think"), (QWEN, "qwen-think"), (GPTOSS, "gptoss-high")]
+
+        model, kind = QWEN, "qwen-think"
+        if model not in tb.models_arm:
+            model = tb.models_arm[0]
+            kind = "qwen-think" if model == QWEN else "gptoss-high"
         feedback = ""
-        for model, kind in attempts:
-            if model not in tb.models_arm:
-                continue
+        best_block: str | None = None
+        best_fail: Candidate | None = None
+        last_signature = None
+        for round_index in range(4):  # 1 burst + up to 3 sequential repairs
             try:
                 text = await tb.sample(
-                    model, fill_messages(tb.problem, current, decl_name, feedback), kind=kind)
+                    model, fill_messages(tb.problem, current, decl_name, feedback),
+                    kind=kind)
             except LLMDead:
-                return None
-            best_failure: Candidate | None = None
-            for block in extract_all_blocks(text)[:3] if text else []:
+                break
+            improved = False
+            for block in (extract_all_blocks(text)[:3] if text else []):
                 if BANNED_RE.search(block) or "import " in block:
                     continue
                 spliced = splice_holes(current, {index: block})
-                attempt = Candidate(source=spliced, origin=f"fill:{decl_name}:{kind}")
+                attempt = Candidate(
+                    source=spliced, origin=f"fill:{decl_name}:{kind}:r{round_index}")
                 await tb.check(attempt)
                 if attempt.error_count == 0 \
                         and len(parse_challenge(spliced).holes) < holes_before:
                     return spliced
-                if best_failure is None or attempt.error_count < best_failure.error_count:
-                    best_failure = attempt
-                if not tb.deadline.allows(180):
+                if best_fail is None or attempt.error_count < best_fail.error_count:
+                    best_fail, best_block = attempt, block
+                    improved = True
+                if not tb.deadline.allows(240):
                     return None
-            if best_failure is not None:
-                feedback = format_messages(best_failure.messages)
+            plateau = not improved
+            if best_fail is not None:
+                signature = error_signature(best_fail.messages)
+                plateau = plateau or signature == last_signature
+                last_signature = signature
+                feedback = ("Your best failed attempt so far:\n```lean\n"
+                            + (best_block or "") + "\n```\n\nLean feedback:\n"
+                            + format_messages(best_fail.messages, limit=3000))
+            if plateau:
+                model = tb.config.other(model)
+                kind = "gptoss-high" if model == GPTOSS else "qwen-think"
+
+        if best_block and best_fail:
+            return await self._sorrify_progress(tb, current, index, best_block, best_fail)
+        return None
+
+    async def _sorrify_progress(self, tb: Toolbox, current: str, index: int,
+                                block: str, fail: Candidate) -> str | None:
+        """Keep a failed fill's scaffolding: truncate at the first error line,
+        append sorry, adopt if the smaller-holed file compiles cleanly."""
+
+        if tb.sorrify_used >= 4:
+            return None
+        holes = parse_challenge(current).holes
+        if index >= len(holes):
+            return None
+        # REPL strips import lines, so message line numbers index the kept lines.
+        prefix_lines = current[: holes[index].start].splitlines() or [""]
+        kept_before = [l for l in prefix_lines if not l.startswith("import ")]
+        start_line = max(0, len(kept_before) - 1)  # 0-based line of the block start
+        block_lines = block.splitlines()
+        first_error_rel: int | None = None
+        for message in fail.messages:
+            if message.get("severity") != "error":
+                continue
+            line = (message.get("pos") or {}).get("line")
+            if isinstance(line, int):
+                rel = (line - 1) - start_line
+                if 0 <= rel < len(block_lines):
+                    first_error_rel = rel if first_error_rel is None \
+                        else min(first_error_rel, rel)
+        if not first_error_rel:  # None or 0: nothing salvageable
+            return None
+        truncated = "\n".join(block_lines[:first_error_rel] + ["sorry"])
+        key = (index, truncated)
+        if key in tb.sorrify_seen:
+            return None
+        spliced = splice_holes(current, {index: truncated})
+        candidate = Candidate(source=spliced, origin="fill:sorrify")
+        await tb.check(candidate)
+        if candidate.error_count == 0:
+            tb.sorrify_seen.add(key)
+            tb.sorrify_used += 1
+            tb.record(candidate, "S4")
+            tb.log(stage="S4", sorrified=f"{first_error_rel} lines kept")
+            return spliced
         return None
 
     def _harvest_lemmas(self, tb: Toolbox, source: str) -> str:
