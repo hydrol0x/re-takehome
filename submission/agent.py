@@ -460,7 +460,17 @@ class Toolbox:
             try:
                 response = await self.services.llm.complete(
                     model=model, messages=messages, **params)
-            except (LLMCallError, BudgetAccountingError, BudgetExceeded, LLMPolicyError) as exc:
+            except LLMCallError as exc:
+                # Under the shipped kit any HTTP failure has already closed the
+                # ledger, so the next reservation raises BudgetAccountingError
+                # below and we die then. Under the kit fix in flight upstream
+                # (zero-cost refusals release instead of closing), the ledger
+                # survives — treating this as one wasted sample lets the run
+                # recover automatically once that lands.
+                self.log(stage="llm", call_error=type(exc).__name__,
+                         detail=str(exc)[:120])
+                return None
+            except (BudgetAccountingError, BudgetExceeded, LLMPolicyError) as exc:
                 self.llm_alive = False
                 self.log(stage="llm", died=type(exc).__name__)
                 raise LLMDead from exc
