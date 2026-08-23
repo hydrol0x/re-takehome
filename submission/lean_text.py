@@ -128,6 +128,12 @@ def insert_preamble(source: str, preamble: str) -> str:
     return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
 
 
+def extract_all_blocks(text: str) -> list[str]:
+    """Every fenced lean block, stripped — for multi-candidate responses."""
+
+    return [block.strip() for block in FENCE_RE.findall(text or "") if block.strip()]
+
+
 def extract_lean(text: str) -> str | None:
     blocks = FENCE_RE.findall(text or "")
     if blocks:

@@ -205,16 +205,22 @@ def fill_messages(problem: Problem, sketch: str, decl_name: str,
                   feedback: str = "") -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover. The file below compiles except "
-        "for `sorry` placeholders. Replace ONLY the sorry inside the declaration "
-        f"`{decl_name}` with a real proof. Keep everything else byte-for-byte "
-        "identical (other sorries stay).\n"
-        + RULES_BLOCK + "\n\n" + COOKBOOK
+        "for `sorry` placeholders. Your job is ONE hole: the `sorry` inside the "
+        f"declaration `{decl_name}`.\n"
+        "Respond with up to THREE genuinely different candidate proofs for that "
+        "hole. Each candidate is its own ```lean code block containing ONLY the "
+        "tactic script that replaces the `sorry` (no theorem header, no imports; "
+        "`have`/`calc` inside the script are fine). Order them most-likely-first "
+        "and make them structurally different (different tactics or proof idea, "
+        "not cosmetic variants).\n"
+        "Never use sorry, admit, axiom, or native_decide.\n\n" + COOKBOOK
     )
     user = [
         f"Problem {problem.id} — current file:",
         "```lean", sketch.rstrip(), "```",
         "",
-        f"Prove the `sorry` in `{decl_name}`. Return the complete updated file.",
+        f"Give up to three alternative proofs for the `sorry` in `{decl_name}`, "
+        "each in its own ```lean block.",
     ]
     if feedback:
         user += ["", "Lean feedback on the previous attempt at this hole:",
@@ -366,6 +372,7 @@ class Toolbox:
         self.gptoss_gap_s = 5.0
         self.gptoss_calls = 0
         self.cycle = 0
+        self.history_notes: list[str] = []  # compact per-cycle failure digest
         # A flaky REPL (container death, cold-boot import timeout) must degrade
         # the search, not crash the problem: after two consecutive failures we
         # stop checking and submit the best unverified candidate instead.
@@ -660,8 +667,10 @@ class SubmissionAgent:
         candidates: list[Candidate] = []
         seen: set[str] = set()
         for wave in waves:
+            history = "\n".join(tb.history_notes[-6:]) if tb.cycle > 1 else ""
             texts = await asyncio.gather(
-                *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge), kind=kind)
+                *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge,
+                                                        history=history), kind=kind)
                   for model, kind in wave),
                 return_exceptions=True)
             for item in texts:
@@ -702,6 +711,14 @@ class SubmissionAgent:
                 if candidate.accepted:
                     tb.log(stage="S1", solved=candidate.origin)
                     return candidate, []
+            if usable:
+                closest = min(usable, key=lambda c: c.error_count)
+                head = next((str(m.get("data", "")).splitlines()[0][:90]
+                             for m in closest.messages
+                             if m.get("severity") == "error"), "no errors surfaced")
+                tb.history_notes.append(
+                    f"cycle {tb.cycle}, {wave[0][1]} x{len(wave)}: best had "
+                    f"{closest.error_count} errors; first: {head}")
             candidates.extend(usable)
         return None, candidates
 
@@ -892,8 +909,11 @@ class SubmissionAgent:
                 if attempt.error_count == 0 \
                         and len(parse_challenge(spliced).holes) < holes_before:
                     return spliced
-        # LLM fills: cheap qwen first, escalate once to gpt-oss high. A dead LLM
-        # leaves the hole unfilled but lets the cascade keep working other holes.
+        # LLM fills: each call returns up to three alternative tactic scripts
+        # for THIS hole, spliced into the file (statements untouchable by
+        # construction). qwen first, escalate once to gpt-oss high. A dead LLM
+        # leaves the hole unfilled but lets the cascade keep working others.
+        from submission.lean_text import BANNED_RE, extract_all_blocks
         attempts = [(QWEN, "qwen-think"), (QWEN, "qwen-think"), (GPTOSS, "gptoss-high")]
         feedback = ""
         for model, kind in attempts:
@@ -904,17 +924,22 @@ class SubmissionAgent:
                     model, fill_messages(tb.problem, current, decl_name, feedback), kind=kind)
             except LLMDead:
                 return None
-            source = extract_lean(text) if text else None
-            guarded = guard_candidate(source, tb.parsed, allow_sorry=True)[0] if source else None
-            if guarded is None:
-                continue
-            attempt = Candidate(source=guarded, origin=f"fill:{decl_name}:{kind}")
-            await tb.check(attempt)
-            before = len(parse_challenge(current).holes)
-            after = len(parse_challenge(guarded).holes)
-            if attempt.error_count == 0 and after < before:
-                return guarded
-            feedback = format_messages(attempt.messages)
+            best_failure: Candidate | None = None
+            for block in extract_all_blocks(text)[:3] if text else []:
+                if BANNED_RE.search(block) or "import " in block:
+                    continue
+                spliced = splice_holes(current, {index: block})
+                attempt = Candidate(source=spliced, origin=f"fill:{decl_name}:{kind}")
+                await tb.check(attempt)
+                if attempt.error_count == 0 \
+                        and len(parse_challenge(spliced).holes) < holes_before:
+                    return spliced
+                if best_failure is None or attempt.error_count < best_failure.error_count:
+                    best_failure = attempt
+                if not tb.deadline.allows(180):
+                    return None
+            if best_failure is not None:
+                feedback = format_messages(best_failure.messages)
         return None
 
     def _harvest_lemmas(self, tb: Toolbox, source: str) -> str:
