@@ -478,12 +478,17 @@ class SubmissionAgent:
             # decomposition (depth) until solved, the LLM dies, or time runs low.
             cycle = 0
             while solved is None and toolbox.llm_alive and toolbox.lean_alive \
-                    and cycle < 8 and toolbox.deadline.allows(1200):
+                    and cycle < 8 and toolbox.deadline.allows(600):
                 cycle += 1
-                solved = await self.stage1_and_2(toolbox)
-                if solved is None and toolbox.deadline.allows(1800) \
-                        and toolbox.lean_alive:
+                # Sampling banks coverage; decomposition gets the next slice of
+                # the window (it is the hard-tier weapon and needs room);
+                # whole-file repair mops up with whatever time remains.
+                solved, near_misses = await self.stage1_sample(toolbox)
+                if solved is None and toolbox.lean_alive \
+                        and toolbox.deadline.allows(900):
                     solved = await self.stage4_decompose(toolbox)
+                if solved is None and toolbox.lean_alive:
+                    solved = await self.stage2_repair(toolbox, near_misses)
         except LLMDead:
             pass  # deterministic results stand; finalize below
 
@@ -614,7 +619,7 @@ class SubmissionAgent:
 
     # ---- S1 + S2/S3 --------------------------------------------------------
 
-    async def stage1_and_2(self, tb: Toolbox) -> Candidate | None:
+    async def stage1_sample(self, tb: Toolbox) -> tuple[Candidate | None, list[Candidate]]:
         # Value-before-risk: run the qwen wave to completion (generate AND
         # check) before the first gpt-oss call, so a gpt-oss 429 that kills the
         # ledger cannot cost us qwen's candidates.
@@ -663,18 +668,21 @@ class SubmissionAgent:
                     "stage": "S1", "origin": unverified.origin, "accepted": False})
                 tb.best = unverified
                 tb.log(stage="S1", unverified_submit=unverified.origin)
-                return unverified
+                return unverified, []
             for candidate in usable:
                 if not tb.deadline.allows(120):
-                    return None
+                    return None, candidates
                 await tb.check(candidate)
                 tb.record(candidate, "S1")
                 if candidate.accepted:
                     tb.log(stage="S1", solved=candidate.origin)
-                    return candidate
+                    return candidate, []
             candidates.extend(usable)
+        return None, candidates
 
-        candidates.sort(key=lambda c: c.error_count)
+    async def stage2_repair(self, tb: Toolbox,
+                            candidates: list[Candidate]) -> Candidate | None:
+        candidates = sorted(candidates, key=lambda c: c.error_count)
         for candidate in candidates[:2]:
             result = await self.repair_with_handoff(
                 tb, candidate,
@@ -758,12 +766,18 @@ class SubmissionAgent:
     async def stage4_decompose(self, tb: Toolbox) -> Candidate | None:
         lemma_pool = tb.lemma_pool
         note = ""
-        sketchers = [m for m in (GPTOSS, QWEN) if m in tb.models_arm] or tb.models_arm
         for round_index in range(self.config.sketch_rounds):
-            if not tb.deadline.allows(tb.config.gptoss_call_s + 600):
+            # Time-adaptive sketcher: the deep reasoner when the window fits its
+            # worst case, else the fast thinker — so decomposition still runs
+            # under small wall-clock caps instead of never engaging.
+            available: list[tuple[str, str]] = []
+            if GPTOSS in tb.models_arm and tb.deadline.allows(tb.config.gptoss_call_s + 900):
+                available.append((GPTOSS, "gptoss-high"))
+            if QWEN in tb.models_arm and tb.deadline.allows(tb.config.qwen_call_s + 600):
+                available.append((QWEN, "qwen-think"))
+            if not available:
                 break
-            sketcher = sketchers[round_index % len(sketchers)]
-            kind = "gptoss-high" if sketcher == GPTOSS else "qwen-think"
+            sketcher, kind = available[round_index % len(available)]
             text = await tb.sample(
                 sketcher, sketch_messages(tb.problem, tb.challenge, lemma_pool, note), kind=kind)
             source = extract_lean(text) if text else None
