@@ -78,6 +78,7 @@ class Config:
     gptoss_samples: int
     repair_rounds: int
     sketch_rounds: int
+    gptoss_call_cap: int
 
     # Worst-case single-call wall clock (observed: gpt-oss ~8 min on hard prompts).
     qwen_call_s: float = 300.0
@@ -97,6 +98,7 @@ class Config:
             gptoss_samples=_env_int("SUBMISSION_GPTOSS_SAMPLES", 2, 0, 64),
             repair_rounds=_env_int("SUBMISSION_REPAIR_ROUNDS", 4, 0, 12),
             sketch_rounds=_env_int("SUBMISSION_SKETCH_ROUNDS", 4, 0, 12),
+            gptoss_call_cap=_env_int("SUBMISSION_GPTOSS_CALL_CAP", 10, 0, 200),
         )
 
     @property
@@ -362,6 +364,8 @@ class Toolbox:
         self.gptoss_gate = asyncio.Semaphore(1)
         self.gptoss_last_start = 0.0
         self.gptoss_gap_s = 5.0
+        self.gptoss_calls = 0
+        self.cycle = 0
         # A flaky REPL (container death, cold-boot import timeout) must degrade
         # the search, not crash the problem: after two consecutive failures we
         # stop checking and submit the best unverified candidate instead.
@@ -441,6 +445,12 @@ class Toolbox:
         gate = self.gptoss_gate if model == GPTOSS else self.semaphore
         async with gate:
             if model == GPTOSS:
+                # Every gpt-oss call is a mortality dice-roll for the whole
+                # problem ledger (observed: 429s, 502s, truncated bodies), so a
+                # hard per-problem cap bounds the cumulative risk.
+                if self.gptoss_calls >= self.config.gptoss_call_cap:
+                    return None
+                self.gptoss_calls += 1
                 gap = self.gptoss_gap_s - (time.monotonic() - self.gptoss_last_start)
                 if gap > 0:
                     await asyncio.sleep(gap)
@@ -480,6 +490,7 @@ class SubmissionAgent:
             while solved is None and toolbox.llm_alive and toolbox.lean_alive \
                     and cycle < 8 and toolbox.deadline.allows(600):
                 cycle += 1
+                toolbox.cycle = cycle
                 # Sampling banks coverage; decomposition gets the next slice of
                 # the window (it is the hard-tier weapon and needs room);
                 # whole-file repair mops up with whatever time remains.
@@ -628,7 +639,11 @@ class SubmissionAgent:
         if QWEN in tb.models_arm:
             fast = self.config.qwen_samples + (self.config.gptoss_samples if solo else 0)
             waves.append([(QWEN, "qwen-fast")] * fast + [(QWEN, "qwen-think")])
-        if GPTOSS in tb.models_arm:
+        # On long-cap runs, gpt-oss joins from cycle 2: its channel carries the
+        # transport-mortality risk, and qwen still has cycles of value to bank
+        # first. Short caps get one combined pass, and solo arms are unaffected.
+        defer_gptoss = (not solo) and self.config.agent_time_s >= 2400 and tb.cycle <= 1
+        if GPTOSS in tb.models_arm and not defer_gptoss:
             count = self.config.gptoss_samples + (self.config.qwen_samples + 1 if solo else 0)
             waves.append([(GPTOSS, "gptoss-med")] * count)
 

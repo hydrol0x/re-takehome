@@ -13,5 +13,10 @@
   "api_key_configured": true,
   "python": "3.11.15",
   "platform": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
-  "resumed_at": "2026-08-23T05:28:07.233598+00:00"
+  "resumed_at": "2026-08-23T05:28:07.233598+00:00",
+  "finished_at": "2026-08-23T06:56:22.155315+00:00",
+  "wall_s": 5294.922,
+  "resumed": true,
+  "resumed_skipped_problems": 1,
+  "executed_problems": 3
 }
