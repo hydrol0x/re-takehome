@@ -825,11 +825,17 @@ class SubmissionAgent:
             # Time-adaptive sketcher: the deep reasoner when the window fits its
             # worst case, else the fast thinker — so decomposition still runs
             # under small wall-clock caps instead of never engaging.
+            # qwen leads sketching: every observed ledger death has been a
+            # gpt-oss transport kill, and the only hard-tier solve came off a
+            # qwen-repaired skeleton. gpt-oss still alternates in when time is
+            # roomy (its sketches carry real ideas — worth one dice-roll per
+            # two rounds), but never carries the first round.
             available: list[tuple[str, str]] = []
-            if GPTOSS in tb.models_arm and tb.deadline.allows(tb.config.gptoss_call_s + 900):
-                available.append((GPTOSS, "gptoss-high"))
             if QWEN in tb.models_arm and tb.deadline.allows(tb.config.qwen_call_s + 600):
                 available.append((QWEN, "qwen-think"))
+            if GPTOSS in tb.models_arm and round_index > 0 \
+                    and tb.deadline.allows(tb.config.gptoss_call_s + 900):
+                available.append((GPTOSS, "gptoss-high"))
             if not available:
                 break
             sketcher, kind = available[round_index % len(available)]
