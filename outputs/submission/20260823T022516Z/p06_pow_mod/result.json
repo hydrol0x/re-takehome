@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "problem_id": "p06_pow_mod",
+  "status": "passed",
+  "passed": true,
+  "points": 1,
+  "comparator": {
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 29902,
+    "output": {
+      "passed": true,
+      "exit_code": 0,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (5.4s)\nwarning: Challenge.lean:4:7: declaration uses `sorry`\nwarning: Challenge.lean:7:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[p06_pow_mod, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, p06_answer] from Challenge\nBuilding Solution\n✔ [8655/8656] Built Solution (5.9s)\nBuild completed successfully (8656 jobs).\nExporting #[p06_pow_mod, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, p06_answer] from Solution\nRunning Lean default kernel on solution.\nLean default kernel accepts the solution\nYour solution is okay!\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- p06_pow_mod propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList p06_answer\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- p06_pow_mod propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList p06_answer\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.00073775,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 112.66,
+  "models_used": [
+    "openai/gpt-oss-120b"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "gptoss",
+    "origin": "sweep:decide",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0.5",
+        "verdict": "agree",
+        "answers": {
+          "p06_answer": "49"
+        },
+        "candidates": [
+          {
+            "p06_answer": "49"
+          },
+          {
+            "p06_answer": "49"
+          }
+        ]
+      },
+      {
+        "stage": "S0",
+        "solved": "sweep:decide"
+      }
+    ],
+    "wall_s": 82.1
+  }
+}
