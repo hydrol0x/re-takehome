@@ -796,6 +796,21 @@ end-to-end tests; `judge_check.sh` green on the free path ($0.00).
 Live S1–S4 validation blocked only on OpenRouter key availability in the
 execution environment (see RUNBOOK.md for the keyed-run sequence).
 
+### 2026-08-23 — Live experiment arc (full detail in EXPERIMENTS.md)
+
+Calibration pinned the real parameter semantics (qwen thinking needs an
+explicit budget; gpt-oss efforts work) and exposed gpt-oss channel
+mortality (429s, 502s, truncated bodies — each fatal to a problem ledger).
+Part-2 arms at matched 30-min caps: **duo 9/16 ($0.16) vs solo-qwen 8/16
+($0.45) vs solo-gptoss 8/16 ($0.04)** — the duo equals the union of the
+solos in one run, and the solos fail different problems, confirming the
+portfolio thesis live. Hard-tier runs at 60-min caps drove two hardening
+rounds (value-before-risk wave order, then gpt-oss deferral + call cap):
+v3 eliminated ledger deaths entirely and demonstrated the full cross-model
+S4 flow (gpt-oss sketches, qwen skeleton repair, cascade fills) iterating
+to partially-filled skeletons — leaving the hard tier a capability×time
+question for the real 8-hour caps.
+
 ## Appendix A: source-of-truth pointers (repo)
 
 - Landmines: `src/re_harness/llm.py:134-186` (reservation, mark_unknown),

@@ -79,3 +79,34 @@ but the story is the *why*:
 Caveat for interpreting all dev-container numbers: tonight's gpt-oss
 transport failures may be time-of-day/pool-specific and may differ in the
 judging environment; the mitigations are cheap insurance either way.
+
+## 2026-08-23 · Hard-tier at 60-min caps, v3 agent (deferral + call cap)
+
+Run `20260823T065723Z`, same four problems: **0/4 solved — but zero ledger
+deaths** (v2: three of four killed). All four problems used their full
+~43-minute agent windows, ran S1 both waves, and iterated S4 through up to
+three sketch rounds each, ending on compiling qwen-repaired skeletons with
+1–2 unfilled holes ($0.04–0.06 per problem). Verdict:
+
+- The v3 mitigations (gpt-oss S1 wave deferred to cycle 2; per-problem
+  gpt-oss call cap) eliminated transport mortality in this run while keeping
+  both models engaged.
+- The hard tier is now a capability×time problem, not a reliability one:
+  reference proofs show these four are provable with exactly the lemma
+  structures S4 is producing skeletons for; the fills need the real 8-hour
+  window (or a stronger per-hole loop) rather than the ~15–25 minutes S4
+  got here after S1.
+
+Cumulative dev spend across calibration + five runs: ≈ $0.95 of the $50 key.
+
+## Where this leaves the system
+
+At matched 30-min caps: duo 9/16 > solo-best 8/16, duo = union of solos at
+one-third of solo-qwen's cost. Baseline comparison: the kit's single-model
+25-turn loops scored 7/16 (qwen) and 8/16 (gpt-oss) under comparable
+wall-clock; the coordination layer's edge at short caps comes from S0 (6
+free), the S0.5 answer gate (p06+p07 solved for ~$0.005 total), portfolio
+coverage in S1, and the cascade's cost discipline. The hard tier requires
+full-cap runs: next validations are a full-sample run at judge settings
+(VM_TIME_LIMIT_S=28800), a real-key `judge_check.sh`, and the Part-2
+writeup from these arms.
