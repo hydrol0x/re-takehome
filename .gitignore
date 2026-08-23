@@ -4,3 +4,7 @@
 .venv/
 .pytest_cache/
 *.egg-info/
+outputs/submission/*/*/events.jsonl
+outputs/submission/*/*/transcript.json
+outputs/submission/*/*/checkpoint.json
+outputs/submission/*/*/worker-config.json
