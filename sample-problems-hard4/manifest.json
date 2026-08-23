@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "set": "hard4",
+  "problems": [
+    {
+      "id": "p09_imo1964",
+      "theorem_names": [
+        "p09_a",
+        "p09_b"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "p10_factorial_pow",
+      "theorem_names": [
+        "p10_factorial_pow"
+      ],
+      "definition_names": [
+        "p10_answer"
+      ],
+      "numeric_answer_names": [
+        "p10_answer"
+      ]
+    },
+    {
+      "id": "rmo_2000_2",
+      "theorem_names": [
+        "rmo_2000_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2001_2",
+      "theorem_names": [
+        "rmo_2001_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    }
+  ]
+}
