@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2000_6",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 5485,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [410/411] Built Challenge (739ms)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nBuild completed successfully (411 jobs).\nExporting #[rmo_2000_6, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n✖ [410/411] Building Solution (740ms)\ntrace: .> LEAN_PATH=/opt/mathlib/.lake/packages/Cli/.lake/build/lib/lean:/opt/mathlib/.lake/packages/batteries/.lake/build/lib/lean:/opt/mathlib/.lake/packages/Qq/.lake/build/lib/lean:/opt/mathlib/.lake/packages/aesop/.lake/build/lib/lean:/opt/mathlib/.lake/packages/proofwidgets/.lake/build/lib/lean:/opt/mathlib/.lake/packages/importGraph/.lake/build/lib/lean:/opt/mathlib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/opt/mathlib/.lake/packages/plausible/.lake/build/lib/lean:/opt/mathlib/.lake/build/lib/lean:/work/project/.lake/build/lib/lean /opt/elan/toolchains/leanprover--lean4---v4.32.0/bin/lean /work/project/Solution.lean -o /work/project/.lake/build/lib/lean/Solution.olean -i /work/project/.lake/build/lib/lean/Solution.ilean -c /work/project/.lake/build/ir/Solution.c --setup /work/project/.lake/build/ir/Solution.setup.json --json\nerror: Solution.lean:5:39: unknown tactic\nerror: Solution.lean:5:35: unsolved goals\n⊢ 2 ^ 4 = 16\nerror: Solution.lean:6:42: unknown tactic\nerror: Solution.lean:6:38: unsolved goals\n⊢ 5 ^ 3 = 125\nerror: Solution.lean:7:63: unknown tactic\nerror: Solution.lean:7:59: unsolved goals\n⊢ 2000 = 2 ^ 4 * 5 ^ 3\nerror: Solution.lean:10:44: Unknown constant `Nat.Prime`\nerror: Solution.lean:11:3: Unknown constant `Nat.factorization`\nwarning: Solution.lean:16:6: declaration uses `sorry`\nerror: Solution.lean:20:5: unknown tactic\nerror: Solution.lean:19:95: unsolved goals\ncase h\n⊢ 0 < 1 ∧ 0 < 20 ∧ 2000 ∣ 1 ^ 3 * 20 ^ 4 ∧ 1 * 20 = 20\nwarning: Solution.lean:22:6: declaration uses `sorry`\nwarning: Solution.lean:24:8: declaration uses `sorry`\nerror: Lean exited with code 1\nSome required targets logged failures:\n- Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_6 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.056755009999999995,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 973.836,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "qwen",
+    "origin": "qwen:s4-skeleton:r2:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 11,
+        "usable": 10,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "min_value_part1_ge_10",
+          "min_value_part2_ge_20",
+          "rmo_2000_6",
+          "val_prime_le_of_dvd"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 11,
+        "usable": 10,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 965.9
+  }
+}
