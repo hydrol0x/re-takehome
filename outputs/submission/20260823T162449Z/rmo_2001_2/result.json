@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2001_2",
+  "status": "cost_unknown",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 29001,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (6.5s)\nwarning: Challenge.lean:5:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n✖ [8655/8656] Building Solution (6.0s)\ntrace: .> LEAN_PATH=/opt/mathlib/.lake/packages/Cli/.lake/build/lib/lean:/opt/mathlib/.lake/packages/batteries/.lake/build/lib/lean:/opt/mathlib/.lake/packages/Qq/.lake/build/lib/lean:/opt/mathlib/.lake/packages/aesop/.lake/build/lib/lean:/opt/mathlib/.lake/packages/proofwidgets/.lake/build/lib/lean:/opt/mathlib/.lake/packages/importGraph/.lake/build/lib/lean:/opt/mathlib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/opt/mathlib/.lake/packages/plausible/.lake/build/lib/lean:/opt/mathlib/.lake/build/lib/lean:/work/project/.lake/build/lib/lean /opt/elan/toolchains/leanprover--lean4---v4.32.0/bin/lean /work/project/Solution.lean -o /work/project/.lake/build/lib/lean/Solution.olean -i /work/project/.lake/build/lib/lean/Solution.ilean -c /work/project/.lake/build/ir/Solution.c --setup /work/project/.lake/build/ir/Solution.setup.json --json\nerror: Solution.lean:8:2: Tactic `rfl` failed: The left-hand side\n  ∃ m, p ^ 2 + 7 * p * q + q ^ 2 = m ^ 2\nis not definitionally equal to the right-hand side\n  p = q ∨ p = 3 ∧ q = 11 ∨ p = 11 ∧ q = 3\n\np q : ℕ\nhp : Nat.Prime p\nhq : Nat.Prime q\n⊢ (∃ m, p ^ 2 + 7 * p * q + q ^ 2 = m ^ 2) ↔ p = q ∨ p = 3 ∧ q = 11 ∨ p = 11 ∧ q = 3\nerror: Lean exited with code 1\nSome required targets logged failures:\n- Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.011470905000000002,
+    "reserved_usd": 0,
+    "accounting_complete": false
+  },
+  "within_time": true,
+  "wall_s": 333.994,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sweep:rfl",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter returned HTTP 429; spend is uncertain: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\""
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "llm",
+        "died": "BudgetAccountingError"
+      }
+    ],
+    "wall_s": 303.3
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "set": "sample",
+  "problems": [
+    {
+      "problem_id": "p01_linear",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 48.439,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p02_frac_cancel",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 47.307,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p03_sq_ge_two_ab",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 51.019,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p04_sum_sq",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 48.165,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p05_gcd_mersenne",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 38.155,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p06_pow_mod",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.002489335,
+      "wall_s": 156.003,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p07_least_divisible",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.003041245,
+      "wall_s": 160.417,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p08_sum_products",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 51.641,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "p09_imo1964",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.012233865,
+      "wall_s": 947.28,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- p09_a p09_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "p10_factorial_pow",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.006217015000000001,
+      "wall_s": 317.614,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- p10_factorial_pow propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList p10_answer\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "putnam_2018_a1",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.020546250000000002,
+      "wall_s": 706.043,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "putnam_2020_a2",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.006590540000000001,
+      "wall_s": 646.115,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "rmo_2000_2",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.0057972200000000005,
+      "wall_s": 138.931,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "rmo_2000_3",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.065119715,
+      "wall_s": 1015.649,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "rmo_2000_6",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.038107764999999995,
+      "wall_s": 937.932,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_6 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2000_6 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Challenge and solution theorem statement do not match: 'rmo_2000_6'\n"
+    },
+    {
+      "problem_id": "rmo_2001_2",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.011470905000000002,
+      "wall_s": 333.994,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  ],
+  "total_points": 10,
+  "max_points": 16,
+  "actual_cost_usd": 0.171613855,
+  "wall_s_sum": 5644.704,
+  "run_id": "28f527e388fd4046a30e150216b85abb",
+  "wall_s": 3055.886,
+  "finished_at": "2026-08-23T17:15:45.860095+00:00"
+}
