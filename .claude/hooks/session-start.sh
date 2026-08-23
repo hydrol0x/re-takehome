@@ -32,4 +32,9 @@ if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
   docker pull "$IMAGE"
 fi
 
+# 4. Warm the page cache with Mathlib's oleans: on a cold boot, concurrent
+#    REPL imports otherwise exceed the harness's fixed 180 s import timeout.
+docker run --rm --entrypoint /bin/sh "$IMAGE" -c \
+  'find /opt/mathlib/.lake /opt/elan -name "*.olean" -exec cat {} + > /dev/null 2>&1 || true' || true
+
 echo "session bootstrap complete: venv ready, dockerd up, Lean image present"

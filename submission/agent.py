@@ -37,6 +37,7 @@ from typing import Any, Callable
 
 from re_harness import AgentResult, Problem, Services
 from re_harness.budget import BudgetAccountingError, BudgetExceeded
+from re_harness.lean import LeanRuntimeError
 from re_harness.llm import LLMCallError, LLMPolicyError
 from re_harness.models import MODEL_A as QWEN, MODEL_B as GPTOSS
 
@@ -361,6 +362,11 @@ class Toolbox:
         self.gptoss_gate = asyncio.Semaphore(1)
         self.gptoss_last_start = 0.0
         self.gptoss_gap_s = 5.0
+        # A flaky REPL (container death, cold-boot import timeout) must degrade
+        # the search, not crash the problem: after two consecutive failures we
+        # stop checking and submit the best unverified candidate instead.
+        self.lean_alive = True
+        self.repl_failures = 0
         self.models_arm: list[str] = {
             "qwen": [QWEN], "gptoss": [GPTOSS]}.get(config.models, [QWEN, GPTOSS])
 
@@ -389,7 +395,21 @@ class Toolbox:
             })
 
     async def check(self, candidate: Candidate, timeout_s: int = 90) -> Candidate:
-        result = await self.services.lean.check_file(candidate.source, timeout_s=timeout_s)
+        if not self.lean_alive:
+            candidate.error_count = 10**6
+            candidate.messages = [{"severity": "error", "data": "REPL unavailable"}]
+            return candidate
+        try:
+            result = await self.services.lean.check_file(candidate.source, timeout_s=timeout_s)
+        except LeanRuntimeError as exc:
+            self.repl_failures += 1
+            self.log(stage="lean", error=str(exc)[:120], consecutive=self.repl_failures)
+            if self.repl_failures >= 2:
+                self.lean_alive = False
+            candidate.error_count = 10**6
+            candidate.messages = [{"severity": "error", "data": f"REPL unavailable: {exc}"}]
+            return candidate
+        self.repl_failures = 0
         candidate.messages = result.messages
         candidate.error_count = sum(
             1 for m in result.messages if m.get("severity") == "error"
@@ -457,17 +477,18 @@ class SubmissionAgent:
             # Anytime loop: alternate fresh diverse sampling (coverage) with
             # decomposition (depth) until solved, the LLM dies, or time runs low.
             cycle = 0
-            while solved is None and toolbox.llm_alive and cycle < 8 \
-                    and toolbox.deadline.allows(1200):
+            while solved is None and toolbox.llm_alive and toolbox.lean_alive \
+                    and cycle < 8 and toolbox.deadline.allows(1200):
                 cycle += 1
                 solved = await self.stage1_and_2(toolbox)
-                if solved is None and toolbox.deadline.allows(1800):
+                if solved is None and toolbox.deadline.allows(1800) \
+                        and toolbox.lean_alive:
                     solved = await self.stage4_decompose(toolbox)
         except LLMDead:
             pass  # deterministic results stand; finalize below
 
         final = solved or toolbox.best
-        if final.accepted and toolbox.deadline.allows(120):
+        if final.accepted and toolbox.lean_alive and toolbox.deadline.allows(120):
             # Re-verify and audit axioms in one pass: `#print axioms` reports the
             # dependency set the Comparator will enforce (catches native_decide).
             audit_source = final.source.rstrip() + "\n\n" + "\n".join(
@@ -557,7 +578,7 @@ class SubmissionAgent:
             tb.log(stage="S0", ran=False)
             return None
         for tactic, preamble in SWEEP:
-            if not tb.deadline.allows(90):
+            if not tb.deadline.allows(90) or not tb.lean_alive:
                 break
             source = splice_tactics(tb.challenge, tactic, preamble)
             if source is None:
@@ -632,6 +653,17 @@ class SubmissionAgent:
                 usable.append(Candidate(source=guarded, origin=f"{kind}:s1"))
             tb.log(stage="S1", wave=wave[0][1], planned=len(wave),
                    usable=len(usable), rejected=rejected)
+            if not tb.lean_alive and usable:
+                # No verifier left: submit the best-effort candidate rather
+                # than the raw challenge — a plausible whole proof can still
+                # pass the Comparator even though we cannot pre-check it.
+                unverified = usable[0]
+                unverified.origin += ":unverified"
+                tb.services.checkpoint(unverified.source, {
+                    "stage": "S1", "origin": unverified.origin, "accepted": False})
+                tb.best = unverified
+                tb.log(stage="S1", unverified_submit=unverified.origin)
+                return unverified
             for candidate in usable:
                 if not tb.deadline.allows(120):
                     return None
