@@ -90,3 +90,28 @@ $1.00 spend — the harness reserves conservatively and the agent stops on
 - Comparator-verified reference proofs exist for p09, p10, rmo_2000_2,
   rmo_2001_2 (plus a REPL-verified rmo_2000_3 proof) in `reference/` — if an
   arm solves the four scorable ones, the pipeline is genuinely working.
+
+## Appendix: running inside the Claude-web dev container
+
+The web container's egress goes through a TLS-re-terminating proxy that the
+harness client (`trust_env=False`) bypasses, causing immediate transport
+failures that close the budget ledger. Two dev-only accommodations, both
+inert in the judge environment and on local machines:
+
+- `scripts/calibrate.py` injects a proxy-aware httpx transport through
+  `LLMClient(transport=…)` — an official harness parameter — when the
+  container's proxy markers exist.
+- Full harness runs need the worker subprocesses to honor the proxy: prefix
+  commands with `PYTHONPATH=scripts/devshim`, e.g.
+  `PYTHONPATH=scripts/devshim VM_TIME_LIMIT_S=1800 .venv/bin/python run.py
+  --problems sample-problems --out outputs --n-workers 2`.
+  The shim (`scripts/devshim/sitecustomize.py`) only activates when both the
+  PYTHONPATH opt-in and the proxy markers are present; TLS verification stays
+  enabled. Never set that PYTHONPATH in judging.
+
+Observed reliability facts (calibration, 2026-08-23): qwen thinking engages
+only with `reasoning: {enabled: true, max_tokens: N}` (a bare `enabled` or an
+`effort` level yields zero reasoning tokens); gpt-oss's upstream pool throws
+transient 429s (~1 in 5 calls during one burst) — the agent therefore banks
+the qwen wave before its first gpt-oss call and paces gpt-oss to one
+in-flight request with a 5 s gap.

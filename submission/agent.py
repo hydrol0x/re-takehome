@@ -354,6 +354,13 @@ class Toolbox:
         self.stage_log: list[dict[str, Any]] = []
         self.llm_alive = not config.disable_llm
         self.lemma_pool = ""  # proven helper lemmas, persistent across S4 cycles
+        # gpt-oss rides a shared upstream pool that intermittently 429s, and one
+        # HTTP error closes the whole problem ledger: keep gpt-oss to a single
+        # in-flight call with a minimum gap between call starts (observed:
+        # 1-in-5 calls hit a transient 429 burst during calibration).
+        self.gptoss_gate = asyncio.Semaphore(1)
+        self.gptoss_last_start = 0.0
+        self.gptoss_gap_s = 5.0
         self.models_arm: list[str] = {
             "qwen": [QWEN], "gptoss": [GPTOSS]}.get(config.models, [QWEN, GPTOSS])
 
@@ -411,7 +418,13 @@ class Toolbox:
                                 reasoning={"effort": "high"},
                                 timeout_s=int(self.config.gptoss_call_s) + 300),
         }[kind]
-        async with self.semaphore:
+        gate = self.gptoss_gate if model == GPTOSS else self.semaphore
+        async with gate:
+            if model == GPTOSS:
+                gap = self.gptoss_gap_s - (time.monotonic() - self.gptoss_last_start)
+                if gap > 0:
+                    await asyncio.sleep(gap)
+                self.gptoss_last_start = time.monotonic()
             if not self.deadline.allows(params["timeout_s"] + 60):
                 return None
             try:
@@ -499,13 +512,12 @@ class SubmissionAgent:
             askers = [(GPTOSS, "gptoss-high"), (GPTOSS, "gptoss-high")]
             judge = (GPTOSS, "gptoss-high")
 
-        texts = await asyncio.gather(
-            *(tb.sample(model, answer_messages(tb.problem, tb.challenge, names),
-                        kind=kind) for model, kind in askers),
-            return_exceptions=True)
-        for item in texts:
-            if isinstance(item, LLMDead):
-                raise item
+        # Sequential, qwen first: a gpt-oss 429 closes the ledger, so bank the
+        # cheaper derivation before touching the risky channel.
+        texts: list[Any] = []
+        for model, kind in askers:
+            texts.append(await tb.sample(
+                model, answer_messages(tb.problem, tb.challenge, names), kind=kind))
         parsed = [parse_answer_lines(t, names) if isinstance(t, str) else None
                   for t in texts]
         a1, a2 = (parsed + [None, None])[:2]
@@ -582,51 +594,53 @@ class SubmissionAgent:
     # ---- S1 + S2/S3 --------------------------------------------------------
 
     async def stage1_and_2(self, tb: Toolbox) -> Candidate | None:
-        plans: list[tuple[str, str]] = []
-        for model in tb.models_arm:
-            if model == QWEN:
-                plans += [(QWEN, "qwen-fast")] * self.config.qwen_samples
-                plans += [(QWEN, "qwen-think")] * (1 if len(tb.models_arm) == 1 else 1)
-            else:
-                plans += [(GPTOSS, "gptoss-med")] * self.config.gptoss_samples
-        if len(tb.models_arm) == 1 and plans:  # solo arms get matched sample counts
-            extra = (self.config.qwen_samples + self.config.gptoss_samples
-                     + 1 - len(plans))
-            plans += [plans[0]] * max(0, extra)
-
-        texts = await asyncio.gather(
-            *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge), kind=kind)
-              for model, kind in plans),
-            return_exceptions=True)
-        for item in texts:
-            if isinstance(item, LLMDead):
-                raise item
+        # Value-before-risk: run the qwen wave to completion (generate AND
+        # check) before the first gpt-oss call, so a gpt-oss 429 that kills the
+        # ledger cannot cost us qwen's candidates.
+        solo = len(tb.models_arm) == 1
+        waves: list[list[tuple[str, str]]] = []
+        if QWEN in tb.models_arm:
+            fast = self.config.qwen_samples + (self.config.gptoss_samples if solo else 0)
+            waves.append([(QWEN, "qwen-fast")] * fast + [(QWEN, "qwen-think")])
+        if GPTOSS in tb.models_arm:
+            count = self.config.gptoss_samples + (self.config.qwen_samples + 1 if solo else 0)
+            waves.append([(GPTOSS, "gptoss-med")] * count)
 
         candidates: list[Candidate] = []
         seen: set[str] = set()
-        rejected = 0
-        for (model, kind), text in zip(plans, texts):
-            source = extract_lean(text) if isinstance(text, str) else None
-            if not source:
-                continue
-            guarded, _reason = guard_candidate(source, tb.parsed)
-            if not guarded:
-                rejected += 1
-                continue
-            if guarded in seen:
-                continue
-            seen.add(guarded)
-            candidates.append(Candidate(source=guarded, origin=f"{kind}:s1"))
-        tb.log(stage="S1", planned=len(plans), usable=len(candidates), rejected=rejected)
-
-        for candidate in candidates:
-            if not tb.deadline.allows(120):
-                return None
-            await tb.check(candidate)
-            tb.record(candidate, "S1")
-            if candidate.accepted:
-                tb.log(stage="S1", solved=candidate.origin)
-                return candidate
+        for wave in waves:
+            texts = await asyncio.gather(
+                *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge), kind=kind)
+                  for model, kind in wave),
+                return_exceptions=True)
+            for item in texts:
+                if isinstance(item, LLMDead):
+                    raise item
+            usable: list[Candidate] = []
+            rejected = 0
+            for (model, kind), text in zip(wave, texts):
+                source = extract_lean(text) if isinstance(text, str) else None
+                if not source:
+                    continue
+                guarded, _reason = guard_candidate(source, tb.parsed)
+                if not guarded:
+                    rejected += 1
+                    continue
+                if guarded in seen:
+                    continue
+                seen.add(guarded)
+                usable.append(Candidate(source=guarded, origin=f"{kind}:s1"))
+            tb.log(stage="S1", wave=wave[0][1], planned=len(wave),
+                   usable=len(usable), rejected=rejected)
+            for candidate in usable:
+                if not tb.deadline.allows(120):
+                    return None
+                await tb.check(candidate)
+                tb.record(candidate, "S1")
+                if candidate.accepted:
+                    tb.log(stage="S1", solved=candidate.origin)
+                    return candidate
+            candidates.extend(usable)
 
         candidates.sort(key=lambda c: c.error_count)
         for candidate in candidates[:2]:

@@ -31,6 +31,32 @@ from re_harness.events import EventLogger
 from re_harness.llm import LLMCallError, LLMClient
 from re_harness.models import MODEL_A as QWEN, MODEL_B as GPTOSS
 
+DEV_PROXY_CA = "/root/.ccr/ca-bundle.crt"
+
+
+def dev_transport():
+    """httpx transport for the Claude-web dev container's egress proxy.
+
+    That container only allows outbound HTTPS through a TLS-re-terminating
+    proxy, which the harness client (trust_env=False) would bypass. LLMClient
+    officially accepts a `transport`, so we inject one that uses the proxy and
+    trusts its CA — TLS verification stays enabled. Returns None everywhere
+    else (judge environment, local machines), leaving harness behavior
+    untouched.
+    """
+
+    import os as _os
+    proxy = _os.environ.get("HTTPS_PROXY")
+    if not (proxy and Path(DEV_PROXY_CA).exists()):
+        return None
+    import ssl
+
+    import certifi
+    import httpx
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    ctx.load_verify_locations(DEV_PROXY_CA)
+    return httpx.AsyncHTTPTransport(proxy=proxy, verify=ctx)
+
 MATH_PROMPT = (
     "Compute 7^2026 mod 100. Think it through, then end with exactly one line: "
     "ANSWER: <number>"
@@ -119,7 +145,8 @@ async def main() -> int:
     events = EventLogger(out_dir / f"calibration-{stamp}.events.jsonl",
                          problem_id="calibration", secrets=(settings.api_key,))
     budget = BudgetLedger(args.cap_usd)
-    llm = LLMClient(api_key=settings.api_key, budget=budget, events=events)
+    llm = LLMClient(api_key=settings.api_key, budget=budget, events=events,
+                    transport=dev_transport())
 
     rows = []
     probes = PROBES + ([] if args.quick else LEAN_PROBES)

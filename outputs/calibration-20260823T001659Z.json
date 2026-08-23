@@ -1,0 +1,101 @@
+[
+  {
+    "label": "qwen default (control)",
+    "model": "qwen/qwen3.5-flash-02-23",
+    "request": {
+      "max_tokens": 3000,
+      "temperature": 0.7
+    },
+    "status": "ok",
+    "latency_s": 15.2,
+    "finish": "stop",
+    "prompt_tokens": 41,
+    "completion_tokens": 2913,
+    "reasoning_tokens": 0,
+    "cost_usd": 0.000760045,
+    "reasoning_returned": false,
+    "has_lean_fence": false,
+    "answer": "49",
+    "content_head": "The user wants to compute $7^{2026} \\pmod{100}$.  1.  **Analyze the problem:**     *   Base: 7     *   Exponent: 2026   "
+  },
+  {
+    "label": "qwen reasoning enabled",
+    "model": "qwen/qwen3.5-flash-02-23",
+    "request": {
+      "max_tokens": 12000,
+      "temperature": 0.7,
+      "reasoning": {
+        "enabled": true
+      }
+    },
+    "status": "ok",
+    "latency_s": 12.7,
+    "finish": "stop",
+    "prompt_tokens": 41,
+    "completion_tokens": 2807,
+    "reasoning_tokens": 0,
+    "cost_usd": 0.000732485,
+    "reasoning_returned": false,
+    "has_lean_fence": false,
+    "answer": "49",
+    "content_head": "Thinking Process:  1.  **Analyze the Request:** The user wants to compute $7^{2026} \\pmod{100}$. I need to show my reaso"
+  },
+  {
+    "label": "qwen reasoning budget 4k",
+    "model": "qwen/qwen3.5-flash-02-23",
+    "request": {
+      "max_tokens": 12000,
+      "temperature": 0.7,
+      "reasoning": {
+        "enabled": true,
+        "max_tokens": 4000
+      }
+    },
+    "status": "ok",
+    "latency_s": 16.5,
+    "finish": "stop",
+    "prompt_tokens": 41,
+    "completion_tokens": 3749,
+    "reasoning_tokens": 3255,
+    "cost_usd": 0.000977405,
+    "reasoning_returned": true,
+    "has_lean_fence": false,
+    "answer": "49",
+    "content_head": "To compute $7^{2026} \\pmod{100}$, we look for a pattern in the powers of 7 modulo 100.  First, let's calculate the first"
+  },
+  {
+    "label": "qwen effort high",
+    "model": "qwen/qwen3.5-flash-02-23",
+    "request": {
+      "max_tokens": 12000,
+      "temperature": 0.7,
+      "reasoning": {
+        "effort": "high"
+      }
+    },
+    "status": "ok",
+    "latency_s": 25.9,
+    "finish": "stop",
+    "prompt_tokens": 41,
+    "completion_tokens": 4985,
+    "reasoning_tokens": 0,
+    "cost_usd": 0.001298765,
+    "reasoning_returned": false,
+    "has_lean_fence": false,
+    "answer": "49",
+    "content_head": "The user wants to compute $7^{2026} \\pmod{100}$.  Let $n = 2026$ and base $a = 7$. We want to find $7^n \\pmod{100}$. Sin"
+  },
+  {
+    "label": "gptoss effort low",
+    "model": "openai/gpt-oss-120b",
+    "request": {
+      "max_tokens": 8000,
+      "temperature": 1.0,
+      "reasoning": {
+        "effort": "low"
+      }
+    },
+    "status": "TRANSPORT-ERROR (ledger closed!)",
+    "error": "OpenRouter returned HTTP 429; spend is uncertain: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"openai/gpt-oss-120b is temporarily rate-limited upstream. Please retry sho"
+  }
+]
