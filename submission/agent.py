@@ -30,9 +30,12 @@ Environment knobs (defaults are the submission configuration):
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import os
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable
 
 from re_harness import AgentResult, Problem, Services
@@ -393,6 +396,16 @@ class Toolbox:
         self.repl_failures = 0
         self.models_arm: list[str] = {
             "qwen": [QWEN], "gptoss": [GPTOSS]}.get(config.models, [QWEN, GPTOSS])
+        # Durable progress (survives worker restarts under `run.py --resume`):
+        # a resumed segment skips finished S0/S0.5 work, keeps proven lemmas
+        # and failure history, and continues the cycle count. One-segment
+        # judge runs simply write it and never read it back.
+        self.s0_done = False
+        self.cycles_done = 0
+        self.pinned_answers: dict[str, int] = {}
+        state_dir = getattr(services, "state_dir", None)
+        self.state_path = Path(state_dir) / "agent_state.json" if state_dir else None
+        self._load_state()
 
     def log(self, **kv: Any) -> None:
         self.stage_log.append(kv)
@@ -408,6 +421,49 @@ class Toolbox:
                 rf"\g<1> {value}", text)
         self.challenge = text
         self.parsed = parse_challenge(text)
+        self.pinned_answers = dict(answers)
+
+    def _state_key(self) -> str:
+        return hashlib.sha256(self.problem.challenge.encode()).hexdigest()[:16]
+
+    def _load_state(self) -> None:
+        if self.state_path is None or not self.state_path.exists():
+            return
+        try:
+            state = json.loads(self.state_path.read_text())
+        except (OSError, ValueError):
+            return
+        if state.get("challenge_sha") != self._state_key():
+            return
+        self.s0_done = bool(state.get("s0_done"))
+        self.cycles_done = max(0, int(state.get("cycles_done", 0)))
+        self.lemma_pool = str(state.get("lemma_pool", ""))
+        self.history_notes = [str(x) for x in state.get("history_notes", [])][-12:]
+        pinned = state.get("pinned_answers")
+        if isinstance(pinned, dict):
+            try:
+                answers = {str(k): int(v) for k, v in pinned.items()}
+            except (TypeError, ValueError):
+                answers = {}
+            if answers:
+                self.pin_answers(answers)
+        self.log(stage="resume", s0_done=self.s0_done, cycles_done=self.cycles_done,
+                 pinned=list(self.pinned_answers), lemma_pool_bytes=len(self.lemma_pool))
+
+    def save_state(self) -> None:
+        if self.state_path is None:
+            return
+        try:
+            self.state_path.write_text(json.dumps({
+                "challenge_sha": self._state_key(),
+                "s0_done": self.s0_done,
+                "cycles_done": self.cycles_done,
+                "lemma_pool": self.lemma_pool[-20000:],
+                "history_notes": self.history_notes[-12:],
+                "pinned_answers": self.pinned_answers,
+            }))
+        except OSError:
+            pass
 
     def record(self, candidate: Candidate, stage: str) -> None:
         if candidate.score() > self.best.score():
@@ -511,15 +567,22 @@ class SubmissionAgent:
         toolbox = Toolbox(problem, services, self.config)
         solved: Candidate | None = None
         try:
-            if toolbox.parsed.numeric_answer_names and toolbox.llm_alive:
+            if toolbox.parsed.numeric_answer_names and toolbox.llm_alive \
+                    and not toolbox.pinned_answers:
                 await self.stage05_answers(toolbox)
-            solved = await self.stage0_sweep(toolbox)
+                if toolbox.pinned_answers:
+                    toolbox.save_state()
+            if not toolbox.s0_done:
+                solved = await self.stage0_sweep(toolbox)
+                if solved is None and toolbox.lean_alive:
+                    toolbox.s0_done = True
+                    toolbox.save_state()
             # Anytime loop: alternate fresh diverse sampling (coverage) with
             # decomposition (depth) until solved, the LLM dies, or time runs low.
             # Eight cycles fill a 30–120 min window, but would strand hours at
             # the judge's 8-hour cap; scale the cap with the window instead.
             max_cycles = max(8, int(self.config.agent_time_s // 1500))
-            cycle = 0
+            cycle = toolbox.cycles_done
             while solved is None and toolbox.llm_alive and toolbox.lean_alive \
                     and cycle < max_cycles and toolbox.deadline.allows(600):
                 cycle += 1
@@ -533,6 +596,8 @@ class SubmissionAgent:
                     solved = await self.stage4_decompose(toolbox)
                 if solved is None and toolbox.lean_alive:
                     solved = await self.stage2_repair(toolbox, near_misses)
+                toolbox.cycles_done = cycle
+                toolbox.save_state()
         except LLMDead:
             pass  # deterministic results stand; finalize below
 
@@ -875,6 +940,7 @@ class SubmissionAgent:
             if filled is not None:
                 lemma_pool = self._harvest_lemmas(tb, filled.source) or lemma_pool
                 tb.lemma_pool = lemma_pool
+                tb.save_state()  # keep harvested lemmas across worker restarts
                 note = ("A previous decomposition proved some helpers (reuse them) but "
                         "stalled on these subgoals, which were evidently too hard as "
                         "stated — replace them with smaller or different lemmas: "

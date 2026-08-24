@@ -6,22 +6,9 @@ theorem rmo_2000_2
   (hy : 0 < y)
   (h : y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) :
   x = 9 ∧ y = 11 := by
-  -- Helper lemma: bound on y from below (y >= x + 2 for all x >= 1)
-  have h_bound_lower : x + 2 ≤ y := by sorry
-  
-  -- Helper lemma: bound on y from above (y <= x + 3 for all x >= 1)  
-  have h_bound_upper : y ≤ x + 3 := by sorry
-  
-  -- Helper lemma: case analysis - if y = x + 2, then x must be small
-  have h_case_y_eq_x_plus_2 : y = x + 2 → x ≤ 9 := by sorry
-  
-  -- Helper lemma: case analysis - if y = x + 3, then x must be small
-  have h_case_y_eq_x_plus_3 : y = x + 3 → x ≤ 9 := by sorry
-  
-  -- Helper lemma: explicit computation for x = 9 gives y = 11
-  have h_computation_9 : 
-    (9 : ℕ) ^ 3 + 8 * (9 : ℕ) ^ 2 - 6 * (9 : ℕ) + 8 = 11 ^ 3 := by sorry
-  
-  -- Main proof using bounds and case analysis
+  have h1 : ∀ n : ℕ, 0 < n → n ^ 3 + 8 * n ^ 2 - 6 * n + 8 < (n + 3) ^ 3 := by sorry
+  have h2 : ∀ n : ℕ, 0 < n → n ≥ 10 → (n + 2) ^ 3 < n ^ 3 + 8 * n ^ 2 - 6 * n + 8 := by sorry
+  have h3 : ∀ n : ℕ, 0 < n → n ≤ 8 → ¬∃ m : ℕ, 0 < m ∧ m ^ 3 = n ^ 3 + 8 * n ^ 2 - 6 * n + 8 := by sorry
+  have h4 : (9 : ℕ) ^ 3 + 8 * (9 : ℕ) ^ 2 - 6 * (9 : ℕ) + 8 = (11 : ℕ) ^ 3 := by sorry
   have h_main : x = 9 ∧ y = 11 := by sorry
   exact h_main

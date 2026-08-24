@@ -84,7 +84,7 @@ async def _run(config: dict[str, Any]) -> int:
         challenge=challenge,
         metadata=config["problem_metadata"],
     )
-    services = Services(llm=llm, lean=lean, checkpoint=checkpoint)
+    services = Services(llm=llm, lean=lean, checkpoint=checkpoint, state_dir=out_dir)
     started = time.monotonic()
     status = "failed"
     agent_error: dict[str, Any] | None = None

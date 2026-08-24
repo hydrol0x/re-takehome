@@ -174,3 +174,30 @@ Launched with these in place: **hard4 at full judge caps**
 (`VM_TIME_LIMIT_S=28800 VM_BUDGET_USD=1.00`, duo, 4 workers,
 `SUBMISSION_GPTOSS_CALL_CAP=24`) — the first run at exactly the judged
 time/budget settings. Results appended here when it lands.
+
+## 2026-08-24 · Dev-container restart storms; durable agent state
+
+The full-cap run surfaced a new dominant hazard, unrelated to providers:
+web-container restarts every ~20–60 min. Forensics on run `20260823T230042Z`
+segment 1: five `RemoteProtocolError`s at literally the same second
+(23:06:51) across three problems — the restart chopping every in-flight
+connection — three ledgers closed. (A first attempt `225408Z` had died to
+dockerd being down at launch: 0/4, $0.0025.) Two responses, both inert at
+judging:
+
+1. `VM_TRANSPORT_FAILURE_POLICY=release` (dev-only env knob, default
+   unchanged): transport drops release their reservation. Validated in
+   segment 2 — the next restart (00:13:31) chopped nine in-flight calls and
+   **all nine released, zero ledger deaths**.
+2. Durable per-problem agent state (`agent_state.json` via a new
+   `Services.state_dir`): resumed segments skip completed S0/S0.5, keep
+   pinned answers, harvested lemmas, failure history, and the cycle count.
+   Before this, every ~40-min segment burned its first ~15 min redoing the
+   deterministic sweep and re-deferring gpt-oss to "cycle 2" forever; now
+   segments compose into one cumulative 8-hour search. Judge runs are
+   single-segment: they write the state and never read it.
+
+Resume also grants each segment the full window (`worker.py` builds a fresh
+ledger and clock), so wall-clock stretches with each restart; per-segment
+events remain the accounting record, and real spend lives in the OpenRouter
+dashboard.

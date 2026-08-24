@@ -29,10 +29,14 @@ class AgentResult:
 class Services:
     """Capabilities provided to an applicant agent for one problem."""
 
-    def __init__(self, *, llm: "LLMClient", lean: "LeanClient", checkpoint):
+    def __init__(self, *, llm: "LLMClient", lean: "LeanClient", checkpoint, state_dir=None):
         self.llm = llm
         self.lean = lean
         self._checkpoint = checkpoint
+        # Durable per-problem scratch directory (the problem's output dir).
+        # Lets an agent persist search state so an interrupted worker can be
+        # resumed without redoing work; None-safe for older callers.
+        self.state_dir = state_dir
 
     def checkpoint(
         self, source: str, metadata: Mapping[str, JSONValue] | None = None
