@@ -121,7 +121,10 @@ holds *by construction*; (b) lexical ban on `sorry`/`admit`/`native_decide`/
   Mid-flight transport failures, cancels, and malformed 200s still close it,
   deliberately — spend there is genuinely unknown. Tests:
   `tests/test_llm.py`. The agent's ordering/pacing/call-cap mitigations stay
-  as cheap insurance for the still-fatal classes.
+  as cheap insurance for the still-fatal classes. (Dev containers only: the
+  `VM_TRANSPORT_FAILURE_POLICY=release` knob relaxes the transport class,
+  because environment restarts there chop all in-flight connections at once
+  — see RUNBOOK.md appendix. Judging always runs the strict default.)
 
 ### 1.4 Time mechanics — the second landmine
 

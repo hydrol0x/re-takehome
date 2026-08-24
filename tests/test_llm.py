@@ -150,6 +150,64 @@ async def test_http_error_releases_budget_and_allows_retry(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_transport_failure_defaults_to_fail_closed(tmp_path, monkeypatch):
+    monkeypatch.delenv("VM_TRANSPORT_FAILURE_POLICY", raising=False)
+
+    def handler(_request):
+        raise httpx.ConnectError("connection dropped")
+
+    ledger = BudgetLedger(1)
+    client = LLMClient(
+        api_key="key",
+        budget=ledger,
+        events=EventLogger(tmp_path / "events", problem_id="p"),
+        transport=httpx.MockTransport(handler),
+    )
+    with pytest.raises(LLMCallError, match="spend is uncertain"):
+        await client.complete(model=MODEL_A, messages=[{"role": "user", "content": "x"}])
+    assert not ledger.snapshot().accounting_complete
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_transport_release_policy_keeps_ledger_open(tmp_path, monkeypatch):
+    # Dev-container knob only (container restarts chop in-flight connections);
+    # never set during judging, where the default above applies.
+    monkeypatch.setenv("VM_TRANSPORT_FAILURE_POLICY", "release")
+    calls = []
+
+    def handler(_request):
+        calls.append(1)
+        if len(calls) == 1:
+            raise httpx.ConnectError("connection dropped")
+        return httpx.Response(200, json={
+            "id": "gen-3",
+            "model": MODEL_A,
+            "choices": [{"finish_reason": "stop", "message": {"content": "ok"}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1, "cost": 0.002},
+        })
+
+    ledger = BudgetLedger(1)
+    client = LLMClient(
+        api_key="key",
+        budget=ledger,
+        events=EventLogger(tmp_path / "events", problem_id="p"),
+        transport=httpx.MockTransport(handler),
+    )
+    with pytest.raises(LLMCallError, match="reservation released"):
+        await client.complete(model=MODEL_A, messages=[{"role": "user", "content": "x"}])
+    snapshot = ledger.snapshot()
+    assert snapshot.accounting_complete
+    assert snapshot.reserved_usd == 0
+    response = await client.complete(
+        model=MODEL_A, messages=[{"role": "user", "content": "x"}]
+    )
+    assert response.content == "ok"
+    assert ledger.snapshot().spent_usd == pytest.approx(0.002)
+    await client.aclose()
+
+
+@pytest.mark.asyncio
 async def test_cancelled_inflight_call_fails_budget_closed(tmp_path):
     entered = asyncio.Event()
 

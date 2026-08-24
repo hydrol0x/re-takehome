@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import time
 import uuid
 from dataclasses import dataclass
@@ -154,19 +155,35 @@ class LLMClient:
                 request_args["timeout"] = timeout_s
             response = await self._client.post(OPENROUTER_URL, **request_args)
         except BaseException as exc:
-            snapshot = self._budget.mark_unknown(reservation)
+            # Transport failures close the ledger: the request may have reached
+            # the provider, so spend is genuinely uncertain. The one exception
+            # is the dev-container knob VM_TRANSPORT_FAILURE_POLICY=release
+            # (never set during judging): environment restarts there chop every
+            # in-flight connection at once, indistinguishable in-band from a
+            # provider drop. Cancellation always stays fail-closed.
+            release_policy = (
+                os.environ.get("VM_TRANSPORT_FAILURE_POLICY") == "release"
+                and isinstance(exc, httpx.HTTPError)
+            )
+            if release_policy:
+                self._budget.release(reservation)
+                snapshot = self._budget.snapshot()
+            else:
+                snapshot = self._budget.mark_unknown(reservation)
             self._events.emit(
                 "llm_error",
                 call_id=call_id,
                 error_type=type(exc).__name__,
                 message=str(exc),
-                cost_status="unknown",
+                cost_status="released" if release_policy else "unknown",
                 budget=snapshot.__dict__,
                 latency_ms=round((time.monotonic() - started) * 1000),
             )
             if isinstance(exc, httpx.HTTPError):
                 raise LLMCallError(
-                    f"OpenRouter request failed; spend is uncertain: {exc}"
+                    f"OpenRouter request failed "
+                    f"({'reservation released, dev policy' if release_policy else 'spend is uncertain'}): "
+                    f"{exc}"
                 ) from exc
             raise
 

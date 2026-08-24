@@ -108,6 +108,15 @@ inert in the judge environment and on local machines:
   The shim (`scripts/devshim/sitecustomize.py`) only activates when both the
   PYTHONPATH opt-in and the proxy markers are present; TLS verification stays
   enabled. Never set that PYTHONPATH in judging.
+- Web-container restarts chop every in-flight HTTP connection at the same
+  instant (observed 2026-08-23 23:06:51: five simultaneous
+  `RemoteProtocolError`s across three problems, three ledgers closed). For
+  long dev runs add `VM_TRANSPORT_FAILURE_POLICY=release` so transport drops
+  release their reservation instead of closing the ledger, and resume after
+  the restart with `--resume latest`. Never set this during judging — the
+  default fail-closed accounting is the judged behavior (and the judging
+  environment has no restart hazard). Dev cost truth lives in the OpenRouter
+  dashboard, not the per-problem ledgers, under this knob.
 
 Observed reliability facts (calibration, 2026-08-23): qwen thinking engages
 only with `reasoning: {enabled: true, max_tokens: N}` (a bare `enabled` or an
