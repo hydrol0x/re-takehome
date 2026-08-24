@@ -67,4 +67,6 @@ theorem rmo_2001_2_backward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
 -- Main theorem statement (kept exactly as specified)
 theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
   (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) ↔
-    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by sorry
+    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by exact
+        ⟨fun h => rmo_2001_2_forward p q hp hq h,
+         fun h => rmo_2001_2_backward p q hp hq h⟩
