@@ -52,12 +52,21 @@ lemma special_case_11_3 : 11^2 + 7*11*3 + 3^2 = 19^2 := by linarith
 
 -- Helper lemma: equal primes case
 lemma equal_primes_square (p : ℕ) (hp : Nat.Prime p) :
-  ∃ m : ℕ, p^2 + 7*p*p + p^2 = m^2 := by sorry
+  ∃ m : ℕ, p^2 + 7*p*p + p^2 = m^2 := by exact ⟨3 * p, by ring⟩
 
 -- Helper lemma: forward direction - existence implies special cases
 theorem rmo_2001_2_forward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
   (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) → 
-    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by sorry
+    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by -- Candidate 2: Direct algebraic manipulation with omega
+    intro h
+    obtain ⟨m, hm⟩ := h
+    have h_diff : m^2 - (p + q)^2 = 5 * p * q := diff_of_squares_analysis p q m hm
+    have h_bounds : (p + q)^2 ≤ m^2 ∧ m^2 < (p + q + 2)^2 := m_bounds p q hp hq m hm
+    have h_m_ge : p + q ≤ m := by
+      nlinarith
+    have h_m_lt : m < p + q + 2 := by
+      nlinarith
+    sorry
 
 -- Helper lemma: reverse direction - special cases imply existence
 theorem rmo_2001_2_backward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
