@@ -10,7 +10,7 @@ theorem pow_two_mod_seven (n : ℕ) : 2 ^ n % 7 =
 theorem div_two_pow_minus_one_iff_mod_eq_one (n : ℕ) : 7 ∣ 2 ^ n - 1 ↔ 2 ^ n % 7 = 1 := by sorry
 
 -- Helper: 3 divides n iff n % 3 = 0
-theorem three_dvd_iff_mod_zero (n : ℕ) : 3 ∣ n ↔ n % 3 = 0 := by sorry
+theorem three_dvd_iff_mod_zero (n : ℕ) : 3 ∣ n ↔ n % 3 = 0 := by omega
 
 -- Main theorem (a): 7 ∣ 2^n - 1 ↔ 3 ∣ n
 theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by
