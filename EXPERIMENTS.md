@@ -201,3 +201,19 @@ Resume also grants each segment the full window (`worker.py` builds a fresh
 ledger and clock), so wall-clock stretches with each restart; per-segment
 events remain the accounting record, and real spend lives in the OpenRouter
 dashboard.
+
+Interim full-cap results (02:24Z, run `20260823T230042Z`, segment 3 with
+one uninterrupted hour+):
+
+- **p09_imo1964 comparator-PASSED** — first solve of p09 by the model pair
+  across every run and baseline. $0.0976, 115 min wall, origin
+  `gptoss:s4-skeleton:r1:filled`, both models used, ledger complete.
+- **p10_factorial_pow: new failure mode.** The agent produced a
+  REPL-accepted proof in 102 min ($0.211) but the **comparator timed out at
+  180 s** building it — a kernel-cost-heavy proof that REPL acceptance
+  cannot screen. (p10 has two comparator-PASSes on record from other runs,
+  so this is proof-instance-specific, not problem-specific.) Post-run
+  follow-up: at finalize, treat a slow re-verify as a warning and keep
+  searching for a lighter proof while holding the heavy one as fallback.
+- rmo_2000_2 and rmo_2001_2 still iterating (lemma pools 664 B / 0 B),
+  zero transport errors, zero ledger deaths.

@@ -26,7 +26,13 @@ lemma completing_square_observation (p q m : ℕ)
 -- Helper lemma: analyzing the difference of squares
 lemma diff_of_squares_analysis (p q m : ℕ) 
   (h : p^2 + 7*p*q + q^2 = m^2) :
-  m^2 - (p + q)^2 = 5*p*q := by sorry
+  m^2 - (p + q)^2 = 5*p*q := by calc
+    m^2 - (p + q)^2 = (p^2 + 7*p*q + q^2) - (p + q)^2 := by rw [h]
+    _ = (p^2 + 7*p*q + q^2) - (p^2 + 2*p*q + q^2) := by ring
+    _ = 5*p*q := by
+      have : (p^2 + 2*p*q + q^2) ≤ (p^2 + 7*p*q + q^2) := by nlinarith
+      rw [show (p^2 + 7*p*q + q^2) = (p^2 + 2*p*q + q^2) + 5*p*q by ring]
+      rw [Nat.add_sub_cancel_left]
 
 -- Helper lemma: divisibility condition from difference of squares
 lemma divisibility_condition (p q m : ℕ) 
@@ -42,7 +48,7 @@ lemma m_bounds (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (m : ℕ)
 lemma special_case_3_11 : 3^2 + 7*3*11 + 11^2 = 19^2 := by linarith
 
 -- Helper lemma: special case verification for (11, 3)
-lemma special_case_11_3 : 11^2 + 7*11*3 + 3^2 = 19^2 := by sorry
+lemma special_case_11_3 : 11^2 + 7*11*3 + 3^2 = 19^2 := by linarith
 
 -- Helper lemma: equal primes case
 lemma equal_primes_square (p : ℕ) (hp : Nat.Prime p) :

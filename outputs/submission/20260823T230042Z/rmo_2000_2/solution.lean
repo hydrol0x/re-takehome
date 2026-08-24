@@ -1,30 +1,42 @@
 import Mathlib
 
--- Helper: establish that for x > 9, y must be at least x + 3
-lemma bound_below_large_x (x : ℕ) (hx_gt_9 : 9 < x) : 
-  x ^ 3 + 8 * x ^ 2 - 6 * x + 8 ≥ (x + 3) ^ 3 := by sorry
+/-- Verify that (9, 11) is a solution. -/
+lemma verify_solution :
+  11 ^ 3 = 9 ^ 3 + 8 * 9 ^ 2 - 6 * 9 + 8 := by
+  norm_num
 
--- Helper: establish that for x > 9, y must be less than x + 4  
-lemma bound_above_large_x (x : ℕ) (hx_gt_9 : 9 < x) :
-  x ^ 3 + 8 * x ^ 2 - 6 * x + 8 < (x + 4) ^ 3 := by sorry
+/-- Upper bound on `x`: if (x,y) is a positive solution, then x ≤ 9. -/
+lemma bound_x (x y : ℕ) (hx : 0 < x) (hy : 0 < y)
+    (h : y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) : x ≤ 9 := by
+  sorry
 
--- Helper: compute exact values for small x cases
-lemma check_small_cases : 
-  ∀ x : ℕ, 0 < x → x ≤ 9 → 
-    (∃ y : ℕ, 0 < y ∧ y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) → 
-    x = 9 := by sorry
+/-- Lower bound on `x`: if (x,y) is a positive solution, then x ≥ 9. -/
+lemma lower_x (x y : ℕ) (hx : 0 < x) (hy : 0 < y)
+    (h : y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) : 9 ≤ x := by
+  sorry
 
--- Helper: verify the specific solution x=9, y=11 works
-lemma verify_solution : 
-  11 ^ 3 = 9 ^ 3 + 8 * 9 ^ 2 - 6 * 9 + 8 := by norm_num
+/-- Upper bound on `y`: if (x,y) is a positive solution, then y ≤ 11. -/
+lemma bound_y (x y : ℕ) (hx : 0 < x) (hy : 0 < y)
+    (h : y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) : y ≤ 11 := by
+  sorry
 
--- Main theorem using helper lemmas
+/-- Lower bound on `y`: if (x,y) is a positive solution, then y ≥ 11. -/
+lemma lower_y (x y : ℕ) (hx : 0 < x) (hy : 0 < y)
+    (h : y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) : 11 ≤ y := by
+  sorry
+
 theorem rmo_2000_2
   (x y : ℕ)
   (hx : 0 < x)
   (hy : 0 < y)
   (h : y ^ 3 = x ^ 3 + 8 * x ^ 2 - 6 * x + 8) :
   x = 9 ∧ y = 11 := by
-  have h_main : x = 9 := by sorry
-  have h_y_val : y = 11 := by sorry
-  exact ⟨h_main, h_y_val⟩
+  have h₁ : x = 9 := by
+    have h₂ : x ≤ 9 := bound_x x y hx hy h
+    have h₃ : 9 ≤ x := lower_x x y hx hy h
+    exact le_antisymm h₂ h₃
+  have h₂ : y = 11 := by
+    have h₃ : y ≤ 11 := bound_y x y hx hy h
+    have h₄ : 11 ≤ y := lower_y x y hx hy h
+    exact le_antisymm h₃ h₄
+  exact ⟨h₁, h₂⟩

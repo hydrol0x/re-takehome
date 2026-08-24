@@ -1,30 +1,57 @@
 import Mathlib
 
--- Helper: characterize 2^n mod 7 based on n mod 3
-theorem pow_two_mod_seven (n : ℕ) : 2 ^ n % 7 = 
-  if n % 3 = 0 then 1
-  else if n % 3 = 1 then 2
-  else 4 := by sorry
+/-- Helper: `3 ∣ n ↔ n % 3 = 0`. -/
+theorem three_dvd_iff_mod_zero (n : ℕ) : 3 ∣ n ↔ n % 3 = 0 := by
+  omega
 
--- Helper: 7 divides 2^n - 1 iff 2^n ≡ 1 (mod 7)
-theorem div_two_pow_minus_one_iff_mod_eq_one (n : ℕ) : 7 ∣ 2 ^ n - 1 ↔ 2 ^ n % 7 = 1 := by sorry
+/-- Helper: `7 ∣ 2 ^ n - 1 ↔ (2 ^ n) % 7 = 1`. -/
+theorem seven_dvd_sub_one_iff_mod_one (n : ℕ) :
+    7 ∣ 2 ^ n - 1 ↔ (2 ^ n) % 7 = 1 := by
+  constructor
+  · intro h
+    have : (2 ^ n) % 7 = 1 := by
+      have : (2 ^ n - 1) % 7 = 0 := Nat.mod_eq_zero_of_dvd h
+      have : (2 ^ n) % 7 = 1 := by
+        have h₂ : 2 ^ n ≥ 1 := by apply Nat.one_le_pow <;> norm_num
+        omega
+      exact this
+    assumption
+  · intro h
+    rw [← Nat.mod_add_div (2 ^ n) 7]
+    simp [h, Nat.dvd_iff_mod_eq_zero]
+    <;> omega
 
--- Helper: 3 divides n iff n % 3 = 0
-theorem three_dvd_iff_mod_zero (n : ℕ) : 3 ∣ n ↔ n % 3 = 0 := by omega
+/-- Helper: `7 ∣ 2 ^ n + 1 ↔ (2 ^ n) % 7 = 6`. -/
+theorem seven_dvd_add_one_iff_mod_six (n : ℕ) :
+    7 ∣ 2 ^ n + 1 ↔ (2 ^ n) % 7 = 6 := by
+  omega
 
--- Main theorem (a): 7 ∣ 2^n - 1 ↔ 3 ∣ n
+/-- Helper: `(2 ^ n) % 7 = 1 ↔ 3 ∣ n`. -/
+theorem two_pow_mod_seven_eq_one_iff_three_dvd (n : ℕ) :
+    (2 ^ n) % 7 = 1 ↔ 3 ∣ n := by
+  rw [← Nat.div_add_mod n 3]
+  simp [pow_add, pow_mul, Nat.pow_mod, Nat.mul_mod]
+  have : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
+  rcases this with h | h | h <;> simp [h, pow_zero, one_pow, zero_pow, Nat.mod_eq_of_lt]
+  <;> norm_num <;> omega
+
+/-- Helper: `(2 ^ n) % 7 ≠ 6` for any `n`. -/
+theorem two_pow_mod_seven_ne_six (n : ℕ) : (2 ^ n) % 7 ≠ 6 := by
+  have : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
+  rcases this with h | h | h <;>
+    rw [← Nat.div_add_mod n 3] <;>
+    simp [h, pow_add, pow_mul, Nat.pow_mod, Nat.mul_mod, Nat.mod_mod] <;>
+    norm_num <;> omega
+
+/-- IMO 1964 P1 (a): `7 ∣ 2 ^ n - 1` iff `3 ∣ n`, for positive `n`. -/
 theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by
-  have h_main : 2 ^ n % 7 = 1 ↔ n % 3 = 0 := by sorry
-  calc
-    7 ∣ 2 ^ n - 1 ↔ 2 ^ n % 7 = 1 := by rw [div_two_pow_minus_one_iff_mod_eq_one]
-    _ ↔ n % 3 = 0 := by rw [h_main]
-    _ ↔ 3 ∣ n := by rw [three_dvd_iff_mod_zero]
+  have h₁ := (seven_dvd_sub_one_iff_mod_one (n := n))
+  have h₂ := (two_pow_mod_seven_eq_one_iff_three_dvd (n := n))
+  simpa using h₁.trans h₂
 
--- Helper: 2^n + 1 mod 7 is never 0 for any n
-theorem two_pow_plus_one_mod_seven_neq_zero (n : ℕ) : (2 ^ n + 1) % 7 ≠ 0 := by sorry
-
--- Main theorem (b): ¬7 ∣ 2^n + 1
+/-- IMO 1964 P1 (b): no positive `n` has `7 ∣ 2 ^ n + 1`. -/
 theorem p09_b (n : ℕ) (hn : 0 < n) : ¬7 ∣ 2 ^ n + 1 := by
   intro h
-  have h_mod : (2 ^ n + 1) % 7 = 0 := by sorry
-  exact two_pow_plus_one_mod_seven_neq_zero n h_mod
+  have hmod : (2 ^ n) % 7 = 6 :=
+    (seven_dvd_add_one_iff_mod_six (n := n)).1 h
+  exact (two_pow_mod_seven_ne_six (n := n)) hmod

@@ -1,1 +1,1 @@
-{"challenge_sha": "f154e972c608d5d1", "s0_done": true, "cycles_done": 0, "lemma_pool": "", "history_notes": [], "pinned_answers": {}}
+{"challenge_sha": "f154e972c608d5d1", "s0_done": true, "cycles_done": 1, "lemma_pool": "theorem three_dvd_iff_mod_zero (n : \u2115) : 3 \u2223 n \u2194 n % 3 = 0 := by omega\n\n-- Main theorem (a): 7 \u2223 2^n - 1 \u2194 3 \u2223 n", "history_notes": ["cycle 1, qwen-fast x9: best had 2 errors; first: Unknown constant `Nat.mod_spec`"], "pinned_answers": {}}
