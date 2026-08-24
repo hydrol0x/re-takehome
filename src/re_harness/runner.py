@@ -320,7 +320,20 @@ def run(
                     if path.exists() or path.is_symlink():
                         if not path.is_file() and not path.is_symlink():
                             raise ValueError(f"output artifact path is not a file: {path}")
-                        path.unlink()
+                        if (
+                            artifact == "events.jsonl"
+                            and path.is_file()
+                            and not path.is_symlink()
+                            and path.stat().st_size > 0
+                        ):
+                            # An interrupted segment's log is the spend audit
+                            # trail — archive it instead of truncating.
+                            n = 1
+                            while (problem_out / f"events.{n}.jsonl").exists():
+                                n += 1
+                            path.rename(problem_out / f"events.{n}.jsonl")
+                        else:
+                            path.unlink()
                 session_id = uuid.uuid4().hex
                 config = _worker_config(problem_set, spec, problem_out, settings, agent, session_id)
                 config_path = problem_out / "worker-config.json"
