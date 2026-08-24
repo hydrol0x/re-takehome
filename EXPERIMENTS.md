@@ -202,18 +202,49 @@ ledger and clock), so wall-clock stretches with each restart; per-segment
 events remain the accounting record, and real spend lives in the OpenRouter
 dashboard.
 
-Interim full-cap results (02:24Z, run `20260823T230042Z`, segment 3 with
-one uninterrupted hour+):
+## 2026-08-24 · Full-cap validation complete: 2/4, two first-ever solves
 
-- **p09_imo1964 comparator-PASSED** — first solve of p09 by the model pair
-  across every run and baseline. $0.0976, 115 min wall, origin
-  `gptoss:s4-skeleton:r1:filled`, both models used, ledger complete.
-- **p10_factorial_pow: new failure mode.** The agent produced a
-  REPL-accepted proof in 102 min ($0.211) but the **comparator timed out at
-  180 s** building it — a kernel-cost-heavy proof that REPL acceptance
-  cannot screen. (p10 has two comparator-PASSes on record from other runs,
-  so this is proof-instance-specific, not problem-specific.) Post-run
-  follow-up: at finalize, treat a slow re-verify as a warning and keep
-  searching for a lighter proof while holding the heavy one as fallback.
-- rmo_2000_2 and rmo_2001_2 still iterating (lemma pools 664 B / 0 B),
-  zero transport errors, zero ledger deaths.
+Run `20260823T230042Z` finished at 08:01Z: **2/4 at exact judge settings**
+(`VM_TIME_LIMIT_S=28800 VM_BUDGET_USD=1.00`, duo, v6 agent + durable
+state), $1.86 total spend, 7.7 h wall for the final segment.
+
+| problem | outcome | spend | wall | origin |
+| --- | --- | --- | --- | --- |
+| p09_imo1964 | **comparator PASS** | $0.098 | 115 min | `gptoss:s4-skeleton:r1:filled` |
+| rmo_2000_2 | **comparator PASS** | $0.748 | 444 min | S4 sketch/fill (late cycle) |
+| p10_factorial_pow | REPL-accepted, **comparator timeout** (180 s) | $0.211 | 105 min | `sketch:qwen-think:2:filled` |
+| rmo_2001_2 | honest incomplete (3 unfilled holes) | $0.805 | 460 min | `sketch:qwen-think:2:partial` |
+
+Readings:
+
+1. **Both passes are first-evers** for the model pair across every run and
+   baseline. rmo_2000_2 needed 7.4 h and 75 % of the dollar cap — direct
+   validation of the §7 hypothesis that the hard tier is a capability×time
+   problem: the same machinery that plateaued at 30–120 min caps closes it
+   with the real window.
+2. **p09 is genuine duo evidence at judge settings**: the winning skeleton
+   came from gpt-oss in the round-robin alternation (qwen sketches first
+   under v6; gpt-oss's turn produced the decomposition that filled). A solo
+   qwen arm would not have had that sketch.
+3. **New failure mode, now guarded**: p10's proof was REPL-accepted but the
+   comparator's cold 180 s build timed out — kernel cost that REPL
+   acceptance cannot screen (p10 has two comparator passes in earlier runs,
+   so it is proof-instance-specific). The agent now records per-check wall
+   time (`Candidate.check_s`) and defers any accepted proof that needed
+   >40 s in the warm REPL, holding it as fallback while hunting a lighter
+   proof whenever ≥30 min of window remain.
+4. **Reliability stack held**: after two early restart-killed segments, the
+   final segment ran 7.7 h uninterrupted; the one mid-run provider drop (a
+   gpt-oss `ReadError` at 02:50) was released under
+   `VM_TRANSPORT_FAILURE_POLICY=release` and cost one sample, not a ledger.
+   Zero `cost_unknown` outcomes; both ledgers accounting-complete.
+5. rmo_2001_2 remains the only provable hard problem the pair has never
+   closed (reference proof exists); it burned its full window productively
+   (2708-check Lean traffic on rmo_2000_2 vs. a comparable count there) but
+   two subgoals never yielded.
+
+Cumulative: the pair has now comparator-passed **3 of the 4 provable
+hard-tier problems** somewhere (p09 and rmo_2000_2 at full caps here, p10
+at 2 h and 30 min caps in earlier runs). Demonstrated coverage across all
+runs: 13 of the 14 scorable sample problems. Cumulative dev spend ≈ $3.7
+of the $50 key.

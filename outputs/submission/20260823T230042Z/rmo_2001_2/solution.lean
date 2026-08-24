@@ -2,80 +2,52 @@ import Mathlib
 
 open Nat
 
--- Helper lemma: primes are at least 2
+theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
+  (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) ↔
+    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by sorry
+
 lemma prime_ge_two (n : ℕ) (h : Nat.Prime n) : n ≥ 2 := by exact?
 
--- Helper lemma: basic inequality for distinct primes
 lemma distinct_primes_product_bound (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) 
-  (hne : p ≠ q) : p * q > max p q := by -- Candidate proof 1: Case analysis using lt_or_gt_of_ne
-  have hp_ge_two := prime_ge_two p hp
-  have hq_ge_two := prime_ge_two q hq
-  cases lt_or_gt_of_ne hne with
-  | inl hpq =>
-    rw [max_eq_right hpq.le]
+  (hne : p ≠ q) : p * q > max p q := by cases lt_or_gt_of_ne hne with
+  | inl h =>
+    rw [max_eq_right (le_of_lt h)]
+    have hp_ge_two := prime_ge_two p hp
     nlinarith
-  | inr hqp =>
-    rw [max_eq_left hqp.le]
+  | inr h =>
+    rw [max_eq_left (le_of_lt h)]
+    have hq_ge_two := prime_ge_two q hq
     nlinarith
 
--- Helper lemma: completing the square observation
-lemma completing_square_observation (p q m : ℕ) 
-  (h : p^2 + 7*p*q + q^2 = m^2) : 
-  (p + q)^2 ≤ m^2 ∧ m^2 < (p + q + 1)^2 → False := by sorry
-
--- Helper lemma: analyzing the difference of squares
 lemma diff_of_squares_analysis (p q m : ℕ) 
   (h : p^2 + 7*p*q + q^2 = m^2) :
-  m^2 - (p + q)^2 = 5*p*q := by calc
-    m^2 - (p + q)^2 = (p^2 + 7*p*q + q^2) - (p + q)^2 := by rw [h]
-    _ = (p^2 + 7*p*q + q^2) - (p^2 + 2*p*q + q^2) := by ring
-    _ = 5*p*q := by
-      have : (p^2 + 2*p*q + q^2) ≤ (p^2 + 7*p*q + q^2) := by nlinarith
-      rw [show (p^2 + 7*p*q + q^2) = (p^2 + 2*p*q + q^2) + 5*p*q by ring]
-      rw [Nat.add_sub_cancel_left]
+  m^2 - (p + q)^2 = 5*p*q := by sorry
 
--- Helper lemma: divisibility condition from difference of squares
-lemma divisibility_condition (p q m : ℕ) 
-  (h : p^2 + 7*p*q + q^2 = m^2) :
-  (m - (p + q)) * (m + (p + q)) = 5*p*q := by sorry
-
--- Helper lemma: bounding m between consecutive squares
-lemma m_bounds (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (m : ℕ)
-  (h : p^2 + 7*p*q + q^2 = m^2) :
-  (p + q)^2 ≤ m^2 ∧ m^2 < (p + q + 2)^2 := by sorry
-
--- Helper lemma: special case verification for (3, 11)
 lemma special_case_3_11 : 3^2 + 7*3*11 + 11^2 = 19^2 := by linarith
 
--- Helper lemma: special case verification for (11, 3)
 lemma special_case_11_3 : 11^2 + 7*11*3 + 3^2 = 19^2 := by linarith
 
--- Helper lemma: equal primes case
 lemma equal_primes_square (p : ℕ) (hp : Nat.Prime p) :
   ∃ m : ℕ, p^2 + 7*p*p + p^2 = m^2 := by exact ⟨3 * p, by ring⟩
 
--- Helper lemma: forward direction - existence implies special cases
-theorem rmo_2001_2_forward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
-  (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) → 
-    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by -- Candidate 2: Direct algebraic manipulation with omega
-    intro h
-    obtain ⟨m, hm⟩ := h
-    have h_diff : m^2 - (p + q)^2 = 5 * p * q := diff_of_squares_analysis p q m hm
-    have h_bounds : (p + q)^2 ≤ m^2 ∧ m^2 < (p + q + 2)^2 := m_bounds p q hp hq m hm
-    have h_m_ge : p + q ≤ m := by
-      nlinarith
-    have h_m_lt : m < p + q + 2 := by
-      nlinarith
-    sorry
+-- Helper: If p = q, then p^2 + 7pq + q^2 is always a square
+lemma case_equal_primes (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) 
+  (heq : p = q) : ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2 := by subst heq; use 3 * p; ring
 
--- Helper lemma: reverse direction - special cases imply existence
-theorem rmo_2001_2_backward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
-  (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) → 
-    (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) := by sorry
+-- Helper: Factorization from difference of squares
+lemma factorization_from_diff_sq (p q m : ℕ) 
+  (h : p^2 + 7*p*q + q^2 = m^2) :
+  ∃ (a b : ℕ), a * b = 5 * p * q ∧ b - a = 2 * (p + q) ∧ a ≤ b := by sorry
 
--- Main theorem statement (kept exactly as specified)
-theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
-  (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) ↔
-    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by exact
-        ⟨fun h => rmo_2001_2_forward p q hp hq h,
-         fun h => rmo_2001_2_backward p q hp hq h⟩
+-- Helper: Divisors of 5pq analysis when p ≠ q
+lemma divisors_of_5pq_when_distinct (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q)
+  (hne : p ≠ q) (a b : ℕ) (hab : a * b = 5 * p * q) (hdiff : b - a = 2 * (p + q)) (hle : a ≤ b) :
+  (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) := by sorry
+
+-- Helper: Backward direction - each case gives a solution
+lemma backward_direction (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
+  (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) → ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2 := by exact?
+
+-- Helper: Forward direction main decomposition
+lemma forward_direction_main (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
+  (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) → (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by exact?

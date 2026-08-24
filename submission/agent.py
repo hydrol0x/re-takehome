@@ -337,6 +337,7 @@ class Candidate:
     error_count: int = 10**6
     sorry_count: int = 0
     messages: list[dict[str, Any]] = field(default_factory=list)
+    check_s: float = 0.0  # wall time of the latest REPL check (kernel-cost proxy)
 
     def score(self) -> tuple:
         return (self.accepted, -self.error_count, -self.sorry_count, -len(self.source))
@@ -479,6 +480,7 @@ class Toolbox:
             candidate.error_count = 10**6
             candidate.messages = [{"severity": "error", "data": "REPL unavailable"}]
             return candidate
+        check_started = time.monotonic()
         try:
             result = await self.services.lean.check_file(candidate.source, timeout_s=timeout_s)
         except LeanRuntimeError as exc:
@@ -490,6 +492,7 @@ class Toolbox:
             candidate.messages = [{"severity": "error", "data": f"REPL unavailable: {exc}"}]
             return candidate
         self.repl_failures = 0
+        candidate.check_s = time.monotonic() - check_started
         candidate.messages = result.messages
         candidate.error_count = sum(
             1 for m in result.messages if m.get("severity") == "error"
@@ -566,6 +569,23 @@ class SubmissionAgent:
     async def solve(self, problem: Problem, services: Services) -> AgentResult:
         toolbox = Toolbox(problem, services, self.config)
         solved: Candidate | None = None
+        heavy_fallback: Candidate | None = None
+
+        def guard_heavy(candidate: Candidate | None) -> Candidate | None:
+            # The comparator rebuilds the file cold under a 180 s cap; a proof
+            # that needs >40 s even in the warm REPL risks timing out there
+            # (observed: p10 REPL-accepted, comparator timeout). While ample
+            # time remains, hold such a win as fallback and hunt a lighter one.
+            nonlocal heavy_fallback
+            if candidate is None or candidate.check_s <= 40 \
+                    or not toolbox.deadline.allows(1800):
+                return candidate
+            if heavy_fallback is None or candidate.check_s < heavy_fallback.check_s:
+                heavy_fallback = candidate
+            toolbox.log(stage="S5-guard", deferred=candidate.origin,
+                        check_s=round(candidate.check_s, 1))
+            return None
+
         try:
             if toolbox.parsed.numeric_answer_names and toolbox.llm_alive \
                     and not toolbox.pinned_answers:
@@ -573,7 +593,7 @@ class SubmissionAgent:
                 if toolbox.pinned_answers:
                     toolbox.save_state()
             if not toolbox.s0_done:
-                solved = await self.stage0_sweep(toolbox)
+                solved = guard_heavy(await self.stage0_sweep(toolbox))
                 if solved is None and toolbox.lean_alive:
                     toolbox.s0_done = True
                     toolbox.save_state()
@@ -596,12 +616,13 @@ class SubmissionAgent:
                     solved = await self.stage4_decompose(toolbox)
                 if solved is None and toolbox.lean_alive:
                     solved = await self.stage2_repair(toolbox, near_misses)
+                solved = guard_heavy(solved)
                 toolbox.cycles_done = cycle
                 toolbox.save_state()
         except LLMDead:
             pass  # deterministic results stand; finalize below
 
-        final = solved or toolbox.best
+        final = solved or heavy_fallback or toolbox.best
         if final.accepted and toolbox.lean_alive and toolbox.deadline.allows(120):
             # Re-verify and audit axioms in one pass: `#print axioms` reports the
             # dependency set the Comparator will enforce (catches native_decide).

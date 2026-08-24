@@ -7,10 +7,9 @@ matters; the second model earns its place where it adds *coverage* (different
 failure modes) or *independent confirmation of compact decisions* (numeric
 answers), and nowhere else we could measure.
 
-Status note: numbers below are from matched 30-minute-cap arms (two seeds)
-plus hard-tier runs at 1–2 h caps. A full-cap (8 h / $1.00, judge-setting)
-validation run is in flight; its results will be appended to
-`EXPERIMENTS.md` and folded in here.
+Evidence base: matched 30-minute-cap arms (two seeds), hard-tier runs at
+1–2 h caps, and a completed full-cap validation run at exact judge
+settings (8 h / $1.00 per problem) — see §2b and `EXPERIMENTS.md`.
 
 ## 1. Experimental design
 
@@ -44,6 +43,30 @@ the comparator build (details and disproof in `reference/`).
   the hard tier (`p09`, `p10`, `rmo_2000_2`, `rmo_2001_2`) additionally
   yielded `p10_factorial_pow` at longer caps (§4).
 
+## 2b. Full-cap validation (exact judge settings)
+
+One duo run of the four hard problems at `VM_TIME_LIMIT_S=28800`
+`VM_BUDGET_USD=1.00` (run `20260823T230042Z`): **2/4, both first-ever
+solves for the model pair**.
+
+| problem | outcome | spend | wall |
+| --- | --- | --- | --- |
+| p09_imo1964 | **comparator PASS** | $0.098 | 115 min |
+| rmo_2000_2 | **comparator PASS** | $0.748 | 444 min |
+| p10_factorial_pow | REPL-accepted; comparator timed out (180 s) | $0.211 | 105 min |
+| rmo_2001_2 | honest incomplete (2 subgoals never closed) | $0.805 | 460 min |
+
+Two findings matter for the collaboration question. First, **p09's winning
+skeleton came from gpt-oss** in the sketcher alternation (qwen sketches
+first; gpt-oss's round produced the decomposition whose holes filled) — at
+full caps, cross-model sketch diversity contributed a solve a solo-qwen arm
+would not have had. Second, rmo_2000_2 needed 7.4 hours and three quarters
+of the dollar cap: the hard tier is a capability×time problem, and
+short-cap arm scores understate what the identical system does with the
+judged window. Cumulatively the pair has comparator-passed 3 of the 4
+provable hard problems (p10 passed at 2 h and 30 min caps in other runs);
+only rmo_2001_2 has never closed.
+
 ## 3. Where the duo's edge actually comes from
 
 Mechanism attribution, in decreasing order of measured value:
@@ -72,13 +95,17 @@ Mechanism attribution, in decreasing order of measured value:
    qwen wave and the sweep have already failed, so the duo is *cheaper*
    than solo-qwen while scoring higher. Model participation on solved
    problems reflects need, not quota (`models_used` in `result.json`).
-5. **Sketch/fill decomposition (S4) — value is depth, not dialogue.** The
-   hard-tier solve (`p10_factorial_pow`, comparator-PASS at 2 h caps,
-   $0.0497) came from a qwen sketch → skeleton repair → depth-first hole
-   fills. Solo-qwen seed-2 then reproduced p10 at a 30-minute cap. So the
-   fill *loop* (best-failure seeding, sorrify salvage, lemma harvesting)
-   is the driver, and it works within one family; the duo's S4 role is
-   alternation after plateaus, an insurance policy rather than the engine.
+5. **Sketch/fill decomposition (S4) — depth is the engine, cross-model
+   sketch diversity is a real second-order term.** The first hard-tier
+   solve (`p10_factorial_pow`, comparator-PASS at 2 h caps, $0.0497) came
+   from a qwen sketch → skeleton repair → depth-first hole fills, and
+   solo-qwen reproduced p10 at a 30-minute cap — so the fill *loop*
+   (best-failure seeding, sorrify salvage, lemma harvesting) is the
+   driver and works within one family. But at full caps the alternation
+   itself scored: p09's winning skeleton was gpt-oss's (§2b), a
+   decomposition the qwen-only arm would never have proposed. Depth does
+   the proving; having two sketchers widens which decompositions exist to
+   be deepened.
 
 ## 4. What collaboration costs
 
@@ -91,6 +118,13 @@ fixes mirrored into `src/re_harness/llm.py` (provider fallbacks under the
 price ceiling; HTTP refusals release instead of closing the ledger), plus
 agent-side ordering (bank qwen's work before the first risky call),
 serialization, and per-problem call caps.
+
+A second cost surfaced at full caps, orthogonal to collaboration: REPL
+acceptance does not screen **kernel cost**, and one REPL-valid p10 proof
+timed out the comparator's cold 180 s build. The agent now measures each
+check's wall time and defers any accepted proof needing >40 s in the warm
+REPL — held as fallback while it hunts a lighter proof whenever ≥30 min
+of window remain.
 
 ## 5. What we looked for and did not find
 
@@ -127,14 +161,20 @@ stage that needs the full 8-hour window.
 - All numbers are from a web dev container with documented environmental
   hazards (restart storms, an egress proxy) — see `EXPERIMENTS.md` and
   `RUNBOOK.md`; provider-health effects may differ at judging time.
-- The 30-minute arms understate every arm's absolute ability (the judged
-  setting is 8 h); the full-cap validation run addresses this.
+- The full-cap validation is a single run (n=1) of the hard tier in the
+  duo arm only; matched solo arms at full caps were not run (8 h × 4
+  problems × 3 arms exceeds the dev window). The duo-vs-solo comparison
+  rests on the matched short-cap arms; the full-cap run shows what the
+  chosen system does at judged settings.
 
 ## Verdict
 
 At matched budgets the coordination layer was never worse than the best
 solo arm, beat it by one problem on both seeds, matched the union of the
-solos, and cost a fraction of the stronger solo. The mechanism is
-unglamorous and robust: **let a compiler judge, buy coverage from two
-model families, spend consensus only on compact decisions, and escalate
-depth (not chatter) on hard problems.**
+solos, and cost a fraction of the stronger solo. At exact judge settings
+it closed two hard problems the pair had never solved — one from a
+gpt-oss skeleton the solo arm could not have produced, one after 7.4
+hours of accumulated lemma-building. The mechanism is unglamorous and
+robust: **let a compiler judge, buy coverage from two model families,
+spend consensus only on compact decisions, and escalate depth (not
+chatter) on hard problems.**

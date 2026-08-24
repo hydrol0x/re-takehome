@@ -1,0 +1,434 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2000_2",
+  "status": "passed",
+  "passed": true,
+  "points": 1,
+  "comparator": {
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 58291,
+    "output": {
+      "passed": true,
+      "exit_code": 0,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (9.3s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (11s)\nwarning: Solution.lean:8:22: This simp argument is unused:\n  Nat.mul_sub_left_distrib\n\nHint: Omit it from the simp argument list.\n  simp [pow_succ, N̵a̵t̵.̵m̵u̵l̵_̵s̵u̵b̵_̵l̵e̵f̵t̵_̵d̵i̵s̵t̵r̵i̵b̵,̵ ̵Nat.mul_sub_right_distrib] at h_eq ⊢\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:8:48: This simp argument is unused:\n  Nat.mul_sub_right_distrib\n\nHint: Omit it from the simp argument list.\n  simp [pow_succ, Nat.mul_sub_left_distrib,̵ ̵N̵a̵t̵.̵m̵u̵l̵_̵s̵u̵b̵_̵r̵i̵g̵h̵t̵_̵d̵i̵s̵t̵r̵i̵b̵] at h_eq ⊢\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:20:28: This simp argument is unused:\n  Nat.mul_sub_left_distrib\n\nHint: Omit it from the simp argument list.\n  simp [pow_succ, N̵a̵t̵.̵m̵u̵l̵_̵s̵u̵b̵_̵l̵e̵f̵t̵_̵d̵i̵s̵t̵r̵i̵b̵,̵ ̵Nat.mul_sub_right_distrib]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:20:54: This simp argument is unused:\n  Nat.mul_sub_right_distrib\n\nHint: Omit it from the simp argument list.\n  simp [pow_succ, Nat.mul_sub_left_distrib,̵ ̵N̵a̵t̵.̵m̵u̵l̵_̵s̵u̵b̵_̵r̵i̵g̵h̵t̵_̵d̵i̵s̵t̵r̵i̵b̵]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:29:31: Variable name `hx` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:37:31: Variable name `hx` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:51:37: Variable name `hx` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\nRunning Lean default kernel on solution.\nLean default kernel accepts the solution\nYour solution is okay!\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.7482317749999988,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 26655.81,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:qwen-think:0:filled",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "bound_above_large_x",
+          "bound_below_large_x",
+          "check_small_cases",
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "gptoss:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "gptoss:s4-skeleton:r4",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "gptoss:s4-skeleton:r4",
+        "unfilled_decls": [
+          "bound_x",
+          "bound_y",
+          "lower_x",
+          "lower_y"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "sorrified": "2 lines kept"
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter request failed (reservation released, dev policy): "
+      },
+      {
+        "stage": "S4",
+        "sorrified": "2 lines kept"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "5 lines kept"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "5 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "bound_x",
+          "lower_x"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "bound_x",
+          "lower_x"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "bound_x",
+          "lower_x",
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 8
+      },
+      {
+        "stage": "S4",
+        "unfilled": 7,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "bound_x",
+          "lower_x",
+          "rmo_2000_2",
+          "x_le_9_upper_bound"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 7
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "no_cube_between_consecutive",
+          "y_eq_11_if_x_eq_9"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 9
+      },
+      {
+        "stage": "S4",
+        "unfilled": 6,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "h_lower_bound_large",
+          "h_no_solution_large_range",
+          "h_no_solution_small_range",
+          "h_y_equals_11_when_x_eq_9",
+          "no_cube_between_consecutive",
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 7
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "h_main_case_split",
+          "h_small_cases_no_solution",
+          "h_substitute_solution",
+          "h_y_between_consecutive_cubes",
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 11
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 0
+      },
+      {
+        "stage": "S4",
+        "solved": "sketch:qwen-think:0:filled"
+      }
+    ],
+    "wall_s": 26595.7
+  }
+}
