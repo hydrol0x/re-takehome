@@ -100,6 +100,15 @@ regardless (full-cap runs prove it), so at 30-min caps the promoted
 config neither helps nor hurts the kit set. At judge caps the promotions
 are identity (shortcap) or cheap-positive (breadth pass).
 
+Transfer check, kit hard4 at 60-min caps with the promoted config
+(`20260825T200925Z`): **0/4**, $0.150 — same total as the v3 agent's
+60-min attempt, but with a structural near-miss: p10 reached a
+REPL-accepted proof in 21.5 min (v5 needed 64 min at 2 h caps) and lost
+only to the comparator-timeout class; the 15 s guard (pushed after this
+run started) targets exactly that. p09/rmo_2000_2/rmo_2001_2 used full
+~44-min windows: the kit hard tier needs hours, consistent with full-cap
+evidence.
+
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
 h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a

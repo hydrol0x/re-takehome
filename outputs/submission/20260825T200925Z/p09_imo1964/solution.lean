@@ -27,8 +27,26 @@ lemma div_7_add_1_iff (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n + 1 ↔ (2 ^ n) % 7 =
 
 /-- Main theorem (a): 7 divides 2^n - 1 iff 3 divides n -/
 theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by
-  sorry
+  rw [div_7_sub_1_iff n hn]
+  rw [pow_two_mod_7_periodic]
+  rw [pow_two_mod_7_base_cases (n % 3) (Nat.mod_lt n (by norm_num))]
+  simp [if_pos, if_neg] at *
+  split_ifs at * <;> simp_all [Nat.dvd_iff_mod_eq_zero] <;> omega
 
 /-- Main theorem (b): 7 does not divide 2^n + 1 for positive n -/
 theorem p09_b (n : ℕ) (hn : 0 < n) : ¬7 ∣ 2 ^ n + 1 := by
-  sorry
+  have h : (2 ^ n) % 7 ∈ ({1, 2, 4} : Finset ℕ) := by
+    rw [pow_two_mod_7_periodic]
+    have h' : n % 3 < 3 := Nat.mod_lt n (by norm_num)
+    have h'' : (2 ^ (n % 3)) % 7 = if n % 3 = 0 then 1 else if n % 3 = 1 then 2 else 4 := by
+      apply pow_two_mod_7_base_cases
+      exact h'
+    rw [h'']
+    split_ifs <;> simp [Finset.mem_insert, Finset.mem_singleton]
+    <;> omega
+  intro hdiv
+  have h6 : (2 ^ n) % 7 = 6 := by
+    rw [div_7_add_1_iff n hn] at *
+    assumption
+  rw [h6] at h
+  simp at h

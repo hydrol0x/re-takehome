@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2001_2",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 117888,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (22s)\nwarning: Challenge.lean:5:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (50s)\nwarning: Solution.lean:12:6: declaration uses `sorry`\nwarning: Solution.lean:16:6: declaration uses `sorry`\ninfo: Solution.lean:21:2: Try this:\n  [apply] exact Dvd.intro B h_prod\nwarning: Solution.lean:23:6: declaration uses `sorry`\nwarning: Solution.lean:28:6: declaration uses `sorry`\nwarning: Solution.lean:33:6: declaration uses `sorry`\nwarning: Solution.lean:38:6: declaration uses `sorry`\nwarning: Solution.lean:43:6: declaration uses `sorry`\nwarning: Solution.lean:48:6: declaration uses `sorry`\nwarning: Solution.lean:53:6: declaration uses `sorry`\nwarning: Solution.lean:58:6: declaration uses `sorry`\nwarning: Solution.lean:63:6: declaration uses `sorry`\nwarning: Solution.lean:67:6: declaration uses `sorry`\nwarning: Solution.lean:73:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.044676039,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 2625.529,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen:s4-skeleton:r1:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 14
+      },
+      {
+        "stage": "S4",
+        "sorrified": "4 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 13,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "backward_direction",
+          "case_A_1",
+          "case_A_5",
+          "case_A_5p",
+          "case_A_5pq",
+          "case_A_5q",
+          "case_A_p",
+          "case_A_pq",
+          "case_A_q",
+          "exists_factors",
+          "forward_direction",
+          "rmo_2001_2",
+          "square_completion"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 2503.7
+  }
+}
