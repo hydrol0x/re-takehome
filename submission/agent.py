@@ -107,7 +107,9 @@ class Config:
             # Promoted default (RESEARCH_LOOP.md iter-2); "0" restores the
             # fixed long-window constants.
             shortcap=os.environ.get("SUBMISSION_SHORTCAP", "1").strip() != "0",
-            fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "").strip() == "1",
+            # Promoted default (RESEARCH_LOOP.md iter-3); "0" restores
+            # depth-first-only fills.
+            fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
         )
 
     @property

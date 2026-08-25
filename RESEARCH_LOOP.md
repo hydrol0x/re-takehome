@@ -83,6 +83,8 @@ Held-set validation of the promotion (run `20260825T174536Z`): **6/8**
 125); missed h03 (inverse-square induction) and m05 (divisibility bash).
 Held rate 75% ≥ dev 62%: no overfitting signal, promotion stands.
 
+| 3 | 2026-08-25 | `SUBMISSION_FILL_BREADTH` (cascade all holes first; window-scaled dialogues) | 10 → **13/16** ($0.155, 28 min, `20260825T180137Z`) | **yes — default on** | +2 over best-ever with structural gain: h01 closed (first time), all three flippers (c03, m01, h05) held simultaneously, m04 repeated. Remaining: h02, h04, m06 (full windows, fills fail on the real math) |
+
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
 h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a
