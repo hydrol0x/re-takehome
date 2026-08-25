@@ -43,6 +43,7 @@ def main() -> int:
             theorem_names=tuple(n for n in args.theorems.split(",") if n),
             definition_names=tuple(n for n in args.defs.split(",") if n),
             numeric_answer_names=(),
+            metadata={},
         )
         result = compare_solution(
             image=settings.lean_image, session_id=uuid.uuid4().hex,
