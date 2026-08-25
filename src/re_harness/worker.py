@@ -11,6 +11,7 @@ import os
 import sys
 import time
 import traceback
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -84,7 +85,36 @@ async def _run(config: dict[str, Any]) -> int:
         challenge=challenge,
         metadata=config["problem_metadata"],
     )
-    services = Services(llm=llm, lean=lean, checkpoint=checkpoint, state_dir=out_dir)
+    def precheck_compare(source: str, timeout_s: int = 240) -> dict[str, Any]:
+        # A fresh session id is mandatory: compare_solution cleans up its
+        # session's containers on exit, and the agent's warm REPL shares
+        # config["session_id"].
+        spec = ProblemSpec(
+            id=config["problem_id"],
+            theorem_names=tuple(config["theorem_names"]),
+            definition_names=tuple(config["definition_names"]),
+            numeric_answer_names=tuple(config["numeric_answer_names"]),
+            metadata=config["problem_metadata"],
+        )
+        verdict = compare_solution(
+            image=config["lean_image"],
+            session_id=uuid.uuid4().hex,
+            challenge=challenge,
+            solution=source,
+            spec=spec,
+            timeout_s=timeout_s,
+        )
+        events.emit(
+            "compare_precheck",
+            passed=verdict.passed,
+            timed_out=verdict.timed_out,
+            duration_ms=verdict.duration_ms,
+        )
+        return {"passed": verdict.passed, "timed_out": verdict.timed_out,
+                "duration_ms": verdict.duration_ms}
+
+    services = Services(llm=llm, lean=lean, checkpoint=checkpoint, state_dir=out_dir,
+                        compare=precheck_compare)
     started = time.monotonic()
     status = "failed"
     agent_error: dict[str, Any] | None = None

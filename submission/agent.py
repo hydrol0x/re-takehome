@@ -91,6 +91,7 @@ class Config:
     fill_breadth: bool = False
     fill_reasoning: bool = False
     skeleton_keep: bool = False
+    compare_precheck: bool = True
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -114,6 +115,10 @@ class Config:
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
             fill_reasoning=os.environ.get("SUBMISSION_FILL_REASONING", "").strip() == "1",
             skeleton_keep=os.environ.get("SUBMISSION_SKELETON_KEEP", "").strip() == "1",
+            # Default on: three p10 proofs were REPL-accepted yet timed out
+            # the comparator's cold build — only the real gate can see that.
+            compare_precheck=os.environ.get(
+                "SUBMISSION_COMPARE_PRECHECK", "1").strip() != "0",
         )
 
     @property
@@ -656,23 +661,52 @@ class SubmissionAgent:
             # the judge's 8-hour cap; scale the cap with the window instead.
             max_cycles = max(8, int(self.config.agent_time_s // 1500))
             cycle = toolbox.cycles_done
-            while solved is None and toolbox.llm_alive and toolbox.lean_alive \
-                    and cycle < max_cycles \
-                    and toolbox.deadline.allows(toolbox.config.scaled(600)):
-                cycle += 1
-                toolbox.cycle = cycle
-                # Sampling banks coverage; decomposition gets the next slice of
-                # the window (it is the hard-tier weapon and needs room);
-                # whole-file repair mops up with whatever time remains.
-                solved, near_misses = await self.stage1_sample(toolbox)
-                if solved is None and toolbox.lean_alive \
-                        and toolbox.deadline.allows(toolbox.config.scaled(900)):
-                    solved = await self.stage4_decompose(toolbox)
-                if solved is None and toolbox.lean_alive:
-                    solved = await self.stage2_repair(toolbox, near_misses)
-                solved = guard_heavy(solved)
-                toolbox.cycles_done = cycle
-                toolbox.save_state()
+            prechecks = 0
+            while True:
+                while solved is None and toolbox.llm_alive and toolbox.lean_alive \
+                        and cycle < max_cycles \
+                        and toolbox.deadline.allows(toolbox.config.scaled(600)):
+                    cycle += 1
+                    toolbox.cycle = cycle
+                    # Sampling banks coverage; decomposition gets the next slice
+                    # of the window (it is the hard-tier weapon and needs room);
+                    # whole-file repair mops up with whatever time remains.
+                    solved, near_misses = await self.stage1_sample(toolbox)
+                    if solved is None and toolbox.lean_alive \
+                            and toolbox.deadline.allows(toolbox.config.scaled(900)):
+                        solved = await self.stage4_decompose(toolbox)
+                    if solved is None and toolbox.lean_alive:
+                        solved = await self.stage2_repair(toolbox, near_misses)
+                    solved = guard_heavy(solved)
+                    toolbox.cycles_done = cycle
+                    toolbox.save_state()
+                # The warm REPL cannot observe cold-build kernel cost (three
+                # p10 proofs were REPL-accepted, then timed out the
+                # comparator's 180 s build). When the real gate is available
+                # and time permits, verify the winner against it; a timeout
+                # demotes the proof to fallback and resumes the hunt.
+                compare = getattr(toolbox.services, "compare", None)
+                if solved is None or not solved.accepted or compare is None \
+                        or not self.config.compare_precheck or prechecks >= 2 \
+                        or not toolbox.deadline.allows(360):
+                    break
+                prechecks += 1
+                try:
+                    verdict = await asyncio.to_thread(compare, solved.source)
+                except Exception as exc:
+                    toolbox.log(stage="S5-precheck", error=str(exc)[:120])
+                    break
+                toolbox.log(stage="S5-precheck", origin=solved.origin,
+                            passed=bool(verdict.get("passed")),
+                            timed_out=bool(verdict.get("timed_out")),
+                            duration_ms=verdict.get("duration_ms"))
+                if verdict.get("passed") or not verdict.get("timed_out"):
+                    # Confirmed — or rejected for a reason further REPL-guided
+                    # search cannot fix better than S5's audit; ship it.
+                    break
+                if heavy_fallback is None or solved.check_s < heavy_fallback.check_s:
+                    heavy_fallback = solved
+                solved = None
         except LLMDead:
             pass  # deterministic results stand; finalize below
 
