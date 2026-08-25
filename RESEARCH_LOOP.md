@@ -75,7 +75,8 @@ hard tier sanity-check that short-cap selection transfers.
 | iter | date | variants tested | dev score (base → best) | promoted | notes |
 | --- | --- | --- | --- | --- | --- |
 | 0 | 2026-08-25 | baseline v6+guard | **11/16** ($0.136, 19 min, run `20260825T161057Z`) | — | easy 7/7, medium 3/5, hard 1/4; zero ledger deaths |
-| 1 | 2026-08-25 | `SUBMISSION_SHORTCAP` (window-proportional constants) | (running) | | |
+| 1 | 2026-08-25 | `SUBMISSION_SHORTCAP` (window-proportional constants) | 11 → **9/16** ($0.124, 33 min, `20260825T163350Z`) | no — regression | mechanics worked (gpt-oss usable 2/2, S4 engaged, c03 one hole short) but slow serialized gpt-oss S1 calls halved qwen's cycle count: lost c03+m01, regained h05 |
+| 2 | 2026-08-25 | shortcap + skip gpt-oss S1 wave at short windows (`c518381`) | (running) | | |
 
 Iter-0 failure analysis (drove iter-1): all five misses (h01, h02, h04,
 m04, m06) ended as S1+S2 cycles with a useless `sweep:rfl` checkpoint —
