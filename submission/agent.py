@@ -87,6 +87,7 @@ class Config:
     qwen_call_s: float = 300.0
     gptoss_call_s: float = 960.0
     llm_concurrency: int = 3
+    shortcap: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -102,6 +103,7 @@ class Config:
             repair_rounds=_env_int("SUBMISSION_REPAIR_ROUNDS", 4, 0, 12),
             sketch_rounds=_env_int("SUBMISSION_SKETCH_ROUNDS", 4, 0, 12),
             gptoss_call_cap=_env_int("SUBMISSION_GPTOSS_CALL_CAP", 10, 0, 200),
+            shortcap=os.environ.get("SUBMISSION_SHORTCAP", "").strip() == "1",
         )
 
     @property
@@ -112,6 +114,21 @@ class Config:
     @property
     def margin_s(self) -> float:
         return min(600.0, max(20.0, self.agent_time_s * 0.12))
+
+    def scaled(self, seconds: float) -> float:
+        """Window-proportional time constant (SUBMISSION_SHORTCAP variant).
+
+        The default constants assume long windows; below a ~40-minute agent
+        window they saturate the guards — a 960 s gpt-oss timeout can never
+        fit a 1080 s window, and S4's 900 s entry gate never opens — which
+        silently disables the gpt-oss channel and decomposition at short
+        caps (measured: iter-0 baseline, RESEARCH_LOOP.md). Scaling by
+        agent_time/2400 restores every stage there; at 40+ minute windows
+        this is the identity, so judge-cap behavior is unchanged.
+        """
+        if not self.shortcap:
+            return seconds
+        return max(60.0, seconds * min(1.0, self.agent_time_s / 2400.0))
 
     def other(self, model: str) -> str:
         if self.models == "qwen":
@@ -508,18 +525,19 @@ class Toolbox:
 
         if not self.llm_alive:
             raise LLMDead
+        scaled = self.config.scaled
         params: dict[str, Any] = {
             "qwen-fast": dict(max_tokens=16000, temperature=0.8, reasoning=None,
-                              timeout_s=int(self.config.qwen_call_s)),
+                              timeout_s=int(scaled(self.config.qwen_call_s))),
             "qwen-think": dict(max_tokens=24000, temperature=0.7,
                                reasoning={"enabled": True, "max_tokens": 12000},
-                               timeout_s=int(self.config.qwen_call_s) + 300),
+                               timeout_s=int(scaled(self.config.qwen_call_s + 300))),
             "gptoss-med": dict(max_tokens=24000, temperature=1.0,
                                reasoning={"effort": "medium"},
-                               timeout_s=int(self.config.gptoss_call_s)),
+                               timeout_s=int(scaled(self.config.gptoss_call_s))),
             "gptoss-high": dict(max_tokens=28000, temperature=1.0,
                                 reasoning={"effort": "high"},
-                                timeout_s=int(self.config.gptoss_call_s) + 300),
+                                timeout_s=int(scaled(self.config.gptoss_call_s + 300))),
         }[kind]
         gate = self.gptoss_gate if model == GPTOSS else self.semaphore
         async with gate:
@@ -578,7 +596,7 @@ class SubmissionAgent:
             # time remains, hold such a win as fallback and hunt a lighter one.
             nonlocal heavy_fallback
             if candidate is None or candidate.check_s <= 40 \
-                    or not toolbox.deadline.allows(1800):
+                    or not toolbox.deadline.allows(toolbox.config.scaled(1800)):
                 return candidate
             if heavy_fallback is None or candidate.check_s < heavy_fallback.check_s:
                 heavy_fallback = candidate
@@ -604,7 +622,8 @@ class SubmissionAgent:
             max_cycles = max(8, int(self.config.agent_time_s // 1500))
             cycle = toolbox.cycles_done
             while solved is None and toolbox.llm_alive and toolbox.lean_alive \
-                    and cycle < max_cycles and toolbox.deadline.allows(600):
+                    and cycle < max_cycles \
+                    and toolbox.deadline.allows(toolbox.config.scaled(600)):
                 cycle += 1
                 toolbox.cycle = cycle
                 # Sampling banks coverage; decomposition gets the next slice of
@@ -612,7 +631,7 @@ class SubmissionAgent:
                 # whole-file repair mops up with whatever time remains.
                 solved, near_misses = await self.stage1_sample(toolbox)
                 if solved is None and toolbox.lean_alive \
-                        and toolbox.deadline.allows(900):
+                        and toolbox.deadline.allows(toolbox.config.scaled(900)):
                     solved = await self.stage4_decompose(toolbox)
                 if solved is None and toolbox.lean_alive:
                     solved = await self.stage2_repair(toolbox, near_misses)
@@ -863,7 +882,8 @@ class SubmissionAgent:
         last_signature = error_signature(candidate.messages)
         for round_index in range(self.config.repair_rounds):
             call_kind = ("qwen-think" if model == QWEN else "gptoss-med")
-            call_s = tb.config.qwen_call_s if model == QWEN else tb.config.gptoss_call_s
+            call_s = tb.config.scaled(
+                tb.config.qwen_call_s if model == QWEN else tb.config.gptoss_call_s)
             if not tb.deadline.allows(call_s + 180):
                 return None
             text = await tb.sample(model, build_messages(format_messages(candidate.messages)),
@@ -920,10 +940,11 @@ class SubmissionAgent:
             # roomy (its sketches carry real ideas — worth one dice-roll per
             # two rounds), but never carries the first round.
             available: list[tuple[str, str]] = []
-            if QWEN in tb.models_arm and tb.deadline.allows(tb.config.qwen_call_s + 600):
+            if QWEN in tb.models_arm \
+                    and tb.deadline.allows(tb.config.scaled(tb.config.qwen_call_s + 600)):
                 available.append((QWEN, "qwen-think"))
             if GPTOSS in tb.models_arm and round_index > 0 \
-                    and tb.deadline.allows(tb.config.gptoss_call_s + 900):
+                    and tb.deadline.allows(tb.config.scaled(tb.config.gptoss_call_s + 900)):
                 available.append((GPTOSS, "gptoss-high"))
             if not available:
                 break

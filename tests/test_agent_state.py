@@ -52,6 +52,18 @@ def test_corrupt_state_is_ignored(tmp_path):
     assert not tb.s0_done and tb.cycles_done == 0
 
 
+def test_scaled_constants(monkeypatch):
+    monkeypatch.setenv("VM_TIME_LIMIT_S", "1200")
+    monkeypatch.delenv("SUBMISSION_SHORTCAP", raising=False)
+    assert Config.from_env().scaled(960) == 960  # flag off: identity
+    monkeypatch.setenv("SUBMISSION_SHORTCAP", "1")
+    short = Config.from_env()
+    assert short.scaled(960) == 960 * (short.agent_time_s / 2400)
+    assert short.scaled(10) == 60  # floor
+    monkeypatch.setenv("VM_TIME_LIMIT_S", "28800")
+    assert Config.from_env().scaled(960) == 960  # long window: identity
+
+
 def test_no_state_dir_is_inert(tmp_path):
     problem = Problem(id="t", description="d", challenge=CHALLENGE)
     services = Services(llm=None, lean=None, checkpoint=lambda s, m: None)

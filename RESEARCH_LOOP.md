@@ -74,4 +74,16 @@ hard tier sanity-check that short-cap selection transfers.
 
 | iter | date | variants tested | dev score (base → best) | promoted | notes |
 | --- | --- | --- | --- | --- | --- |
-| 0 | 2026-08-24 | baseline v6+guard | (pending first eval) | — | dev-set baseline |
+| 0 | 2026-08-25 | baseline v6+guard | **11/16** ($0.136, 19 min, run `20260825T161057Z`) | — | easy 7/7, medium 3/5, hard 1/4; zero ledger deaths |
+| 1 | 2026-08-25 | `SUBMISSION_SHORTCAP` (window-proportional constants) | (running) | | |
+
+Iter-0 failure analysis (drove iter-1): all five misses (h01, h02, h04,
+m04, m06) ended as S1+S2 cycles with a useless `sweep:rfl` checkpoint —
+**S4 never ran** (its 900 s entry gate cannot open inside a 1080 s agent
+window after S0+S1) and **gpt-oss issued zero calls** (`planned: 2,
+usable: 0` every wave: the per-call guard needs `allows(timeout+60)` and
+the 960 s gpt-oss timeout never fits). The loop also exits at the 600 s
+tail gate stranding ~8 of 20 minutes. One coherent defect: fixed time
+constants assume long windows. Fix: `Config.scaled()` multiplies the
+constants by `min(1, agent_time/2400)` under the flag — identity at 40+
+minute windows, so judge-cap behavior is untouched.
