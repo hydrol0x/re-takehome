@@ -779,9 +779,15 @@ class SubmissionAgent:
             waves.append([(QWEN, "qwen-fast")] * fast + [(QWEN, "qwen-think")])
         # On long-cap runs, gpt-oss joins from cycle 2: its channel carries the
         # transport-mortality risk, and qwen still has cycles of value to bank
-        # first. Short caps get one combined pass, and solo arms are unaffected.
+        # first. Under SUBMISSION_SHORTCAP at short windows it skips the S1
+        # wave entirely — its ~2–5 min serialized calls halve the cycle count
+        # a 20-minute window affords qwen (measured: iter-1, RESEARCH_LOOP.md)
+        # — while keeping its S0.5 / S4-sketch / fill-escalation roles.
+        # Solo arms are unaffected.
         defer_gptoss = (not solo) and self.config.agent_time_s >= 2400 and tb.cycle <= 1
-        if GPTOSS in tb.models_arm and not defer_gptoss:
+        skip_gptoss = (not solo) and self.config.shortcap \
+            and self.config.agent_time_s < 2400
+        if GPTOSS in tb.models_arm and not defer_gptoss and not skip_gptoss:
             count = self.config.gptoss_samples + (self.config.qwen_samples + 1 if solo else 0)
             waves.append([(GPTOSS, "gptoss-med")] * count)
 
