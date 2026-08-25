@@ -89,6 +89,7 @@ class Config:
     llm_concurrency: int = 3
     shortcap: bool = False
     fill_breadth: bool = False
+    fill_reasoning: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -110,6 +111,7 @@ class Config:
             # Promoted default (RESEARCH_LOOP.md iter-3); "0" restores
             # depth-first-only fills.
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
+            fill_reasoning=os.environ.get("SUBMISSION_FILL_REASONING", "").strip() == "1",
         )
 
     @property
@@ -538,6 +540,9 @@ class Toolbox:
             "qwen-think": dict(max_tokens=24000, temperature=0.7,
                                reasoning={"enabled": True, "max_tokens": 12000},
                                timeout_s=int(scaled(self.config.qwen_call_s + 300))),
+            "qwen-deep": dict(max_tokens=28000, temperature=0.7,
+                              reasoning={"enabled": True, "max_tokens": 16000},
+                              timeout_s=int(scaled(self.config.qwen_call_s + 420))),
             "gptoss-med": dict(max_tokens=24000, temperature=1.0,
                                reasoning={"effort": "medium"},
                                timeout_s=int(scaled(self.config.gptoss_call_s))),
@@ -1083,9 +1088,11 @@ class SubmissionAgent:
                 return fill
 
         model, kind = QWEN, "qwen-think"
+        if tb.config.fill_reasoning:
+            kind = "qwen-deep"  # fills die on the real math — buy deeper thinks
         if model not in tb.models_arm:
             model = tb.models_arm[0]
-            kind = "qwen-think" if model == QWEN else "gptoss-high"
+            kind = kind if model == QWEN else "gptoss-high"
         feedback = ""
         best_block: str | None = None
         best_fail: Candidate | None = None
@@ -1128,7 +1135,10 @@ class SubmissionAgent:
                             + format_messages(best_fail.messages, limit=3000))
             if plateau:
                 model = tb.config.other(model)
-                kind = "gptoss-high" if model == GPTOSS else "qwen-think"
+                if model == GPTOSS:
+                    kind = "gptoss-high"
+                else:
+                    kind = "qwen-deep" if tb.config.fill_reasoning else "qwen-think"
 
         if best_block and best_fail:
             return await self._sorrify_progress(tb, current, index, best_block, best_fail)
