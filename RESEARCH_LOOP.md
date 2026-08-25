@@ -91,6 +91,15 @@ Held-set validation of the fill-breadth promotion (`20260825T183009Z`):
 **6/8** — identical composition to the shortcap check (h03 and m05 are
 the held set's own structural pair). Promotion stands.
 
+Transfer check, kit sample-16 at 30-min caps with the promoted config
+(`20260825T192220Z`): **9/16**, $0.341, zero ledger deaths — within the
+duo arm's historical 9–10 band, not an improvement. Honest read: the
+custom-set gains come from problems whose decompositions fit a short
+window (the set was authored that way); the kit's hard tier needs hours
+regardless (full-cap runs prove it), so at 30-min caps the promoted
+config neither helps nor hurts the kit set. At judge caps the promotions
+are identity (shortcap) or cheap-positive (breadth pass).
+
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
 h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a
