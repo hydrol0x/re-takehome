@@ -109,22 +109,23 @@ holds *by construction*; (b) lexical ban on `sorry`/`admit`/`native_decide`/
   providers. For gpt-oss this excludes the fast expensive hosts (Cerebras
   ~$0.69/M out, Groq $0.60/M): expect the **cheap, slow tier** (~25–40 tok/s
   observed).
-- **Update (2026-08-23): landmine partially defused in our tree.** Another
-  applicant hit the same 429 mortality and filed it upstream; the kit
-  maintainer approved two fixes (kit PRs #3 and #5) but had not merged them
-  by submission time. Since judging clones *this* repo (`RULES.md`), we
-  mirrored the approved semantics into `src/re_harness/llm.py`: (a)
-  `allow_fallbacks: true` under the unchanged `max_price` ceiling and
-  `require_parameters`, so routing can avoid a rate-limited provider of the
-  same model; (b) a complete HTTP ≥ 400 response now *releases* its
-  reservation (a refusal bills nothing) instead of closing the ledger.
-  Mid-flight transport failures, cancels, and malformed 200s still close it,
-  deliberately — spend there is genuinely unknown. Tests:
-  `tests/test_llm.py`. The agent's ordering/pacing/call-cap mitigations stay
-  as cheap insurance for the still-fatal classes. (Dev containers only: the
-  `VM_TRANSPORT_FAILURE_POLICY=release` knob relaxes the transport class,
-  because environment restarts there chop all in-flight connections at once
-  — see RUNBOOK.md appendix. Judging always runs the strict default.)
+- **Update (2026-08-25): landmine officially defused upstream; our tree
+  reconciled.** Another applicant hit the same 429 mortality and filed it
+  upstream; we first mirrored the approved-but-unmerged semantics, and the
+  kit then merged the official fix (upstream commit “Handle provider rate
+  limits without closing the budget ledger (#6)”). Our
+  `src/re_harness/llm.py` now carries upstream #6 **verbatim**:
+  `allow_fallbacks: true` under the unchanged `max_price` ceiling; a **429
+  only** is treated leniently — released if the refusal reported no cost,
+  **settled at the reported cost** if it did; and stricter numeric
+  coercion of `usage.cost`. Every other HTTP error (402/408/5xx),
+  mid-flight transport failure, cancel, and malformed 200 still closes the
+  ledger — so the agent's ordering/pacing/call-cap mitigations remain
+  load-bearing for the 502/truncated classes. Tests: `tests/test_llm.py`
+  (upstream's suite adopted). Our sole delta from upstream is the
+  dev-container-only `VM_TRANSPORT_FAILURE_POLICY=release` knob for the
+  transport class (environment restarts chop all in-flight connections at
+  once — RUNBOOK.md appendix); judging always runs the strict default.
 
 ### 1.4 Time mechanics — the second landmine
 

@@ -175,6 +175,19 @@ Launched with these in place: **hard4 at full judge caps**
 `SUBMISSION_GPTOSS_CALL_CAP=24`) — the first run at exactly the judged
 time/budget settings. Results appended here when it lands.
 
+## 2026-08-25 · Upstream kit fix merged; harness reconciled verbatim
+
+The kit merged the official ledger fix (upstream #6). Compared with our
+interim mirror it is narrower and more honest: only a **429** is lenient —
+released when the refusal reports no cost, **settled at the reported
+cost** when it does — while 402/408/5xx stay fatal; `allow_fallbacks`
+under the price ceiling is confirmed; `usage.cost` parsing is stricter.
+We adopted upstream's `llm.py` and test suite verbatim (50 passed), the
+one retained delta being the dev-only `VM_TRANSPORT_FAILURE_POLICY`
+knob. Practical consequence: 502s and truncated bodies remain
+ledger-fatal at judge settings, so the agent's gpt-oss pacing and call
+caps stay load-bearing.
+
 ## 2026-08-24 · Dev-container restart storms; durable agent state
 
 The full-cap run surfaced a new dominant hazard, unrelated to providers:
