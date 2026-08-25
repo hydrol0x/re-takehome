@@ -8,7 +8,7 @@ lemma eq_case_perfect_square (p : ℕ) (hp : Nat.Prime p) :
 
 -- Helper: Specific case (3, 11) works
 lemma case_3_11_perfect_square :
-  ∃ m : ℕ, 3^2 + 7*3*11 + 11^2 = m^2 := by sorry
+  ∃ m : ℕ, 3^2 + 7*3*11 + 11^2 = m^2 := by exact ⟨19, by norm_num⟩
 
 -- Helper: Specific case (11, 3) works  
 lemma case_11_3_perfect_square :
