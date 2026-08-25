@@ -1,0 +1,155 @@
+{
+ "schema_version": 1,
+ "set": "custom-problems-dev",
+ "problems": [
+  {
+   "id": "c01_quad_roots",
+   "theorem_names": [
+    "c01_quad_roots"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "c02_amgm_frac",
+   "theorem_names": [
+    "c02_amgm_frac"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "c03_coprime_linear",
+   "theorem_names": [
+    "c03_coprime_linear"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "c05_pow_sum_div",
+   "theorem_names": [
+    "c05_pow_sum_div"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "c06_three_pow",
+   "theorem_names": [
+    "c06_three_pow"
+   ],
+   "definition_names": [
+    "c06_answer"
+   ],
+   "numeric_answer_names": [
+    "c06_answer"
+   ]
+  },
+  {
+   "id": "c08_count_congr",
+   "theorem_names": [
+    "c08_count_congr"
+   ],
+   "definition_names": [
+    "c08_answer"
+   ],
+   "numeric_answer_names": [
+    "c08_answer"
+   ]
+  },
+  {
+   "id": "c10_tau_360",
+   "theorem_names": [
+    "c10_tau_360"
+   ],
+   "definition_names": [
+    "c10_answer"
+   ],
+   "numeric_answer_names": [
+    "c10_answer"
+   ]
+  },
+  {
+   "id": "m01_dvd13",
+   "theorem_names": [
+    "m01_dvd13"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "m02_ord25",
+   "theorem_names": [
+    "m02_ord25"
+   ],
+   "definition_names": [
+    "m02_answer"
+   ],
+   "numeric_answer_names": [
+    "m02_answer"
+   ]
+  },
+  {
+   "id": "m04_sumfact",
+   "theorem_names": [
+    "m04_sumfact"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "m06_factcop",
+   "theorem_names": [
+    "m06_factcop"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "m08_amgm8",
+   "theorem_names": [
+    "m08_amgm8"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "h01_legendre100",
+   "theorem_names": [
+    "h01_legendre100"
+   ],
+   "definition_names": [
+    "h01_answer"
+   ],
+   "numeric_answer_names": [
+    "h01_answer"
+   ]
+  },
+  {
+   "id": "h02_mod23_cycle",
+   "theorem_names": [
+    "h02_a",
+    "h02_b"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "h04_square_shift",
+   "theorem_names": [
+    "h04_square_shift"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "h05_telescope_prod",
+   "theorem_names": [
+    "h05_telescope_prod"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  }
+ ]
+}

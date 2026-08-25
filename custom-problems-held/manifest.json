@@ -1,0 +1,82 @@
+{
+ "schema_version": 1,
+ "set": "custom-problems-held",
+ "problems": [
+  {
+   "id": "c04_sum_odds",
+   "theorem_names": [
+    "c04_sum_odds"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "c07_order_three",
+   "theorem_names": [
+    "c07_order_three"
+   ],
+   "definition_names": [
+    "c07_answer"
+   ],
+   "numeric_answer_names": [
+    "c07_answer"
+   ]
+  },
+  {
+   "id": "c09_factorial_mod",
+   "theorem_names": [
+    "c09_factorial_mod"
+   ],
+   "definition_names": [
+    "c09_answer"
+   ],
+   "numeric_answer_names": [
+    "c09_answer"
+   ]
+  },
+  {
+   "id": "m03_recip9",
+   "theorem_names": [
+    "m03_recip9"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "m05_divbash",
+   "theorem_names": [
+    "m05_divbash"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "m07_sumgeo",
+   "theorem_names": [
+    "m07_sumgeo"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "h03_invsq_sum",
+   "theorem_names": [
+    "h03_invsq_sum"
+   ],
+   "definition_names": [],
+   "numeric_answer_names": []
+  },
+  {
+   "id": "h06_order_mod125",
+   "theorem_names": [
+    "h06_order_mod125"
+   ],
+   "definition_names": [
+    "h06_answer"
+   ],
+   "numeric_answer_names": [
+    "h06_answer"
+   ]
+  }
+ ]
+}

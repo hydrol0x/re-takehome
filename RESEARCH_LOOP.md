@@ -10,10 +10,18 @@ wider problem distribution than the 16 kit samples.
   authored by frontier-assistant subagents in exact kit format, each with a
   REPL-verified reference proof (truth certificate) and a
   comparator-build-verified pristine challenge. **Selection metric runs
-  here.** Reference proofs live outside the repo runtime paths and are
-  never read by the agent (same policy as `reference/`).
+  here.** Reference proofs live in `reference-custom/` and are never read
+  by the agent (same policy as `reference/`).
 - `custom-problems-held/` — 8 problems held back from the loop. Run rarely
   (promotion candidates only) to detect overfitting to the dev set.
+- Composition (all 24 authored 2026-08-25; every reference proof
+  independently re-verified, comparator spot-passes on all easy+hard pairs
+  at 59–77 s builds): dev = c01_quad_roots, c02_amgm_frac,
+  c03_coprime_linear, c05_pow_sum_div, c06_three_pow, c08_count_congr,
+  c10_tau_360, m01_dvd13, m02_ord25, m04_sumfact, m06_factcop, m08_amgm8,
+  h01_legendre100, h02_mod23_cycle, h04_square_shift, h05_telescope_prod;
+  held = c04_sum_odds, c07_order_three, c09_factorial_mod, m03_recip9,
+  m05_divbash, m07_sumgeo, h03_invsq_sum, h06_order_mod125.
 - The 16 kit samples remain the reporting benchmark; the loop never
   selects on them directly (they are closer to the holdout's format
   quirks and we do not want to tune to their two broken entries).
