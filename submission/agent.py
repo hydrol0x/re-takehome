@@ -90,6 +90,7 @@ class Config:
     shortcap: bool = False
     fill_breadth: bool = False
     fill_reasoning: bool = False
+    skeleton_keep: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -112,6 +113,7 @@ class Config:
             # depth-first-only fills.
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
             fill_reasoning=os.environ.get("SUBMISSION_FILL_REASONING", "").strip() == "1",
+            skeleton_keep=os.environ.get("SUBMISSION_SKELETON_KEEP", "").strip() == "1",
         )
 
     @property
@@ -415,6 +417,13 @@ class Toolbox:
         self.sorrify_seen: set = set()
         self.sorrify_used = 0
         self.last_unfilled: list[str] = []
+        # Best partial skeleton so far (SUBMISSION_SKELETON_KEEP): kept for
+        # direct S4 resume instead of re-sketching from scratch, which throws
+        # away filled holes that were not harvestable as standalone lemmas.
+        # Ranking is (holes, errors) lexicographic; sentinels mean "none kept".
+        self.kept_skeleton = ""
+        self.kept_skeleton_holes = 10**6
+        self.kept_skeleton_errors = 10**6
         # A flaky REPL (container death, cold-boot import timeout) must degrade
         # the search, not crash the problem: after two consecutive failures we
         # stop checking and submit the best unverified candidate instead.
@@ -465,6 +474,12 @@ class Toolbox:
         self.cycles_done = max(0, int(state.get("cycles_done", 0)))
         self.lemma_pool = str(state.get("lemma_pool", ""))
         self.history_notes = [str(x) for x in state.get("history_notes", [])][-12:]
+        if self.config.skeleton_keep:
+            skeleton = state.get("kept_skeleton")
+            if isinstance(skeleton, str) and 0 < len(skeleton) <= 40000:
+                self.kept_skeleton = skeleton
+                self.kept_skeleton_holes = max(0, int(state.get("kept_skeleton_holes", 10**6)))
+                self.kept_skeleton_errors = max(0, int(state.get("kept_skeleton_errors", 10**6)))
         pinned = state.get("pinned_answers")
         if isinstance(pinned, dict):
             try:
@@ -479,15 +494,22 @@ class Toolbox:
     def save_state(self) -> None:
         if self.state_path is None:
             return
+        state: dict[str, Any] = {
+            "challenge_sha": self._state_key(),
+            "s0_done": self.s0_done,
+            "cycles_done": self.cycles_done,
+            "lemma_pool": self.lemma_pool[-20000:],
+            "history_notes": self.history_notes[-12:],
+            "pinned_answers": self.pinned_answers,
+        }
+        # A truncated skeleton is not valid Lean, so an oversized one is
+        # dropped from the state file rather than sliced to the cap.
+        if self.config.skeleton_keep and 0 < len(self.kept_skeleton) <= 40000:
+            state["kept_skeleton"] = self.kept_skeleton
+            state["kept_skeleton_holes"] = self.kept_skeleton_holes
+            state["kept_skeleton_errors"] = self.kept_skeleton_errors
         try:
-            self.state_path.write_text(json.dumps({
-                "challenge_sha": self._state_key(),
-                "s0_done": self.s0_done,
-                "cycles_done": self.cycles_done,
-                "lemma_pool": self.lemma_pool[-20000:],
-                "history_notes": self.history_notes[-12:],
-                "pinned_answers": self.pinned_answers,
-            }))
+            self.state_path.write_text(json.dumps(state))
         except OSError:
             pass
 
@@ -949,47 +971,61 @@ class SubmissionAgent:
     async def stage4_decompose(self, tb: Toolbox) -> Candidate | None:
         lemma_pool = tb.lemma_pool
         note = ""
+        # Resume-first (SUBMISSION_SKELETON_KEEP): the best partial skeleton
+        # re-enters the fill loop before any fresh sketch is paid for —
+        # re-sketching from scratch throws away filled holes that were not
+        # harvestable as standalone lemmas. Fresh sketching takes over once a
+        # resume round stops closing holes; the skeleton stays kept for later
+        # cycles unless a better partial displaces it.
+        resume = tb.config.skeleton_keep and bool(tb.kept_skeleton)
         for round_index in range(self.config.sketch_rounds):
-            # Time-adaptive sketcher: the deep reasoner when the window fits its
-            # worst case, else the fast thinker — so decomposition still runs
-            # under small wall-clock caps instead of never engaging.
-            # qwen leads sketching: every observed ledger death has been a
-            # gpt-oss transport kill, and the only hard-tier solve came off a
-            # qwen-repaired skeleton. gpt-oss still alternates in when time is
-            # roomy (its sketches carry real ideas — worth one dice-roll per
-            # two rounds), but never carries the first round.
-            available: list[tuple[str, str]] = []
-            if QWEN in tb.models_arm \
-                    and tb.deadline.allows(tb.config.scaled(tb.config.qwen_call_s + 600)):
-                available.append((QWEN, "qwen-think"))
-            if GPTOSS in tb.models_arm and round_index > 0 \
-                    and tb.deadline.allows(tb.config.scaled(tb.config.gptoss_call_s + 900)):
-                available.append((GPTOSS, "gptoss-high"))
-            if not available:
-                break
-            sketcher, kind = available[round_index % len(available)]
-            text = await tb.sample(
-                sketcher, sketch_messages(tb.problem, tb.challenge, lemma_pool, note), kind=kind)
-            source = extract_lean(text) if text else None
-            guarded = guard_candidate(source, tb.parsed, allow_sorry=True)[0] if source else None
-            if guarded is None:
-                note = "The previous sketch was rejected (statement altered or banned token)."
-                continue
-            sketch = Candidate(source=guarded, origin=f"sketch:{kind}:{round_index}")
-            await tb.check(sketch)
-            if sketch.error_count > 0:
-                repaired = await self.repair_with_handoff(
-                    tb, sketch, origin_model=sketcher,
-                    build_messages=lambda fb: sketch_messages(
-                        tb.problem, tb.challenge, lemma_pool,
-                        f"Your sketch had compile errors, fix them (keep the sorries):\n{fb}"),
-                    guard=lambda src: guard_candidate(src, tb.parsed, allow_sorry=True)[0],
-                    stage="S4-skeleton",
-                    success=lambda c: c.error_count == 0)
-                if repaired is None:
-                    note = "The previous sketch did not compile; use simpler helper statements."
+            resumed, resume = resume, False
+            if resumed:
+                entry_holes = tb.kept_skeleton_holes
+                sketch = Candidate(source=tb.kept_skeleton,
+                                   origin=f"sketch:kept:{round_index}")
+                await tb.check(sketch)
+            else:
+                # Time-adaptive sketcher: the deep reasoner when the window fits its
+                # worst case, else the fast thinker — so decomposition still runs
+                # under small wall-clock caps instead of never engaging.
+                # qwen leads sketching: every observed ledger death has been a
+                # gpt-oss transport kill, and the only hard-tier solve came off a
+                # qwen-repaired skeleton. gpt-oss still alternates in when time is
+                # roomy (its sketches carry real ideas — worth one dice-roll per
+                # two rounds), but never carries the first round.
+                available: list[tuple[str, str]] = []
+                if QWEN in tb.models_arm \
+                        and tb.deadline.allows(tb.config.scaled(tb.config.qwen_call_s + 600)):
+                    available.append((QWEN, "qwen-think"))
+                if GPTOSS in tb.models_arm and round_index > 0 \
+                        and tb.deadline.allows(tb.config.scaled(tb.config.gptoss_call_s + 900)):
+                    available.append((GPTOSS, "gptoss-high"))
+                if not available:
+                    break
+                sketcher, kind = available[round_index % len(available)]
+                text = await tb.sample(
+                    sketcher, sketch_messages(tb.problem, tb.challenge, lemma_pool, note), kind=kind)
+                source = extract_lean(text) if text else None
+                guarded = guard_candidate(source, tb.parsed, allow_sorry=True)[0] if source else None
+                if guarded is None:
+                    note = "The previous sketch was rejected (statement altered or banned token)."
                     continue
-                sketch = repaired
+                sketch = Candidate(source=guarded, origin=f"sketch:{kind}:{round_index}")
+                await tb.check(sketch)
+                if sketch.error_count > 0:
+                    repaired = await self.repair_with_handoff(
+                        tb, sketch, origin_model=sketcher,
+                        build_messages=lambda fb: sketch_messages(
+                            tb.problem, tb.challenge, lemma_pool,
+                            f"Your sketch had compile errors, fix them (keep the sorries):\n{fb}"),
+                        guard=lambda src: guard_candidate(src, tb.parsed, allow_sorry=True)[0],
+                        stage="S4-skeleton",
+                        success=lambda c: c.error_count == 0)
+                    if repaired is None:
+                        note = "The previous sketch did not compile; use simpler helper statements."
+                        continue
+                    sketch = repaired
             tb.record(sketch, "S4")
             tb.log(stage="S4", sketch=sketch.origin, holes=len(parse_challenge(sketch.source).holes))
 
@@ -997,6 +1033,19 @@ class SubmissionAgent:
             if filled is not None and filled.accepted:
                 tb.log(stage="S4", solved=filled.origin)
                 return filled
+            if tb.config.skeleton_keep and filled is not None:
+                # Fewest-holes-first, fewer-errors tie-break; a hole-free
+                # unaccepted file is never kept (nothing left to resume).
+                holes_now = len(parse_challenge(filled.source).holes)
+                if 0 < holes_now < tb.kept_skeleton_holes or (
+                        holes_now == tb.kept_skeleton_holes
+                        and filled.error_count < tb.kept_skeleton_errors):
+                    tb.kept_skeleton = filled.source
+                    tb.kept_skeleton_holes = holes_now
+                    tb.kept_skeleton_errors = filled.error_count
+                    tb.log(stage="S4", kept=filled.origin, kept_holes=holes_now)
+                # A resume round holds the sketch slot only while it closes holes.
+                resume = resumed and 0 < holes_now < entry_holes
             # harvest proven helper lemmas (error-free file: sorry-free decls compiled)
             if filled is not None:
                 lemma_pool = self._harvest_lemmas(tb, filled.source) or lemma_pool

@@ -1,5 +1,7 @@
 """Offline tests for the agent's durable per-problem state (resume support)."""
 
+import json
+
 from re_harness import Problem, Services
 from submission.agent import Config, Toolbox
 
@@ -63,6 +65,62 @@ def test_scaled_constants(monkeypatch):
     assert short.scaled(10) == 60  # floor
     monkeypatch.setenv("VM_TIME_LIMIT_S", "28800")
     assert Config.from_env().scaled(960) == 960  # long window: identity
+
+
+SKELETON = "lemma helper : 1 + 1 = 2 := by sorry\n\n" + CHALLENGE
+
+
+def test_kept_skeleton_roundtrip(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_KEEP", "1")
+    tb = make_toolbox(tmp_path)
+    assert tb.kept_skeleton == "" and tb.kept_skeleton_holes == 10**6
+    tb.kept_skeleton = SKELETON
+    tb.kept_skeleton_holes = 1
+    tb.kept_skeleton_errors = 0
+    tb.save_state()
+
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.kept_skeleton == SKELETON
+    assert tb2.kept_skeleton_holes == 1
+    assert tb2.kept_skeleton_errors == 0
+
+
+def test_kept_skeleton_ignored_when_flag_off(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_KEEP", "1")
+    tb = make_toolbox(tmp_path)
+    tb.kept_skeleton = SKELETON
+    tb.kept_skeleton_holes = 1
+    tb.kept_skeleton_errors = 0
+    tb.save_state()
+
+    monkeypatch.delenv("SUBMISSION_SKELETON_KEEP")
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.kept_skeleton == "" and tb2.kept_skeleton_holes == 10**6
+    tb2.save_state()  # flag off: the fields never reach the state file
+    state = json.loads((tmp_path / "agent_state.json").read_text())
+    assert "kept_skeleton" not in state
+
+
+def test_kept_skeleton_oversized_is_dropped(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_KEEP", "1")
+    tb = make_toolbox(tmp_path)
+    tb.kept_skeleton = "-- comment\n" * 8000  # > 40000 chars
+    tb.kept_skeleton_holes = 2
+    tb.kept_skeleton_errors = 0
+    tb.save_state()
+
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.kept_skeleton == "" and tb2.kept_skeleton_holes == 10**6
+
+
+def test_kept_skeleton_guarded_by_challenge_sha(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_KEEP", "1")
+    tb = make_toolbox(tmp_path)
+    tb.kept_skeleton = SKELETON
+    tb.kept_skeleton_holes = 1
+    tb.save_state()
+    tb2 = make_toolbox(tmp_path, challenge=CHALLENGE + "-- edited\n")
+    assert tb2.kept_skeleton == "" and tb2.kept_skeleton_holes == 10**6
 
 
 def test_no_state_dir_is_inert(tmp_path):

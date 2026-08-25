@@ -1,7 +1,11 @@
 import Mathlib
 
 /-- For any k : ℕ, 2^(3*k) ≡ 1 (mod 7). -/
-lemma two_pow_three_mul_mod_seven (k : ℕ) : 2 ^ (3 * k) % 7 = 1 := by sorry
+lemma two_pow_three_mul_mod_seven (k : ℕ) : 2 ^ (3 * k) % 7 = 1 := by induction k with
+  | zero => norm_num
+  | succ k ih =>
+      rw [Nat.mul_succ, pow_add, Nat.mul_mod, ih]
+      norm_num
 
 /-- For any k : ℕ, 2^(3*k+1) ≡ 2 (mod 7). -/
 lemma two_pow_three_mul_add_one_mod_seven (k : ℕ) : 2 ^ (3 * k + 1) % 7 = 2 := by sorry
