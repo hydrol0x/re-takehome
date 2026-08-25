@@ -88,6 +88,7 @@ class Config:
     gptoss_call_s: float = 960.0
     llm_concurrency: int = 3
     shortcap: bool = False
+    fill_breadth: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -106,6 +107,7 @@ class Config:
             # Promoted default (RESEARCH_LOOP.md iter-2); "0" restores the
             # fixed long-window constants.
             shortcap=os.environ.get("SUBMISSION_SHORTCAP", "1").strip() != "0",
+            fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "").strip() == "1",
         )
 
     @property
@@ -1002,6 +1004,28 @@ class SubmissionAgent:
 
     async def _fill_holes(self, tb: Toolbox, sketch: Candidate) -> Candidate | None:
         current = sketch.source
+        if tb.config.fill_breadth:
+            # Breadth pass first (SUBMISSION_FILL_BREADTH): sweep EVERY hole
+            # with the cheap tactic cascade before any LLM dialogue — an
+            # early hole's expensive dialogue must not starve later holes a
+            # one-line tactic closes (iter-2: m06 filled 0 of 8 holes).
+            swept = True
+            while swept:
+                swept = False
+                for index, hole in enumerate(parse_challenge(current).holes):
+                    if not tb.deadline.allows(120):
+                        break
+                    if not hole.is_tactic:
+                        continue
+                    fill = await self._cascade_hole(tb, current, index, hole.decl_name)
+                    if fill is not None:
+                        current = fill
+                        swept = True
+                        partial = Candidate(source=current,
+                                            origin=sketch.origin + ":partial")
+                        await tb.check(partial)
+                        tb.record(partial, "S4")
+                        break  # re-parse: hole indices shifted
         progressed = True
         while progressed:
             holes = parse_challenge(current).holes
@@ -1051,17 +1075,10 @@ class SubmissionAgent:
         from submission.lean_text import BANNED_RE, extract_all_blocks
 
         holes_before = len(parse_challenge(current).holes)
-        if tactic_only:
-            for tactic in FILL_SWEEP:
-                if not tb.deadline.allows(90):
-                    return None
-                spliced = splice_holes(current, {index: tactic})
-                attempt = Candidate(source=spliced,
-                                    origin=f"fill:{decl_name}:{tactic.splitlines()[0]}")
-                await tb.check(attempt, timeout_s=60)
-                if attempt.error_count == 0 \
-                        and len(parse_challenge(spliced).holes) < holes_before:
-                    return spliced
+        if tactic_only and not tb.config.fill_breadth:  # breadth pass did this
+            fill = await self._cascade_hole(tb, current, index, decl_name)
+            if fill is not None:
+                return fill
 
         model, kind = QWEN, "qwen-think"
         if model not in tb.models_arm:
@@ -1071,7 +1088,12 @@ class SubmissionAgent:
         best_block: str | None = None
         best_fail: Candidate | None = None
         last_signature = None
-        for round_index in range(4):  # 1 burst + up to 3 sequential repairs
+        # 1 burst + up to 3 sequential repairs; under the breadth variant the
+        # dialogue budget scales with the window so more holes get a turn.
+        rounds = 4
+        if tb.config.fill_breadth:
+            rounds = max(1, round(4 * min(1.0, tb.config.agent_time_s / 2400.0)))
+        for round_index in range(rounds):
             try:
                 text = await tb.sample(
                     model, fill_messages(tb.problem, current, decl_name, feedback),
@@ -1108,6 +1130,23 @@ class SubmissionAgent:
 
         if best_block and best_fail:
             return await self._sorrify_progress(tb, current, index, best_block, best_fail)
+        return None
+
+    async def _cascade_hole(self, tb: Toolbox, current: str, index: int,
+                            decl_name: str) -> str | None:
+        """Try each FILL_SWEEP tactic on one hole; return the filled file."""
+
+        holes_before = len(parse_challenge(current).holes)
+        for tactic in FILL_SWEEP:
+            if not tb.deadline.allows(90):
+                return None
+            spliced = splice_holes(current, {index: tactic})
+            attempt = Candidate(source=spliced,
+                                origin=f"fill:{decl_name}:{tactic.splitlines()[0]}")
+            await tb.check(attempt, timeout_s=60)
+            if attempt.error_count == 0 \
+                    and len(parse_challenge(spliced).holes) < holes_before:
+                return spliced
         return None
 
     async def _sorrify_progress(self, tb: Toolbox, current: str, index: int,
