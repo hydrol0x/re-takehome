@@ -103,7 +103,9 @@ class Config:
             repair_rounds=_env_int("SUBMISSION_REPAIR_ROUNDS", 4, 0, 12),
             sketch_rounds=_env_int("SUBMISSION_SKETCH_ROUNDS", 4, 0, 12),
             gptoss_call_cap=_env_int("SUBMISSION_GPTOSS_CALL_CAP", 10, 0, 200),
-            shortcap=os.environ.get("SUBMISSION_SHORTCAP", "").strip() == "1",
+            # Promoted default (RESEARCH_LOOP.md iter-2); "0" restores the
+            # fixed long-window constants.
+            shortcap=os.environ.get("SUBMISSION_SHORTCAP", "1").strip() != "0",
         )
 
     @property

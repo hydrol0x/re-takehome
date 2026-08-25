@@ -54,10 +54,11 @@ def test_corrupt_state_is_ignored(tmp_path):
 
 def test_scaled_constants(monkeypatch):
     monkeypatch.setenv("VM_TIME_LIMIT_S", "1200")
+    monkeypatch.setenv("SUBMISSION_SHORTCAP", "0")
+    assert Config.from_env().scaled(960) == 960  # opted out: identity
     monkeypatch.delenv("SUBMISSION_SHORTCAP", raising=False)
-    assert Config.from_env().scaled(960) == 960  # flag off: identity
-    monkeypatch.setenv("SUBMISSION_SHORTCAP", "1")
-    short = Config.from_env()
+    short = Config.from_env()  # promoted default: on
+    assert short.shortcap
     assert short.scaled(960) == 960 * (short.agent_time_s / 2400)
     assert short.scaled(10) == 60  # floor
     monkeypatch.setenv("VM_TIME_LIMIT_S", "28800")

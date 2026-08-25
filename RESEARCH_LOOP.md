@@ -76,7 +76,12 @@ hard tier sanity-check that short-cap selection transfers.
 | --- | --- | --- | --- | --- | --- |
 | 0 | 2026-08-25 | baseline v6+guard | **11/16** ($0.136, 19 min, run `20260825T161057Z`) | — | easy 7/7, medium 3/5, hard 1/4; zero ledger deaths |
 | 1 | 2026-08-25 | `SUBMISSION_SHORTCAP` (window-proportional constants) | 11 → **9/16** ($0.124, 33 min, `20260825T163350Z`) | no — regression | mechanics worked (gpt-oss usable 2/2, S4 engaged, c03 one hole short) but slow serialized gpt-oss S1 calls halved qwen's cycle count: lost c03+m01, regained h05 |
-| 2 | 2026-08-25 | shortcap + skip gpt-oss S1 wave at short windows (`c518381`) | (running) | | |
+| 2 | 2026-08-25 | shortcap + skip gpt-oss S1 wave at short windows (`c518381`) | 11 → **10/16** ($0.114, 37 min, `20260825T170727Z`) | **yes — default on** | first-ever m04 solve (S4 at short caps — the baseline structurally could not), m01 recovered; c03/h05 lost to S1 seed-noise (both flip across runs). Totals 11/9/10 are within noise; promoted on composition + mechanism + judge-cap safety (identity ≥ 40-min windows) |
+
+Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
+c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
+h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a
+composition argument or repeat runs, not just a total.
 
 Iter-0 failure analysis (drove iter-1): all five misses (h01, h02, h04,
 m04, m06) ended as S1+S2 cycles with a useless `sweep:rfl` checkpoint —
