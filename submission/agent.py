@@ -601,12 +601,14 @@ class SubmissionAgent:
         heavy_fallback: Candidate | None = None
 
         def guard_heavy(candidate: Candidate | None) -> Candidate | None:
-            # The comparator rebuilds the file cold under a 180 s cap; a proof
-            # that needs >40 s even in the warm REPL risks timing out there
-            # (observed: p10 REPL-accepted, comparator timeout). While ample
-            # time remains, hold such a win as fallback and hunt a lighter one.
+            # The comparator rebuilds the file cold under a 180 s cap that
+            # also covers the challenge build and two kernel exports, leaving
+            # ~60-90 s for the solution — and cold elaboration is slower than
+            # the warm REPL (observed twice on p10: REPL-accepted proofs, 40 s
+            # guard silent, comparator timeout at 180.9 s). While ample time
+            # remains, hold a >15 s win as fallback and hunt a lighter one.
             nonlocal heavy_fallback
-            if candidate is None or candidate.check_s <= 40 \
+            if candidate is None or candidate.check_s <= 15 \
                     or not toolbox.deadline.allows(toolbox.config.scaled(1800)):
                 return candidate
             if heavy_fallback is None or candidate.check_s < heavy_fallback.check_s:
