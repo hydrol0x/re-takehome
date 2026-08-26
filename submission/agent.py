@@ -92,6 +92,7 @@ class Config:
     fill_reasoning: bool = False
     skeleton_keep: bool = False
     compare_precheck: bool = True
+    plan_first: bool = False
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
     wave_spread: bool = False
@@ -119,6 +120,9 @@ class Config:
             fill_reasoning=os.environ.get("SUBMISSION_FILL_REASONING", "").strip() == "1",
             skeleton_keep=os.environ.get("SUBMISSION_SKELETON_KEEP", "").strip() == "1",
             # Default on: three p10 proofs were REPL-accepted yet timed out
+            # Research branch B2 (DSP-lite): majority-pick an informal plan
+            # before the cycle-1 S1 wave and condition qwen-fast samples on it.
+            plan_first=os.environ.get("SUBMISSION_PLAN_FIRST", "").strip() == "1",
             # the comparator's cold build — only the real gate can see that.
             compare_precheck=os.environ.get(
                 "SUBMISSION_COMPARE_PRECHECK", "1").strip() != "0",
@@ -215,7 +219,7 @@ RULES_BLOCK = """Hard rules:
 
 
 def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
-                         history: str = "") -> list[dict[str, str]]:
+                         history: str = "", plan: str = "") -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover. Produce a complete, compiling "
         "Lean file that proves the challenge theorem(s), replacing every `sorry`.\n"
@@ -226,6 +230,9 @@ def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
         "Challenge file (fill in the sorries, change nothing else):",
         "```lean", challenge.rstrip(), "```",
     ]
+    if plan:  # SUBMISSION_PLAN_FIRST: condition the wave on a shared strategy.
+        user = ["A promising strategy:", plan,
+                "Follow it unless clearly wrong.", ""] + user
     if history:
         user += ["", "What has been tried so far (do something different):", history]
     if feedback:
@@ -234,6 +241,50 @@ def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
                  "Fix the reported problems. Return the full corrected file."]
     return [{"role": "system", "content": system},
             {"role": "user", "content": "\n".join(user)}]
+
+
+def plan_messages(problem: Problem, challenge: str) -> list[dict[str, str]]:
+    """Compact plan prompt (SUBMISSION_PLAN_FIRST): idea + strategy, no Lean."""
+
+    system = (
+        "You are an expert competition mathematician planning a Lean 4 proof. "
+        "Answer in at most 6 short lines: the key mathematical idea and the "
+        "proof strategy. Plain text only; no Lean code."
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Challenge file:", "```lean", challenge.rstrip(), "```", "",
+        "In <=6 lines: the key mathematical idea and proof strategy; "
+        "no Lean code.",
+    ]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+def pick_plan(plans: list[str] | None) -> str | None:
+    """Majority-pick one informal plan (SUBMISSION_PLAN_FIRST; pure).
+
+    Each plan is normalized to a crude strategy key: its first non-empty
+    line, lowercased, punctuation stripped, whitespace collapsed. If two
+    plans share a key, the first of them wins; otherwise the longest plan
+    wins. None, empty, or all-blank input yields None.
+    """
+
+    usable = [p.strip() for p in (plans or [])
+              if isinstance(p, str) and p.strip()]
+    if not usable:
+        return None
+
+    def key(plan: str) -> str:
+        first = plan.splitlines()[0].lower()
+        cleaned = "".join(c if c.isalnum() or c.isspace() else " " for c in first)
+        return " ".join(cleaned.split())
+
+    keys = [key(p) for p in usable]
+    for i, k in enumerate(keys):
+        if k and k in keys[i + 1:]:
+            return usable[i]
+    return max(usable, key=len)
 
 
 def sketch_messages(problem: Problem, challenge: str, lemma_pool: str,
@@ -874,7 +925,43 @@ class SubmissionAgent:
 
     # ---- S1 + S2/S3 --------------------------------------------------------
 
+    async def _plan_first(self, tb: Toolbox) -> str:
+        """SUBMISSION_PLAN_FIRST: majority-pick a short informal plan (DSP-lite).
+
+        Measured problem: on several dev problems the whole cycle-1 S1 wave
+        chases one wrong strategy. Three cheap qwen-fast plan samples plus a
+        majority pick align the wave with a majority-good strategy instead.
+        Returns "" (wave unconditioned) when qwen is absent, the budget cannot
+        afford ~3 short calls, or no usable plan comes back.
+        """
+
+        if QWEN not in tb.models_arm:
+            return ""
+        # The three short calls run concurrently under tb.semaphore, so the
+        # wall cost is ~one qwen window; demand that plus the slack the S4
+        # entry gate uses, else skip the step entirely.
+        if not tb.deadline.allows(tb.config.scaled(tb.config.qwen_call_s + 600)):
+            return ""
+        messages = plan_messages(tb.problem, tb.challenge)
+        texts = await asyncio.gather(
+            *(tb.sample(QWEN, messages, kind="qwen-fast") for _ in range(3)),
+            return_exceptions=True)
+        for item in texts:
+            if isinstance(item, LLMDead):
+                raise item
+        plans = [t for t in texts if isinstance(t, str)]
+        plan = pick_plan(plans)
+        # Bound what a runaway sampler could inject into every wave prompt.
+        plan = "\n".join(plan.strip().splitlines()[:8])[:1200] if plan else ""
+        tb.log(stage="S1", plan_samples=len(plans), plan_picked=bool(plan))
+        return plan
+
     async def stage1_sample(self, tb: Toolbox) -> tuple[Candidate | None, list[Candidate]]:
+        # SUBMISSION_PLAN_FIRST (off by default): cheap plan-selection step
+        # before the first wave only; later cycles are unchanged.
+        plan = ""
+        if self.config.plan_first and tb.cycle <= 1:
+            plan = await self._plan_first(tb)
         # Value-before-risk: run the qwen wave to completion (generate AND
         # check) before the first gpt-oss call, so a gpt-oss 429 that kills the
         # ledger cannot cost us qwen's candidates.
@@ -913,8 +1000,9 @@ class SubmissionAgent:
                 if self.config.wave_spread and kind == "qwen-fast" else None
                 for i, (_model, kind) in enumerate(wave)]
             texts = await asyncio.gather(
-                *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge,
-                                                        history=history), kind=kind,
+                *(tb.sample(model, whole_proof_messages(
+                    tb.problem, tb.challenge, history=history,
+                    plan=plan if kind == "qwen-fast" else ""), kind=kind,
                             temperature=temp)
                   for (model, kind), temp in zip(wave, temps)),
                 return_exceptions=True)
