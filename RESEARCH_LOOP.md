@@ -166,6 +166,7 @@ Phase-2 eval results:
 | B5 premise-hints | **13/16** ($0.206, `20260826T153552Z`) | promotion candidate — ties best-ever; first eval to hold ALL flippers (c03/m01/h05) simultaneously + h01 + m04; second seed queued |
 | B6 suggest-harvest | 11/16 ($0.196, `20260826T161532Z`) | no — lost both flippers c03/h05 and all three structurals h02/h04/m06. Probe telemetry: harvest fired hardest exactly on the failures (m06 19 Try-this, h05 12, c03 5) without converting any, and c05/h04 spent 12–14 probes for zero suggestions — `apply?` surfaces term-mode lemma applications that don't close these goals, while the probe checks crowd out productive fill rounds |
 | B2 plan-first | 11/16 ($0.249, `20260826T165906Z`) | no — flippers c03/m01 held, but h05 lost, m04 (a usually-pass mid) flipped fail, and all three structurals missed; costliest eval yet. Plan generation + pick taxes cycle-1 without converting the structural opens; conditioning the qwen-fast wave on one plan narrows the very diversity that carries m04/h05 |
+| B9 skeleton-portfolio | 11/16 ($0.175, `20260826T174144Z`) | no at 20-min windows — c03/m01/m04 held but h01 (a usually-pass hard) flipped fail alongside h05 + all structurals. Splitting rounds across two skeleton slots halves repair depth per skeleton, which is exactly what h01 needs; the design targets long windows, so revisit only inside B12's 60-min run, not as a default |
 
 Eval order by expected value: B5, B6, B1, B2, B9, B10, B3, B4, B7, B8;
 then second seeds for the top three, a combination eval of compatible
