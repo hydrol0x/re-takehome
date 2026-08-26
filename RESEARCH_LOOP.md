@@ -163,6 +163,7 @@ Phase-2 eval results:
 | branch | dev score | verdict |
 | --- | --- | --- |
 | B1 wave-spread | 9/16 ($0.230, `20260826T144557Z`) | no — c03 recovered but c02 (an always-pass easy) and h01 flipped fail; spread dilutes the productive t=0.8 mass |
+| B5 premise-hints | **13/16** ($0.206, `20260826T153552Z`) | promotion candidate — ties best-ever; first eval to hold ALL flippers (c03/m01/h05) simultaneously + h01 + m04; second seed queued |
 
 Eval order by expected value: B5, B6, B1, B2, B9, B10, B3, B4, B7, B8;
 then second seeds for the top three, a combination eval of compatible
