@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "problem_id": "c03_coprime_linear",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 70948,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (8.8s)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[c03_coprime_linear, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (34s)\nwarning: Solution.lean:4:8: declaration uses `sorry`\ninfo: Solution.lean:20:69: Try this:\n  [apply] exact c03_coprime_linear n\nBuild completed successfully (8656 jobs).\nExporting #[c03_coprime_linear, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- c03_coprime_linear propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- c03_coprime_linear propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.026247585000000004,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 759.935,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:qwen-think:2:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "c03_coprime_linear",
+          "gcd_helper_dvd_n",
+          "gcd_helper_dvd_one"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "c03_coprime_linear"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 4,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 685.2
+  }
+}

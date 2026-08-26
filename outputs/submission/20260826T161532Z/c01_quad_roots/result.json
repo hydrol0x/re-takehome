@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "problem_id": "c01_quad_roots",
+  "status": "passed",
+  "passed": true,
+  "points": 1,
+  "comparator": {
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 76577,
+    "output": {
+      "passed": true,
+      "exit_code": 0,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (20s)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[c01_quad_roots, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n✔ [8655/8656] Built Solution (7.5s)\nBuild completed successfully (8656 jobs).\nExporting #[c01_quad_roots, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\nRunning Lean default kernel on solution.\nLean default kernel accepts the solution\nYour solution is okay!\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- c01_quad_roots propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- c01_quad_roots propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.007699575000000003,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 676.844,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen-fast:s1",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-fast:s1",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 241247
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-fast:s1",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 241093
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      }
+    ],
+    "wall_s": 596.6
+  }
+}
