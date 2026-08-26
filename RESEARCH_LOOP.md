@@ -158,6 +158,12 @@ held-set checks, unchanged. All flags default off until promoted.
 | B10 | `SUBMISSION_BOUND_TEMPLATES` | deterministic templates: derive bounds for bounded-quantifier goals → `interval_cases`/`decide` reformulations in the per-hole cascade | bounded goals, zero LLM cost |
 | B12 | (eval-only) | skeleton-keep + tuned knobs at 60-min caps on kit hard4 | long-window transfer |
 
+Phase-2 eval results:
+
+| branch | dev score | verdict |
+| --- | --- | --- |
+| B1 wave-spread | 9/16 ($0.230, `20260826T144557Z`) | no — c03 recovered but c02 (an always-pass easy) and h01 flipped fail; spread dilutes the productive t=0.8 mass |
+
 Eval order by expected value: B5, B6, B1, B2, B9, B10, B3, B4, B7, B8;
 then second seeds for the top three, a combination eval of compatible
 winners, held-set on any promotion, and B12.
