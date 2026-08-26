@@ -20,19 +20,19 @@ theorem h04_product_eq {x y : ℕ} (hx : 0 < x) (hy : 0 < y)
 /-- Helper: The smaller factor (x - (y + 1)) divides 16. -/
 theorem h04_a_divides_16 {x y : ℕ} (h_prod : (x - (y + 1)) * (x + (y + 1)) = 16) :
     (x - (y + 1)) ∣ 16 := by
-  sorry
+  exact?
 
 /-- Helper: Bounds the smaller factor to be at most 3. -/
 theorem h04_a_le_3 {x y : ℕ} (hx : 0 < x) (hy : 0 < y)
     (h_gt : x > y + 1) (h_prod : (x - (y + 1)) * (x + (y + 1)) = 16) :
     x - (y + 1) ≤ 3 := by
-  sorry
+  nlinarith
 
 /-- Helper: The smaller factor is strictly positive. -/
 theorem h04_a_pos {x y : ℕ} (hx : 0 < x) (hy : 0 < y)
     (h_gt : x > y + 1) :
     0 < x - (y + 1) := by
-  sorry
+  omega
 
 /-- Main theorem characterizing the unique solution. -/
 theorem h04_square_shift (x y : ℕ) (hx : 0 < x) (hy : 0 < y) :
