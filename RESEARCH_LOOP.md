@@ -126,6 +126,14 @@ proofs), and existing entries omega/nlinarith dominate the closable
 remainder. Additions landed in FILL_SWEEP as iter-6; eval queued behind
 the p10 precheck-validation run.
 
+p10 precheck validation (`20260826T062410Z`, 2 h cap, 1 worker):
+**comparator PASS, 1/1** ($0.029, 38 min, gpt-oss S1 sample) — the
+winning proof cleared the precheck (97 s) and the final comparator
+(45 s). After three straight comparator-timeout losses on p10, the
+precheck-equipped stack ships a verified point. The comparator-timeout
+class is now handled end-to-end: reject-heavy-and-keep-hunting at S5,
+confirmed live on both p09 (reject path) and p10 (accept path).
+
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
 h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a

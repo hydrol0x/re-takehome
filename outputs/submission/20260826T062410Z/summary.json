@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "set": "p10-only",
+  "problems": [
+    {
+      "problem_id": "p10_factorial_pow",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.029460521999999992,
+      "wall_s": 2251.447,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 1,
+  "max_points": 1,
+  "actual_cost_usd": 0.029460522,
+  "wall_s_sum": 2251.447,
+  "run_id": "06abc36e2e8b43179b18d931dcecbe1d",
+  "wall_s": 2251.826,
+  "finished_at": "2026-08-26T08:01:02.941446+00:00"
+}
