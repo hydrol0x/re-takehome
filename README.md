@@ -202,3 +202,35 @@ See `RULES.md` for the complete assignment rules.
 | `docker/` | Source for the Lean runtime image |
 | `docs/` | Agent API, setup, artifacts, and security model |
 | `scripts/` | Setup, smoke test, rescore, and judging checks |
+
+## Submission notes (applicant)
+
+The coordination layer is `submission/agent.py` + `submission/lean_text.py`;
+its design rationale and evidence live in the applicant documents:
+
+| Document | Contents |
+| --- | --- |
+| `RESEARCH.md` | Harness analysis, model calibration, literature review, architecture |
+| `PART2.md` | Part Two answer: does collaboration beat either model alone, and why |
+| `EXPERIMENTS.md` | Chronological log of every keyed run |
+| `RESEARCH_LOOP.md` | Variant-selection loop on the custom eval set |
+| `RUNBOOK.md` | How to reproduce runs (incl. web-dev-container specifics) |
+| `reference/`, `reference-custom/` | Machine-verified reference proofs (never read by the agent) |
+| `custom-problems-dev/`, `custom-problems-held/` | Applicant-authored eval sets in kit format |
+
+Disclosures and attribution:
+
+- **AI assistance**: this submission was developed with substantial
+  assistance from Claude (Anthropic), disclosed per `RULES.md` Conduct —
+  including code, reference proofs, the custom eval sets, and these
+  documents. The coordination design decisions and their experimental
+  validation are recorded transparently in the documents above.
+- **Harness provenance**: `src/re_harness/` is the kit's harness with the
+  upstream ledger fix (kit issue → merged commit #6) adopted verbatim, plus
+  applicant additions kept deliberately small and inert at judging:
+  `Services.state_dir` (durable agent state), `Services.compare`
+  (real-comparator precheck), events-archive-on-resume in the runner, and
+  a dev-container-only `VM_TRANSPORT_FAILURE_POLICY` knob (never set during
+  judging; default behavior is fail-closed and covered by the kit's tests).
+- No per-problem special-casing: runtime prompts contain only generic
+  technique material; reference proofs are documentation, never inputs.
