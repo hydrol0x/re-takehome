@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "problem_id": "c03_coprime_linear",
+  "status": "passed",
+  "passed": true,
+  "points": 1,
+  "comparator": {
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 40720,
+    "output": {
+      "passed": true,
+      "exit_code": 0,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (6.0s)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[c03_coprime_linear, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (7.4s)\nwarning: Solution.lean:8:10: This simp argument is unused:\n  Nat.gcd_add_mul_right_right\n\nHint: Omit it from the simp argument list.\n  simp ̵[̵N̵a̵t̵.̵g̵c̵d̵_̵a̵d̵d̵_̵m̵u̵l̵_̵r̵i̵g̵h̵t̵_̵r̵i̵g̵h̵t̵]̵\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:14:24: This simp argument is unused:\n  Nat.gcd_add_mul_right_right\n\nHint: Omit it from the simp argument list.\n  simp [Nat.gcd_comm,̵ ̵N̵a̵t̵.̵g̵c̵d̵_̵a̵d̵d̵_̵m̵u̵l̵_̵r̵i̵g̵h̵t̵_̵r̵i̵g̵h̵t̵]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nBuild completed successfully (8656 jobs).\nExporting #[c03_coprime_linear, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\nRunning Lean default kernel on solution.\nLean default kernel accepts the solution\nYour solution is okay!\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- c03_coprime_linear propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- c03_coprime_linear propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.014425385,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 714.876,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen:s2:r2",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "sorrified": "2 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "c03_coprime_linear",
+          "gcd_step_one"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:1",
+        "holes": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:qwen-think:1",
+        "unfilled_decls": [
+          "gcd_reduction_step"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "c03_coprime_linear",
+          "gcd_reduction_step_1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": "qwen:s2:r2"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen:s2:r2",
+        "passed": true,
+        "timed_out": false,
+        "duration_ms": 184475
+      }
+    ],
+    "wall_s": 670.8
+  }
+}
