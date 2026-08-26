@@ -99,9 +99,6 @@ class Config:
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
     wave_spread: bool = False
-    # SUBMISSION_PREMISE_HINTS (research branch B5): REPL-verified Mathlib
-    # premise names injected into S4 fill prompts; default off.
-    premise_hints: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -142,9 +139,6 @@ class Config:
                 "SUBMISSION_COMPARE_PRECHECK", "1").strip() != "0",
             # SUBMISSION_WAVE_SPREAD (research branch B1): default off.
             wave_spread=os.environ.get("SUBMISSION_WAVE_SPREAD", "").strip() == "1",
-            # SUBMISSION_PREMISE_HINTS (research branch B5): default off.
-            premise_hints=os.environ.get(
-                "SUBMISSION_PREMISE_HINTS", "").strip() == "1",
         )
 
     @property
@@ -335,7 +329,7 @@ def sketch_messages(problem: Problem, challenge: str, lemma_pool: str,
 
 
 def fill_messages(problem: Problem, sketch: str, decl_name: str,
-                  feedback: str = "", hints: str = "") -> list[dict[str, str]]:
+                  feedback: str = "") -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover. The file below compiles except "
         "for `sorry` placeholders. Your job is ONE hole: the `sorry` inside the "
@@ -355,8 +349,6 @@ def fill_messages(problem: Problem, sketch: str, decl_name: str,
         f"Give up to three alternative proofs for the `sorry` in `{decl_name}`, "
         "each in its own ```lean block.",
     ]
-    if hints:
-        user += ["", hints]
     if feedback:
         user += ["", "Lean feedback on the previous attempt at this hole:",
                  "```", feedback, "```"]
@@ -403,69 +395,6 @@ def parse_answer_lines(text: str, names: list[str]) -> dict[str, int] | None:
         if value is not None:
             found[name] = value
     return found if len(found) == len(names) else None
-
-
-# ---------------------------------------------------------------------------
-# Premise hints (SUBMISSION_PREMISE_HINTS / B5): hallucinated Mathlib names
-# ("unknown identifier") are a top fill-error class. One cheap call proposes
-# candidate lemma names, one batched `#check` file verifies which exist —
-# `#check <name>` errors iff the name is unknown — and only survivors are
-# ever injected into fill prompts.
-
-
-def premise_messages(problem: Problem, challenge: str) -> list[dict[str, str]]:
-    system = (
-        "You are a Lean 4 / Mathlib librarian. List Mathlib lemma or theorem "
-        "names likely to be useful for proving the problem below.\n"
-        "Rules: at most 15 names, fully qualified (e.g. `Nat.pow_mod`, "
-        "`Finset.sum_range_succ`), ONE name per line, no code, no commentary."
-    )
-    user = [
-        f"Problem {problem.id}:", problem.description, "",
-        "Formal statement:", "```lean", challenge.rstrip(), "```", "",
-        "List up to 15 likely-relevant Mathlib lemma names, one per line.",
-    ]
-    return [{"role": "system", "content": system},
-            {"role": "user", "content": "\n".join(user)}]
-
-
-def parse_premise_names(text: str, cap: int = 15) -> list[str]:
-    """Qualified identifiers (`Nat.pow_mod`) from LLM output, deduped, capped."""
-
-    import re as _re
-    names: list[str] = []
-    for match in _re.finditer(
-            r"\b[A-Za-z_][A-Za-z0-9_']*(?:\.[A-Za-z_][A-Za-z0-9_']*)+", text or ""):
-        name = match.group(0)
-        if all(len(segment) <= 1 for segment in name.split(".")):
-            continue  # prose artifacts like `e.g` / `i.e`
-        if name not in names:
-            names.append(name)
-        if len(names) >= cap:
-            break
-    return names
-
-
-def failed_premise_indexes(messages: list[dict[str, Any]], count: int) -> set[int]:
-    """0-based indexes of `#check` candidates whose line carries an error.
-
-    Mirrors _sorrify_progress's accounting: the REPL strips import lines, so
-    message line numbers are 1-based over the KEPT lines — and the premise
-    probe file is imports followed immediately by one `#check` per candidate,
-    so kept line k is candidate k-1. An error that cannot be attributed to a
-    candidate line fails the whole batch (never inject unvetted names).
-    """
-
-    failed: set[int] = set()
-    for message in messages:
-        if message.get("severity") != "error":
-            continue
-        line = (message.get("pos") or {}).get("line")
-        if isinstance(line, int) and 1 <= line <= count:
-            failed.add(line - 1)
-        else:
-            return set(range(count))
-    return failed
 
 
 # ---------------------------------------------------------------------------
@@ -597,9 +526,6 @@ class Toolbox:
         self.sorrify_seen: set = set()
         self.sorrify_used = 0
         self.last_unfilled: list[str] = []
-        # Verified Mathlib premise names for fill prompts (B5): None until
-        # computed on the first fill pass; "" caches a failed/empty attempt.
-        self._premise_hints: str | None = None
         # Best partial skeleton so far (SUBMISSION_SKELETON_KEEP): kept for
         # direct S4 resume instead of re-sketching from scratch, which throws
         # away filled holes that were not harvestable as standalone lemmas.
@@ -775,8 +701,7 @@ class Toolbox:
         return candidate
 
     async def sample(self, model: str, messages: list[dict[str, str]], *,
-                     kind: str, temperature: float | None = None,
-                     max_tokens: int | None = None) -> str | None:
+                     kind: str, temperature: float | None = None) -> str | None:
         """One guarded LLM call. kind: qwen-fast | qwen-think | gptoss-med | gptoss-high.
 
         `temperature`, when set, overrides the kind profile's value
@@ -805,8 +730,6 @@ class Toolbox:
         # SUBMISSION_WAVE_SPREAD (research branch B1): per-call override.
         if temperature is not None:
             params["temperature"] = temperature
-        if max_tokens is not None:  # cheap auxiliary calls (B5 premise hints)
-            params["max_tokens"] = max_tokens
         gate = self.gptoss_gate if model == GPTOSS else self.semaphore
         async with gate:
             if model == GPTOSS:
@@ -842,53 +765,6 @@ class Toolbox:
         if response.finish_reason == "error" or not response.content:
             return None  # provider hiccup (content filter etc.) — sample wasted
         return response.content
-
-    async def premise_hints(self) -> str:
-        """Verified-premise block for S4 fill prompts (SUBMISSION_PREMISE_HINTS).
-
-        One cheap qwen-fast call proposes likely-relevant Mathlib lemma
-        names; one batched `#check` file keeps only the names this Mathlib
-        actually has (a `#check` line errors iff its name is unknown), so
-        fill prompts only ever see verified names. Computed lazily once per
-        problem; any failure caches "" so the fill loop never pays twice.
-        """
-
-        if self._premise_hints is not None:
-            return self._premise_hints
-        hints = ""
-        try:
-            # QWEN-arm-gated (arm isolation, like every stage): the qwen-fast
-            # proposer must not leak into a gptoss-only research arm.
-            if QWEN in self.models_arm and self.llm_alive and self.lean_alive \
-                    and self.deadline.allows(240):
-                text = await self.sample(
-                    QWEN, premise_messages(self.problem, self.challenge),
-                    kind="qwen-fast", max_tokens=1000)
-                names = parse_premise_names(text or "")
-                if names:
-                    # Imports first, then exactly one `#check` per line: the
-                    # REPL strips import lines (the _sorrify_progress
-                    # accounting), so kept line k maps to candidate k-1.
-                    source = "\n".join(
-                        self.parsed.imports
-                        + [f"#check {name}" for name in names]) + "\n"
-                    probe = Candidate(source=source, origin="premise-hints")
-                    await self.check(probe, timeout_s=60)
-                    if probe.error_count < 10**6:  # REPL alive, no timeout
-                        failed = failed_premise_indexes(probe.messages, len(names))
-                        kept = [name for index, name in enumerate(names)
-                                if index not in failed]
-                        if kept:
-                            hints = ("Verified available lemmas (these names "
-                                     "exist; prefer them):\n"
-                                     + "\n".join(f"- {name}" for name in kept))
-                        self.log(stage="S4-premises", proposed=len(names),
-                                 verified=len(kept))
-        except Exception as exc:  # hints must never break the fill loop
-            self.log(stage="S4-premises", error=type(exc).__name__)
-            hints = ""
-        self._premise_hints = hints
-        return hints
 
 
 # ---------------------------------------------------------------------------
@@ -1448,10 +1324,6 @@ class SubmissionAgent:
 
     async def _fill_holes(self, tb: Toolbox, sketch: Candidate) -> Candidate | None:
         current = sketch.source
-        # B5 (SUBMISSION_PREMISE_HINTS): REPL-verified Mathlib names, computed
-        # once per problem on the first fill pass, injected into every fill
-        # dialogue. "" while the flag is off — prompts are byte-identical.
-        hints = await tb.premise_hints() if tb.config.premise_hints else ""
         if tb.config.fill_breadth:
             # Breadth pass first (SUBMISSION_FILL_BREADTH): sweep EVERY hole
             # with the cheap tactic cascade before any LLM dialogue — an
@@ -1491,8 +1363,7 @@ class SubmissionAgent:
                 if not tb.deadline.allows(240):
                     break
                 fill = await self._fill_one_hole(tb, current, index, hole.decl_name,
-                                                 tactic_only=hole.is_tactic,
-                                                 hints=hints)
+                                                 tactic_only=hole.is_tactic)
                 if fill is not None:
                     current = fill
                     progressed = True
@@ -1510,8 +1381,7 @@ class SubmissionAgent:
         return partial
 
     async def _fill_one_hole(self, tb: Toolbox, current: str, index: int,
-                             decl_name: str, *, tactic_only: bool,
-                             hints: str = "") -> str | None:
+                             decl_name: str, *, tactic_only: bool) -> str | None:
         """Return the file with hole `index` filled (or sorrify-progressed).
 
         Depth over breadth (Delta Prover / Prover Agent / MechMath evidence):
@@ -1548,8 +1418,7 @@ class SubmissionAgent:
         for round_index in range(rounds):
             try:
                 text = await tb.sample(
-                    model, fill_messages(tb.problem, current, decl_name, feedback,
-                                         hints=hints),
+                    model, fill_messages(tb.problem, current, decl_name, feedback),
                     kind=kind)
             except LLMDead:
                 break
