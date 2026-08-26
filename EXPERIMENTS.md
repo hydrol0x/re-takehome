@@ -302,3 +302,37 @@ hard-tier problems** somewhere (p09 and rmo_2000_2 at full caps here, p10
 at 2 h and 30 min caps in earlier runs). Demonstrated coverage across all
 runs: 13 of the 14 scorable sample problems. Cumulative dev spend ≈ $3.7
 of the $50 key.
+
+## 2026-08-26 (evening): Phase-2 branch funnel (ten mechanisms, one night)
+
+Ten independently-implemented mechanisms (built by parallel worktree
+subagents, merged behind default-off flags, suite 195-passed) were each
+evaluated single-flag on the dev-16 at 20-min/$1 caps, serialized through
+one 4-worker eval at a time (~45 min, $0.17–0.26 each):
+
+| flag | run | score |
+| --- | --- | --- |
+| B1 wave-spread | `20260826T144557Z` | 9/16 |
+| B5 premise-hints | `20260826T153552Z` | 13/16 |
+| B6 suggest-harvest | `20260826T161532Z` | 11/16 |
+| B2 plan-first | `20260826T165906Z` | 11/16 |
+| B9 skeleton-portfolio | `20260826T174144Z` | 11/16 |
+| B10 bound-templates | `20260826T182346Z` | 12/16 |
+| B3 cluster-repair | `20260826T190301Z` | 11/16 (mechanism never fired) |
+| B4 typed-fills | `20260826T194007Z` | 11/16 |
+| B7 strengthen-IH | `20260826T202214Z` | 11/16 (fired once; one infra loss) |
+| B8 critic-notes | `20260826T210416Z` | 12/16 |
+| B5 confirmation seed | `20260826T214916Z` | 10/16 → **not confirmed** |
+
+Verdict (full composition analysis in `RESEARCH_LOOP.md`): the tuned
+defaults are a local optimum; observed spread is flipper churn inside the
+±2 noise band; the three structural opens survived everything; prompt-
+lengthening mechanisms cost more and scored no better. One environment
+note: a container restart mid-B10 was resumed cleanly (`--resume latest`),
+and B7's m02 loss was a transport-drop cascade released under the dev
+knob, not a capability miss. Phase-2 eval spend ≈ $2.3. Cumulative key
+spend ≈ $10 of $50.
+
+B12 (60-min caps, kit hard4, `SUBMISSION_SKELETON_KEEP=1`) launched
+`20260826T222901Z` as the long-window transfer check — results below when
+scored.

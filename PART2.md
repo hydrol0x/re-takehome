@@ -194,6 +194,26 @@ bear on the collaboration question:
   tactics were kept on direct archived-hole evidence but showed no live
   win. Selection was by composition, not raw totals — per-problem seed
   noise at short caps is ±2.
+- **A second, wider sweep found the plateau.** Ten more mechanisms were
+  built as independent branches and each evaluated single-flag on the
+  dev set: temperature-spread sampling waves, plan-then-sample,
+  error-clustered repair transplants, goal-typed fill prompts,
+  REPL-verified premise hints, `apply?` suggestion harvesting,
+  strengthen-the-induction re-sketching, a cross-cycle critic, a
+  two-skeleton portfolio, and deterministic bounded-goal templates
+  (`RESEARCH_LOOP.md`, Phase-2 table). None beat the tuned defaults.
+  The best first-seed score (premise hints, 13/16 with every coin-flip
+  problem held) collapsed to 10/16 on its confirmation seed — seed luck,
+  not mechanism. Two mechanisms never fired at all: their trigger
+  conditions (clustered near-miss errors; repeated induction failures)
+  are simply rare at 20-minute windows. The three never-solved dev
+  problems survived all ten variants. The instructive part: every
+  mechanism that *added prompt material* (plans, technique blocks,
+  harvested suggestions) scored at or below defaults while costing more
+  — at short windows, cycle count and sample diversity beat guidance.
+  The tuned defaults are a real local optimum, and the remaining
+  headroom on structurally hard problems is at longer time horizons,
+  not cleverer prompting.
 
 ## Verdict
 
