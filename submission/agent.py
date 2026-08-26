@@ -92,6 +92,7 @@ class Config:
     fill_breadth: bool = False
     fill_reasoning: bool = False
     skeleton_keep: bool = False
+    skeleton_portfolio: bool = False
     compare_precheck: bool = True
     bound_templates: bool = False
     plan_first: bool = False
@@ -116,6 +117,10 @@ class Config:
             # Promoted default (RESEARCH_LOOP.md iter-2); "0" restores the
             # fixed long-window constants.
             shortcap=os.environ.get("SUBMISSION_SHORTCAP", "1").strip() != "0",
+            # Research branch B9: two-slot portfolio of distinct partial
+            # skeletons resumed on alternating S4 rounds; default off.
+            skeleton_portfolio=os.environ.get(
+                "SUBMISSION_SKELETON_PORTFOLIO", "").strip() == "1",
             # Promoted default (RESEARCH_LOOP.md iter-3); "0" restores
             # depth-first-only fills.
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
@@ -478,6 +483,18 @@ class LLMDead(Exception):
     """LLM budget/transport is gone; deterministic work may continue."""
 
 
+def skeleton_portfolio_key(source: str) -> tuple[str, ...]:
+    """Distinctness key of a decomposition: sorted distinct hole decl names.
+
+    Two skeletons with the same key leave holes in the same declarations, so
+    they count as the SAME decomposition for SUBMISSION_SKELETON_PORTFOLIO
+    (the fewer-holes version supersedes — e.g. a partial fill that closed one
+    of several sorries inside a helper); different keys are different plans.
+    """
+
+    return tuple(sorted({hole.decl_name for hole in parse_challenge(source).holes}))
+
+
 class Toolbox:
     """Shared plumbing for all stages: checking, sampling, best-candidate."""
 
@@ -516,6 +533,12 @@ class Toolbox:
         self.kept_skeleton = ""
         self.kept_skeleton_holes = 10**6
         self.kept_skeleton_errors = 10**6
+        # Two-slot portfolio (SUBMISSION_SKELETON_PORTFOLIO, independent of
+        # SKELETON_KEEP): compiling partial skeletons of up to two DISTINCT
+        # decompositions — keyed by skeleton_portfolio_key — so S4 fill effort
+        # hedges across plans instead of funnelling into a possibly-wrong
+        # round-1 skeleton. Entries: {"source": str, "holes": int, "key": tuple}.
+        self.portfolio: list[dict[str, Any]] = []
         # A flaky REPL (container death, cold-boot import timeout) must degrade
         # the search, not crash the problem: after two consecutive failures we
         # stop checking and submit the best unverified candidate instead.
@@ -572,6 +595,17 @@ class Toolbox:
                 self.kept_skeleton = skeleton
                 self.kept_skeleton_holes = max(0, int(state.get("kept_skeleton_holes", 10**6)))
                 self.kept_skeleton_errors = max(0, int(state.get("kept_skeleton_errors", 10**6)))
+        if self.config.skeleton_portfolio:
+            stored = state.get("skeleton_portfolio")
+            for entry in (stored if isinstance(stored, list) else [])[:2]:
+                source = entry.get("source") if isinstance(entry, dict) else None
+                key = entry.get("key") if isinstance(entry, dict) else None
+                if isinstance(source, str) and 0 < len(source) <= 40000 \
+                        and isinstance(key, list):
+                    self.portfolio.append({
+                        "source": source,
+                        "holes": max(0, int(entry.get("holes", 0))),
+                        "key": tuple(str(k) for k in key)})
         pinned = state.get("pinned_answers")
         if isinstance(pinned, dict):
             try:
@@ -600,10 +634,35 @@ class Toolbox:
             state["kept_skeleton"] = self.kept_skeleton
             state["kept_skeleton_holes"] = self.kept_skeleton_holes
             state["kept_skeleton_errors"] = self.kept_skeleton_errors
+        # Same rule for portfolio entries: oversized sources are dropped whole.
+        if self.config.skeleton_portfolio:
+            entries = [
+                {"source": e["source"], "holes": e["holes"], "key": list(e["key"])}
+                for e in self.portfolio if 0 < len(e["source"]) <= 40000]
+            if entries:
+                state["skeleton_portfolio"] = entries
         try:
             self.state_path.write_text(json.dumps(state))
         except OSError:
             pass
+
+    def update_portfolio(self, source: str, holes: int) -> None:
+        """Insert/replace one compiling partial skeleton in the two slots.
+
+        Same key = same decomposition: the fewer-holes version wins. A new key
+        adds a slot; beyond two distinct decompositions the most-holed entry
+        is dropped.
+        """
+
+        key = skeleton_portfolio_key(source)
+        for entry in self.portfolio:
+            if entry["key"] == key:
+                if holes < entry["holes"]:
+                    entry["source"], entry["holes"] = source, holes
+                return
+        self.portfolio.append({"source": source, "holes": holes, "key": key})
+        if len(self.portfolio) > 2:
+            self.portfolio.remove(max(self.portfolio, key=lambda e: e["holes"]))
 
     def record(self, candidate: Candidate, stage: str) -> None:
         if candidate.score() > self.best.score():
@@ -1155,12 +1214,30 @@ class SubmissionAgent:
         # resume round stops closing holes; the skeleton stays kept for later
         # cycles unless a better partial displaces it.
         resume = tb.config.skeleton_keep and bool(tb.kept_skeleton)
+        # Two-slot hedge (SUBMISSION_SKELETON_PORTFOLIO): even rounds resume
+        # the best not-yet-resumed-this-cycle portfolio entry instead of
+        # sketching, odd rounds sketch fresh — so both slots and fresh
+        # decompositions all get fill turns across rounds.
+        portfolio_resumed: set = set()
         for round_index in range(self.config.sketch_rounds):
             resumed, resume = resume, False
+            slot: dict[str, Any] | None = None
+            if tb.config.skeleton_portfolio and not resumed \
+                    and round_index % 2 == 0:
+                pending = [entry for entry in tb.portfolio
+                           if entry["holes"] > 0
+                           and entry["key"] not in portfolio_resumed]
+                if pending:
+                    slot = min(pending, key=lambda entry: entry["holes"])
+                    portfolio_resumed.add(slot["key"])
             if resumed:
                 entry_holes = tb.kept_skeleton_holes
                 sketch = Candidate(source=tb.kept_skeleton,
                                    origin=f"sketch:kept:{round_index}")
+                await tb.check(sketch)
+            elif slot is not None:
+                sketch = Candidate(source=slot["source"],
+                                   origin=f"sketch:portfolio:{round_index}")
                 await tb.check(sketch)
             else:
                 # Time-adaptive sketcher: the deep reasoner when the window fits its
@@ -1223,6 +1300,14 @@ class SubmissionAgent:
                     tb.log(stage="S4", kept=filled.origin, kept_holes=holes_now)
                 # A resume round holds the sketch slot only while it closes holes.
                 resume = resumed and 0 < holes_now < entry_holes
+            if tb.config.skeleton_portfolio and filled is not None:
+                # Only a compiling, still-holed partial is portfolio material:
+                # solved files returned above; broken ones cannot be resumed.
+                portfolio_holes = len(parse_challenge(filled.source).holes)
+                if 0 < portfolio_holes and filled.error_count == 0:
+                    tb.update_portfolio(filled.source, portfolio_holes)
+                    tb.log(stage="S4", portfolio=[
+                        entry["holes"] for entry in tb.portfolio])
             # harvest proven helper lemmas (error-free file: sorry-free decls compiled)
             if filled is not None:
                 lemma_pool = self._harvest_lemmas(tb, filled.source) or lemma_pool

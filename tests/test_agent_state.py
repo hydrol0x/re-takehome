@@ -4,7 +4,13 @@ import asyncio
 import json
 
 from re_harness import LeanCheck, Problem, Services
-from submission.agent import Config, SubmissionAgent, Toolbox
+from submission.agent import (
+    Candidate,
+    Config,
+    SubmissionAgent,
+    Toolbox,
+    skeleton_portfolio_key,
+)
 
 CHALLENGE = """import Mathlib
 
@@ -129,7 +135,148 @@ def test_no_state_dir_is_inert(tmp_path):
     services = Services(llm=None, lean=None, checkpoint=lambda s, m: None)
     tb = Toolbox(problem, services, Config.from_env())
     tb.save_state()  # must not raise
-    assert tb.state_path is None
+
+
+# ---- SUBMISSION_SKELETON_PORTFOLIO ----------------------------------------
+
+PORT_A3 = ("lemma h1 : True ∧ True := by\n  constructor\n  · sorry\n  · sorry\n\n"
+           "lemma h2 : True := by sorry\n")  # 3 holes, key (h1, h2)
+PORT_A2 = "lemma h1 : True := by sorry\n\nlemma h2 : True := by sorry\n"  # 2 holes, same key
+PORT_B = "lemma g1 : True := by sorry\n"  # 1 hole, key (g1,)
+PORT_C = "lemma z1 : True := by sorry\n"  # 1 hole, key (z1,)
+
+
+def test_skeleton_portfolio_key_is_sorted_distinct_hole_decls():
+    a = "lemma h2 : True := by sorry\n\nlemma h1 : True := by sorry\n"
+    b = "lemma h1 : 1 = 1 := by sorry\n\nlemma h2 : 2 = 2 := by sorry\n"
+    assert skeleton_portfolio_key(a) == ("h1", "h2")  # sorted, order-insensitive
+    assert skeleton_portfolio_key(a) == skeleton_portfolio_key(b)  # names only
+    assert skeleton_portfolio_key(PORT_A3) == ("h1", "h2")  # deduplicated
+    filled = "lemma h1 : True := trivial\n\nlemma h2 : True := by sorry\n"
+    assert skeleton_portfolio_key(filled) == ("h2",)  # closed holes leave the key
+    assert skeleton_portfolio_key("theorem t : True := trivial\n") == ()
+
+
+def test_skeleton_portfolio_update_rules(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_PORTFOLIO", "1")
+    tb = make_toolbox(tmp_path)
+    assert tb.portfolio == []
+    tb.update_portfolio(PORT_A3, 3)
+    tb.update_portfolio(PORT_B, 1)
+    tb.update_portfolio(PORT_A2, 2)  # same key as PORT_A3, fewer holes: replaces
+    assert [(e["key"], e["holes"], e["source"]) for e in tb.portfolio] == [
+        (("h1", "h2"), 2, PORT_A2), (("g1",), 1, PORT_B)]
+    tb.update_portfolio(PORT_A3, 3)  # same key, more holes: ignored
+    assert [e["holes"] for e in tb.portfolio] == [2, 1]
+    tb.update_portfolio(PORT_C, 1)  # third distinct key: worst (most holes) dropped
+    assert [(e["key"], e["holes"]) for e in tb.portfolio] == [
+        (("g1",), 1), (("z1",), 1)]
+
+
+def test_skeleton_portfolio_roundtrip(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_PORTFOLIO", "1")
+    tb = make_toolbox(tmp_path)
+    tb.update_portfolio(PORT_A2, 2)
+    tb.update_portfolio(PORT_B, 1)
+    tb.save_state()
+
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.portfolio == [
+        {"source": PORT_A2, "holes": 2, "key": ("h1", "h2")},
+        {"source": PORT_B, "holes": 1, "key": ("g1",)},
+    ]
+
+
+def test_skeleton_portfolio_ignored_when_flag_off(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_PORTFOLIO", "1")
+    tb = make_toolbox(tmp_path)
+    tb.update_portfolio(PORT_A2, 2)
+    tb.save_state()
+
+    monkeypatch.delenv("SUBMISSION_SKELETON_PORTFOLIO")
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.portfolio == []
+    tb2.save_state()  # flag off: the field never reaches the state file
+    state = json.loads((tmp_path / "agent_state.json").read_text())
+    assert "skeleton_portfolio" not in state
+
+
+def test_state_file_byte_identical_when_flags_off(tmp_path, monkeypatch):
+    monkeypatch.delenv("SUBMISSION_SKELETON_KEEP", raising=False)
+    monkeypatch.delenv("SUBMISSION_SKELETON_PORTFOLIO", raising=False)
+    tb = make_toolbox(tmp_path)
+    tb.kept_skeleton = SKELETON  # populated in memory, flags off:
+    tb.kept_skeleton_holes = 1
+    tb.portfolio = [{"source": PORT_A2, "holes": 2, "key": ("h1", "h2")}]
+    tb.save_state()
+    baseline = json.dumps({  # ...the file keeps today's exact flag-off bytes
+        "challenge_sha": tb._state_key(),
+        "s0_done": False,
+        "cycles_done": 0,
+        "lemma_pool": "",
+        "history_notes": [],
+        "pinned_answers": {},
+    })
+    assert (tmp_path / "agent_state.json").read_text() == baseline
+
+
+def test_skeleton_portfolio_oversized_entry_dropped(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_PORTFOLIO", "1")
+    tb = make_toolbox(tmp_path)
+    tb.update_portfolio("lemma big : True := by sorry\n" + "-- pad\n" * 8000, 1)
+    tb.save_state()  # > 40000 chars: dropped whole, not sliced
+
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.portfolio == []
+    state = json.loads((tmp_path / "agent_state.json").read_text())
+    assert "skeleton_portfolio" not in state
+
+
+def test_skeleton_portfolio_and_keep_coexist(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_KEEP", "1")
+    monkeypatch.setenv("SUBMISSION_SKELETON_PORTFOLIO", "1")
+    tb = make_toolbox(tmp_path)
+    tb.kept_skeleton = SKELETON
+    tb.kept_skeleton_holes = 1
+    tb.kept_skeleton_errors = 0
+    tb.update_portfolio(PORT_A2, 2)
+    tb.save_state()
+
+    tb2 = make_toolbox(tmp_path)
+    assert tb2.kept_skeleton == SKELETON
+    assert tb2.portfolio == [{"source": PORT_A2, "holes": 2, "key": ("h1", "h2")}]
+
+
+async def test_stage4_even_round_resumes_best_portfolio_entry(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_SKELETON_PORTFOLIO", "1")
+    monkeypatch.setenv("SUBMISSION_SKETCH_ROUNDS", "1")  # round 0 only
+    tb = make_toolbox(tmp_path)
+    tb.update_portfolio(PORT_A2, 2)
+    tb.update_portfolio(PORT_B, 1)
+    agent = SubmissionAgent()
+
+    async def fake_check(candidate, timeout_s=90):
+        candidate.error_count = 0
+        return candidate
+
+    fill_inputs = []
+
+    async def fake_fill(tb_, sketch):
+        fill_inputs.append((sketch.origin, sketch.source))
+        partial = Candidate(source=PORT_C, origin=sketch.origin + ":stalled")
+        partial.error_count = 0  # compiling, one hole left
+        return partial
+
+    monkeypatch.setattr(tb, "check", fake_check)
+    monkeypatch.setattr(agent, "_fill_holes", fake_fill)
+
+    assert await agent.stage4_decompose(tb) is None
+    # Round 0 resumed the fewest-holes slot instead of sketching (no LLM ran).
+    assert fill_inputs == [("sketch:portfolio:0", PORT_B)]
+    # The fill's partial re-entered the portfolio; the cap dropped the worst.
+    assert [(e["key"], e["holes"]) for e in tb.portfolio] == [
+        (("g1",), 1), (("z1",), 1)]
+    assert tb.state_path is not None  # real harness wires state_dir through
 
 
 def test_bound_templates_flag(monkeypatch):
