@@ -175,6 +175,16 @@ Launched with these in place: **hard4 at full judge caps**
 `SUBMISSION_GPTOSS_CALL_CAP=24`) — the first run at exactly the judged
 time/budget settings. Results appended here when it lands.
 
+## 2026-08-26 · p10 converted: precheck validated end-to-end
+
+Dedicated p10 run (`20260826T062410Z`, 2 h cap, 1 worker): **comparator
+PASS, 1/1**, $0.029, 38 min. The winning proof (gpt-oss S1 sample)
+cleared the in-run comparator precheck in 97 s and the final comparator
+in 45 s. p10 had lost three straight runs to REPL-accepted proofs that
+timed out the comparator's cold build; with the precheck the class is
+closed in both directions — reject-and-rehunt (p09's two saves) and
+confirm-and-ship (here). Full loop history: `RESEARCH_LOOP.md`.
+
 ## 2026-08-26 · Full-cap re-validation #2: 1/4, and the precheck earns its keep
 
 Run `20260825T205403Z` (judge caps, duo, reconciled harness + promoted

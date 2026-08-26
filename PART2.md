@@ -167,6 +167,34 @@ stage that needs the full 8-hour window.
   rests on the matched short-cap arms; the full-cap run shows what the
   chosen system does at judged settings.
 
+## 8. Post-arm development: the selection loop and the verifier's last word
+
+After the arm experiments, a two-day variant-selection loop ran on a
+**custom 24-problem eval set** (authored in kit format with
+machine-verified reference proofs; 16-problem dev split for selection, 8
+held back for overfitting checks — `RESEARCH_LOOP.md`). Outcomes that
+bear on the collaboration question:
+
+- **Two promotions** (window-proportional time constants; breadth-first
+  hole filling) lifted the dev set from 11/16 to 13/16 and held on the
+  held-back set (6/8 twice). Both are identity-or-benign at judge caps.
+- **The comparator precheck** — the loop's most valuable product — came
+  from chasing a failure the REPL cannot see: three p10 proofs were
+  REPL-accepted yet timed out the comparator's cold build. The agent now
+  verifies accepted winners against the *actual* comparator when time
+  permits, demoting timeouts to fallback and continuing the hunt. Live
+  results: p09 re-passed at judge caps after the precheck rejected two
+  would-be-fatal proofs (the run ships 0/4 without it), and p10 finally
+  converted ($0.029, 38 min) after three straight timeout losses. This is
+  the verifier-centric thesis at its endpoint: when the scoring gate and
+  the search-time checker disagree, trust only the gate.
+- **Negative results kept**: deeper fill reasoning (12/16, no structural
+  gain, +16 % cost) and gpt-oss inside short-window sampling waves
+  (halves qwen's cycle count) were measured and rejected; mined cascade
+  tactics were kept on direct archived-hole evidence but showed no live
+  win. Selection was by composition, not raw totals — per-problem seed
+  noise at short caps is ±2.
+
 ## Verdict
 
 At matched budgets the coordination layer was never worse than the best
