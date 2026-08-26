@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "problem_id": "p09_imo1964",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 59778,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (13s)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nwarning: Challenge.lean:8:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[p09_a, p09_b, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (13s)\nwarning: Solution.lean:69:6: declaration uses `sorry`\nwarning: Solution.lean:72:8: declaration uses `sorry`\nwarning: Solution.lean:75:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[p09_a, p09_b, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- p09_a p09_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- p09_a p09_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.041197317,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 2527.094,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:qwen-think:2:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 7
+      },
+      {
+        "stage": "S4",
+        "sorrified": "3 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "p09_a",
+          "p09_b",
+          "pow_two_add_one_not_cong_zero_mod_seven"
+        ]
+      },
+      {
+        "stage": "S4",
+        "kept": "sketch:qwen-think:2:stalled",
+        "kept_holes": 3
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 2464.5
+  }
+}

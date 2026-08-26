@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2000_2",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 60342,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (5.8s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (27s)\nwarning: Solution.lean:3:8: declaration uses `sorry`\nwarning: Solution.lean:16:22: This simp argument is unused:\n  Nat.mul_sub_left_distrib\n\nHint: Omit it from the simp argument list.\n  simp [pow_succ,̵ ̵N̵a̵t̵.̵m̵u̵l̵_̵s̵u̵b̵_̵l̵e̵f̵t̵_̵d̵i̵s̵t̵r̵i̵b̵] at *\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:17:6: 'norm_num' tactic does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nwarning: Solution.lean:24:6: declaration uses `sorry`\nwarning: Solution.lean:27:6: declaration uses `sorry`\nwarning: Solution.lean:31:6: declaration uses `sorry`\ninfo: Solution.lean:37:25: Try this:\n  [apply] exact rmo_2000_2 x y hx hy h\nwarning: Solution.lean:36:49: Variable name `hbound` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:39:6: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.06786314500000001,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 2580.712,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:qwen-think:1:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 6,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "ge_x_plus_one",
+          "le_x_plus_two",
+          "not_y_eq_x_plus_one",
+          "rmo_2000_2",
+          "y_eq_x_plus_two_iff_x_eq_9",
+          "y_is_x_plus_one_or_two"
+        ]
+      },
+      {
+        "stage": "S4",
+        "kept": "qwen:s4-skeleton:r1:stalled",
+        "kept_holes": 6
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:1",
+        "holes": 8
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "sketch:qwen-think:1",
+        "unfilled_decls": [
+          "not_y_eq_x_plus_one",
+          "rmo_2000_2",
+          "y_cube_bound_x_plus_two_large",
+          "y_eq_x_plus_two_iff_x_eq_9",
+          "y_is_x_plus_one_or_two"
+        ]
+      },
+      {
+        "stage": "S4",
+        "kept": "sketch:qwen-think:1:stalled",
+        "kept_holes": 5
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 2516.7
+  }
+}

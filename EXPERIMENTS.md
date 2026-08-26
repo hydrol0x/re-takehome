@@ -333,6 +333,10 @@ and B7's m02 loss was a transport-drop cascade released under the dev
 knob, not a capability miss. Phase-2 eval spend ≈ $2.3. Cumulative key
 spend ≈ $10 of $50.
 
-B12 (60-min caps, kit hard4, `SUBMISSION_SKELETON_KEEP=1`) launched
-`20260826T222901Z` as the long-window transfer check — results below when
-scored.
+B12 (60-min caps, kit hard4, `SUBMISSION_SKELETON_KEEP=1`,
+`20260826T222901Z`): **0/4, $0.221** — zero REPL-accepted candidates on
+any problem, matching the prior 0/4 defaults run at these caps. Skeleton
+persistence buys nothing at 60 min; the hard tier converts only at full
+8 h caps, where the coordination layer has already demonstrated p09
+2-for-2, rmo_2000_2 1-for-2, and the p10 conversion. Funnel complete.
+Phase-2 total spend ≈ $2.8; cumulative key spend ≈ $10.6 of $50.

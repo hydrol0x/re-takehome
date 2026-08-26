@@ -174,6 +174,8 @@ Phase-2 eval results:
 | B8 critic-notes | 12/16 ($0.191, `20260826T210416Z`) | weak maybe — second-best single-flag score, tied with B10. Critic fired in 9/16 problems (heaviest on c03: 7 events, which passed; h04: 6, which didn't), c03/m01/m04/h01/m02 all held, h05 lost, structurals missed. Cheap (one gptoss-med call/problem) and no observed harm, but no structural conversion either — same tier as B10: opt-in, combo candidate behind B5 |
 | B5 premise-hints seed-2 | 10/16 ($0.259, `20260826T214916Z`) | **not confirmed** — lost m01 + h05 flippers and h01; only c03 held. Two-seed average 11.5 sits inside the defaults' noise band, so seed-1's "all flippers held" 13 was substantially seed luck, not mechanism. Held-set check skipped per protocol (seed-2 ≤ 11). B5 stays opt-in, not promoted |
 
+| B12 60-min hard4 (skeleton-keep) | 0/4 ($0.221, `20260826T222901Z`) | no transfer — zero REPL-accepted candidates on any of p09/p10/rmo_2000_2/rmo_2001_2 within 60-min windows (the prior defaults run at these caps was also 0/4, and its p10 REPL-acceptance at 21.5 min was the lucky end of the variance). Confirms the standing read: the hard tier is a capability×time story that resolves at full 8 h caps (p09 2-for-2, rmo_2000_2 1-for-2, p10 converted there), not something a 60-min knob rescues |
+
 **Phase-2 verdict (all ten single-flag branches + confirmation seed):** no
 mechanism beat the tuned defaults on dev-16. The three structural opens
 (h02/h04/m06) survived every variant at 20-min windows; observed spread
