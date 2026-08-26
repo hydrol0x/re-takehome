@@ -98,6 +98,7 @@ class Config:
     plan_first: bool = False
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
+    suggest_harvest: bool = False
     wave_spread: bool = False
     # SUBMISSION_PREMISE_HINTS (research branch B5): REPL-verified Mathlib
     # premise names injected into S4 fill prompts; default off.
@@ -134,6 +135,9 @@ class Config:
             bound_templates=os.environ.get(
                 "SUBMISSION_BOUND_TEMPLATES", "").strip() == "1",
             # Default on: three p10 proofs were REPL-accepted yet timed out
+            # B6 (default off): per-hole `apply?` Try-this harvesting in S4 fills.
+            suggest_harvest=os.environ.get(
+                "SUBMISSION_SUGGEST_HARVEST", "").strip() == "1",
             # Research branch B2 (DSP-lite): majority-pick an informal plan
             # before the cycle-1 S1 wave and condition qwen-fast samples on it.
             plan_first=os.environ.get("SUBMISSION_PLAN_FIRST", "").strip() == "1",
@@ -518,6 +522,26 @@ FILL_SWEEP = ["linarith", "norm_num", "omega", "simp", "simp_all", "positivity",
               "exact?"]
 
 TRY_THIS = "Try this:"
+
+
+def harvest_try_this(messages: list[dict[str, Any]]) -> list[str]:
+    """Cleaned `Try this:` suggestions from REPL messages, deduped, in order.
+
+    Pure and offline-testable. Used by the SUBMISSION_SUGGEST_HARVEST per-hole
+    `apply?` probe in S4 fills — distinct from S0's `_concretize_exact`, which
+    re-splices a whole-file `exact?` that already closed every hole.
+    """
+
+    seen: set[str] = set()
+    suggestions: list[str] = []
+    for message in messages:
+        data = str(message.get("data", ""))
+        for chunk in data.split(TRY_THIS)[1:]:
+            suggestion = chunk.strip()
+            if suggestion and suggestion not in seen:
+                seen.add(suggestion)
+                suggestions.append(suggestion)
+    return suggestions
 
 
 # ---------------------------------------------------------------------------
@@ -1530,13 +1554,38 @@ class SubmissionAgent:
             if fill is not None:
                 return fill
 
+        suggest_note = ""
+        if tb.config.suggest_harvest and tactic_only and tb.deadline.allows(180):
+            # SUBMISSION_SUGGEST_HARVEST: the cascade's bare `exact?` closer
+            # did not fire, but an `apply?` probe still emits "Try this:"
+            # suggestions naming real Mathlib lemmas. Try the first few as
+            # direct fills; failing that, hand them to the LLM rounds as hints.
+            probe = Candidate(source=splice_holes(current, {index: "apply?"}),
+                              origin=f"fill:{decl_name}:apply?")
+            await tb.check(probe, timeout_s=60)
+            suggestions = harvest_try_this(probe.messages)
+            for suggestion in suggestions[:3]:
+                if not tb.deadline.allows(90):
+                    break
+                spliced = splice_holes(current, {index: suggestion})
+                attempt = Candidate(
+                    source=spliced,
+                    origin=f"fill:{decl_name}:harvest:{suggestion.splitlines()[0][:40]}")
+                await tb.check(attempt, timeout_s=60)
+                if attempt.error_count == 0 \
+                        and len(parse_challenge(spliced).holes) < holes_before:
+                    return spliced
+            if suggestions:
+                suggest_note = ("Lean's search suggests these may apply:\n- "
+                                + "\n- ".join(s[:120] for s in suggestions[:5]))
+
         model, kind = QWEN, "qwen-think"
         if tb.config.fill_reasoning:
             kind = "qwen-deep"  # fills die on the real math — buy deeper thinks
         if model not in tb.models_arm:
             model = tb.models_arm[0]
             kind = kind if model == QWEN else "gptoss-high"
-        feedback = ""
+        feedback = suggest_note
         best_block: str | None = None
         best_fail: Candidate | None = None
         last_signature = None
@@ -1577,6 +1626,8 @@ class SubmissionAgent:
                 feedback = ("Your best failed attempt so far:\n```lean\n"
                             + (best_block or "") + "\n```\n\nLean feedback:\n"
                             + format_messages(best_fail.messages, limit=3000))
+                if suggest_note:
+                    feedback += "\n\n" + suggest_note
             if plateau:
                 model = tb.config.other(model)
                 if model == GPTOSS:

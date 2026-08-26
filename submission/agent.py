@@ -98,6 +98,11 @@ class Config:
     plan_first: bool = False
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
+    # SUBMISSION_CRITIC_NOTES (research branch B8): after a repair pass that
+    # closed nothing, one bounded gpt-oss diagnosis of the best near-miss is
+    # appended to history_notes for later S1 waves. A hint, never a judge
+    # (RESEARCH.md §4.2); default off.
+    critic_notes: bool = False
     suggest_harvest: bool = False
     wave_spread: bool = False
     # SUBMISSION_PREMISE_HINTS (research branch B5): REPL-verified Mathlib
@@ -134,6 +139,8 @@ class Config:
             # templates for bounded-∀ statements, tried before FILL_SWEEP.
             bound_templates=os.environ.get(
                 "SUBMISSION_BOUND_TEMPLATES", "").strip() == "1",
+            # SUBMISSION_CRITIC_NOTES (research branch B8): default off.
+            critic_notes=os.environ.get("SUBMISSION_CRITIC_NOTES", "").strip() == "1",
             # Default on: three p10 proofs were REPL-accepted yet timed out
             # B6 (default off): per-hole `apply?` Try-this harvesting in S4 fills.
             suggest_harvest=os.environ.get(
@@ -306,6 +313,25 @@ def pick_plan(plans: list[str] | None) -> str | None:
         if k and k in keys[i + 1:]:
             return usable[i]
     return max(usable, key=len)
+
+
+def critic_messages(problem: Problem, source: str,
+                    feedback: str) -> list[dict[str, str]]:
+    """Bounded diagnosis prompt (SUBMISSION_CRITIC_NOTES): root cause, no code."""
+
+    system = (
+        "You are an expert Lean 4 / Mathlib prover reviewing a failed proof "
+        "attempt. Answer in at most 8 short lines of plain text. NO Lean code."
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Best failed attempt:", "```lean", source[:6000], "```", "",
+        "Lean compiler feedback:", "```", feedback, "```", "",
+        "In <=8 lines: diagnose the mathematical/technical root cause and "
+        "state a concrete alternative approach. NO Lean code.",
+    ]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
 
 
 def sketch_messages(problem: Problem, challenge: str, lemma_pool: str,
@@ -618,6 +644,9 @@ class Toolbox:
         self.gptoss_calls = 0
         self.cycle = 0
         self.history_notes: list[str] = []  # compact per-cycle failure digest
+        # SUBMISSION_CRITIC_NOTES (research branch B8): at most one gpt-oss
+        # diagnosis call per problem; the slot burns even on a failed call.
+        self.critic_notes_used = 0
         self.sorrify_seen: set = set()
         self.sorrify_used = 0
         self.last_unfilled: list[str] = []
@@ -1281,7 +1310,40 @@ class SubmissionAgent:
             if result is not None:
                 return result
         tb.log(stage="S2", solved=False)
+        # SUBMISSION_CRITIC_NOTES (research branch B8): a repair pass that
+        # closed nothing ends with one bounded gpt-oss diagnosis of the best
+        # near-miss; the note reaches later S1 waves through history_notes
+        # and gates nothing (RESEARCH.md §4.2: critique is a hint, no judge).
+        if self.config.critic_notes and candidates:
+            await self._critic_note(tb, candidates[0])
         return None
+
+    async def _critic_note(self, tb: Toolbox, near_miss: Candidate) -> None:
+        """One capped gpt-oss diagnosis per problem (SUBMISSION_CRITIC_NOTES).
+
+        Skips unless the arm includes gpt-oss, the once-per-problem slot is
+        unused, and the deadline affords a gpt-oss call (Toolbox.sample still
+        enforces the gpt-oss call cap and start gap). The slot burns before
+        the call: a None return skips silently and is never retried; LLMDead
+        propagates like every other call site.
+        """
+
+        if tb.critic_notes_used or GPTOSS not in tb.models_arm:
+            return
+        call_s = tb.config.scaled(tb.config.gptoss_call_s)
+        if not tb.deadline.allows(call_s + 180):
+            return
+        tb.critic_notes_used = 1
+        text = await tb.sample(
+            GPTOSS,
+            critic_messages(tb.problem, near_miss.source,
+                            format_messages(near_miss.messages)),
+            kind="gptoss-med")
+        if not text:
+            tb.log(stage="S2", critic=False)
+            return
+        tb.history_notes.append("gpt-oss diagnosis: " + text.strip()[:800])
+        tb.log(stage="S2", critic=True)
 
     # ---- S2/S3 core: capped repair with plateau handoff --------------------
 
