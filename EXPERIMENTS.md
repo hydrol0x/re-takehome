@@ -175,7 +175,38 @@ Launched with these in place: **hard4 at full judge caps**
 `SUBMISSION_GPTOSS_CALL_CAP=24`) — the first run at exactly the judged
 time/budget settings. Results appended here when it lands.
 
-## 2026-08-25 · Upstream kit fix merged; harness reconciled verbatim
+## 2026-08-26 · Full-cap re-validation #2: 1/4, and the precheck earns its keep
+
+Run `20260825T205403Z` (judge caps, duo, reconciled harness + promoted
+config + comparator precheck): **1/4**, $2.16, fought through one
+container restart and a ~70-min egress outage (openrouter dropped from
+the environment allowlist; recovered) with zero ledger deaths across 13
+chopped calls.
+
+| problem | this run | first full-cap run |
+| --- | --- | --- |
+| p09_imo1964 | **PASS** $0.36 / 202 min | PASS $0.098 / 115 min |
+| rmo_2000_2 | fail — 5 holes open, $0.89 / 458 min | PASS $0.748 / 444 min |
+| rmo_2001_2 | fail — 7 holes open, $0.89 / 460 min | fail (incomplete) |
+| p10_factorial_pow | fail — comparator timeout (finished pre-precheck) | fail — comparator timeout |
+
+Readings:
+
+1. **The comparator precheck saved p09's point live.** Its first two
+   accepted proofs (a qwen-fast S1 sample, then an S2 repair) were
+   REPL-clean but timed out the real comparator at 240 s each — the exact
+   class that has now cost p10 three runs. The precheck rejected both,
+   the search continued, and the third proof passed the actual gate in
+   52 s. Under the pre-precheck code this run scores 0/4.
+2. **p09 is now 2-for-2 at judge caps.** rmo_2000_2 is 1-for-2: its pass
+   needed a full uninterrupted 7.4 h window, and this attempt was split
+   across three segments by the environment — durable state preserves
+   lemmas and cycle counts but not in-flight fill context, a
+   dev-environment tax judging does not pay. Hard-tier scoring at full
+   caps carries real seed variance either way; PART2.md notes it.
+3. Both misses ended as credible skeletons (rmo_2000_2's decomposition
+   matches the reference proof's structure: bound, then case bash) with
+   fills unclosed — capability, not scaffolding, is the binding edge.
 
 The kit merged the official ledger fix (upstream #6). Compared with our
 interim mirror it is narrower and more honest: only a **429** is lenient —

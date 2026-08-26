@@ -1,0 +1,749 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2001_2",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 37878,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (7.2s)\nwarning: Challenge.lean:5:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (7.0s)\nwarning: Solution.lean:5:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.8904139949999998,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 27611.507,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:qwen-think:2",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "resume",
+        "s0_done": true,
+        "cycles_done": 0,
+        "pinned": [],
+        "lemma_pool_bytes": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 10
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "lower_bound",
+          "rmo_2001_2",
+          "rmo_2001_2_backward",
+          "rmo_2001_2_forward",
+          "strict_bounds_lt"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "distinct_primes_bound",
+          "no_square_between_consecutive",
+          "rmo_2001_2",
+          "rmo_2001_2_backward",
+          "rmo_2001_2_forward"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 7
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "forward_distinct",
+          "not_eq_p_plus_3q",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 3
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "backward_direction",
+          "forward_direction"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 3
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "lemma_neq_cases",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "check_small_values",
+          "no_square_between_consecutive",
+          "prime_neq_cases",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "direction_backward",
+          "direction_forward"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "sorrified": "2 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "no_solution_for_p_3_q_gt_3",
+          "no_solution_for_p_gt_3_q_3",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "main_classification",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "analyze_p_lt_q",
+          "analyze_q_lt_p",
+          "no_other_solutions",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 9
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "backward_direction_3_11",
+          "backward_direction_eq",
+          "case_p_lt_q_implies_3_11",
+          "case_q_lt_p_implies_11_3",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "backward_case_p_eq_q",
+          "forward_case_p_lt_q",
+          "forward_case_q_lt_p",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "diophantine_solution_p_lt_q",
+          "diophantine_solution_q_lt_p",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "unfilled": 6,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "backward_11_3_case",
+          "backward_3_11_case",
+          "backward_eq_case",
+          "case_p_lt_q",
+          "case_q_lt_p",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "key_case_p_lt_q",
+          "key_case_q_lt_p",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 19
+      },
+      {
+        "stage": "S4",
+        "unfilled": 7,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "backward_direction",
+          "case_p_less_q_implies_3_11",
+          "case_q_less_p_implies_11_3",
+          "forward_direction",
+          "key_case_eq",
+          "no_square_between_consecutive",
+          "rmo_2001_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 27569.9
+  }
+}

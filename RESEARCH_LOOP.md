@@ -109,6 +109,12 @@ run started) targets exactly that. p09/rmo_2000_2/rmo_2001_2 used full
 ~44-min windows: the kit hard tier needs hours, consistent with full-cap
 evidence.
 
+Full-cap re-validation with promoted config + precheck
+(`20260825T205403Z`): 1/4 — p09 PASS with the **comparator precheck
+saving the point live** (two REPL-accepted proofs rejected on real-gate
+timeouts before a 52 s-build proof shipped); rmo_2000_2 regressed to
+incomplete across a restart-split window; details in EXPERIMENTS.md.
+
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
 h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a
