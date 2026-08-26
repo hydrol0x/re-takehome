@@ -1,96 +1,131 @@
 import Mathlib
 
-/-- Powers of 2 mod 7 for multiples of 3 -/
-lemma pow_two_mod_three_base : ∀ k : ℕ, 2 ^ (3 * k) % 7 = 1 := by
-  intro k
-  induction k with
-  | zero =>
-      simp
-  | succ k ih =>
-      calc
-        2 ^ (3 * (k.succ)) % 7
-            = (2 ^ (3 * k + 3)) % 7 := by
-              simpa [Nat.mul_succ]
-        _ = ((2 ^ (3 * k) * 2 ^ 3) % 7) := by
-              simpa [pow_add]
-        _ = ((2 ^ (3 * k) % 7) * (2 ^ 3 % 7)) % 7 := by
-              simpa [Nat.mul_mod]
-        _ = (1 * (2 ^ 3 % 7)) % 7 := by
-              simpa [ih]
-        _ = (2 ^ 3 % 7) % 7 := by simp
-        _ = 1 := by norm_num
-
-/-- Powers of 2 mod 7 for 3k+1 -/
-lemma pow_two_mod_three_one : ∀ k : ℕ, 2 ^ (3 * k + 1) % 7 = 2 := by
-  intro k
-  induction k with
-  | zero =>
-      simp
-  | succ k ih =>
-      calc
-        2 ^ (3 * (k.succ) + 1) % 7
-            = (2 ^ (3 * k + 4)) % 7 := by
-              simpa [Nat.mul_succ, add_assoc]
-        _ = (2 ^ (3 * k + 1 + 3)) % 7 := by
-              ring_nf
-        _ = ((2 ^ (3 * k + 1) * 2 ^ 3) % 7) := by
-              rw [pow_add]
-        _ = ((2 ^ (3 * k + 1) % 7) * (2 ^ 3 % 7)) % 7 := by
-              rw [Nat.mul_mod]
-        _ = (2 * (2 ^ 3 % 7)) % 7 := by
-              rw [ih]
-        _ = (2 * 1) % 7 := by norm_num
-        _ = 2 := by norm_num
-
-/-- Powers of 2 mod 7 for 3k+2 -/
-lemma pow_two_mod_three_two : ∀ k : ℕ, 2 ^ (3 * k + 2) % 7 = 4 := by
-  intro k
-  calc
-    2 ^ (3 * k + 2) % 7
-        = (2 ^ (3 * k) * 2 ^ 2) % 7 := by
-          rw [pow_add]
-    _ = ((2 ^ (3 * k) % 7) * (2 ^ 2 % 7)) % 7 := by
-          rw [Nat.mul_mod]
-    _ = (1 * 4) % 7 := by
-          rw [pow_two_mod_three_base]
-          <;> norm_num
-    _ = 4 := by norm_num
-
-/-- Characterization of divisibility by 3 -/
-lemma three_dvd_iff_mod_zero : ∀ n : ℕ, 3 ∣ n ↔ n % 3 = 0 := by
-  omega
-
-/-- If n is not divisible by 3, then n%3 ≠ 0 -/
-lemma not_dvd_implies_mod_neq_zero : ∀ n : ℕ, ¬(3 ∣ n) → n % 3 ≠ 0 := by
-  omega
-
-/-- If n%3 = 0, then 3 divides n -/
-lemma mod_zero_implies_dvd : ∀ n : ℕ, n % 3 = 0 → 3 ∣ n := by
-  omega
-
-/-- Remainder of 2^n when divided by 7 depends on n mod 3 -/
-lemma pow_two_mod_seven_by_rem : ∀ n : ℕ, 2 ^ n % 7 = 
-  if n % 3 = 0 then 1
-  else if n % 3 = 1 then 2
-  else 4 := by
-  sorry
-
-/-- For positive n, 2^n ≥ 1 -/
-lemma two_pow_pos_ge_one : ∀ n : ℕ, 0 < n → 1 ≤ 2 ^ n := by
-  exact?
-
-/-- Main theorem (a): 7 divides 2^n - 1 iff 3 divides n -/
+/-- IMO 1964 P1 (a): `7 ∣ 2 ^ n - 1` iff `3 ∣ n`, for positive `n`. -/
 theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by
-  sorry
+  have h_cycle : ∀ k : ℕ, 2 ^ (3 * k) % 7 = 1 := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      simp [pow_add, pow_mul, Nat.mul_succ, Nat.pow_succ] at ih ⊢
+      norm_num at ih ⊢
+      omega
+  
+  have h_not_one : ∀ k : ℕ, 2 ^ (3 * k + 1) % 7 = 2 := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      simp [pow_add, pow_mul, Nat.mul_succ, Nat.pow_succ] at ih ⊢
+      norm_num at ih ⊢
+      omega
+  
+  have h_not_two : ∀ k : ℕ, 2 ^ (3 * k + 2) % 7 = 4 := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      simp [pow_add, pow_mul, Nat.mul_succ, Nat.pow_succ] at ih ⊢
+      norm_num at ih ⊢
+      omega
+  
+  constructor
+  · -- Forward direction: if 7 ∣ 2^n - 1, then 3 ∣ n
+    intro h
+    have h_mod : (2 ^ n - 1) % 7 = 0 := by
+      rw [← Nat.mod_eq_zero_of_dvd h]
+    have h_mod2 : (2 ^ n) % 7 = 1 := by
+      have h_sub : 2 ^ n ≥ 1 := by
+        apply Nat.one_le_pow
+        linarith
+      have h_val : (2 ^ n - 1) % 7 = 0 := h_mod
+      omega
+    -- Now check which case n falls into (mod 3)
+    have h_cases : n % 3 = 0 := by
+      have h_rem : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
+      rcases h_rem with (h_rem | h_rem | h_rem)
+      · exact h_rem
+      · -- Case n ≡ 1 (mod 3)
+        have h_case : ∃ k, n = 3 * k + 1 := by
+          use n / 3
+          omega
+        rcases h_case with ⟨k, rfl⟩
+        have : (2 ^ (3 * k + 1)) % 7 = 2 := h_not_one k
+        omega
+      · -- Case n ≡ 2 (mod 3)
+        have h_case : ∃ k, n = 3 * k + 2 := by
+          use n / 3
+          omega
+        rcases h_case with ⟨k, rfl⟩
+        have : (2 ^ (3 * k + 2)) % 7 = 4 := h_not_two k
+        omega
+    -- If n % 3 = 0, then 3 ∣ n
+    omega
+  · -- Backward direction: if 3 ∣ n, then 7 ∣ 2^n - 1
+    intro h
+    obtain ⟨k, rfl⟩ := h
+    have h_mod : (2 ^ (3 * k)) % 7 = 1 := h_cycle k
+    have h_ge : 2 ^ (3 * k) ≥ 1 := by
+      apply Nat.one_le_pow
+      omega
+    have h_div : (2 ^ (3 * k) - 1) % 7 = 0 := by
+      omega
+    omega
 
-/-- Main theorem (b): no positive n has 7 dividing 2^n + 1 -/
+/-- IMO 1964 P1 (b): no positive `n` has `7 ∣ 2 ^ n + 1`. -/
 theorem p09_b (n : ℕ) (hn : 0 < n) : ¬7 ∣ 2 ^ n + 1 := by
-  by_contra H
-  rw [Nat.dvd_iff_mod_eq_zero] at H
-  have h : 2 ^ n % 7 = 1 ∨ 2 ^ n % 7 = 2 ∨ 2 ^ n % 7 = 4 := by
-    have := pow_two_mod_seven_by_rem n
-    split_ifs at this <;> simp_all
-    <;> omega
-  rcases h with (h | h | h) <;>
-    (try {omega}) <;>
-    (try {norm_num at *; omega})
+  intro h
+  have h_mod : (2 ^ n + 1) % 7 = 0 := by
+    rw [← Nat.mod_eq_zero_of_dvd h]
+  
+  -- Check all three cases for n % 3
+  have h_cases : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by omega
+  rcases h_cases with (h_rem | h_rem | h_rem)
+  · -- Case n ≡ 0 (mod 3)
+    have h_case : ∃ k, n = 3 * k := by
+      use n / 3
+      omega
+    rcases h_case with ⟨k, rfl⟩
+    have : (2 ^ (3 * k)) % 7 = 1 := by
+      have h_cycle : ∀ m : ℕ, (2 ^ (3 * m)) % 7 = 1 := by
+        intro m
+        induction m with
+        | zero => simp
+        | succ m ih =>
+          simp [pow_add, pow_mul, Nat.mul_succ, Nat.pow_succ] at ih ⊢
+          norm_num at ih ⊢
+          omega
+      exact h_cycle k
+    omega
+  · -- Case n ≡ 1 (mod 3)
+    have h_case : ∃ k, n = 3 * k + 1 := by
+      use n / 3
+      omega
+    rcases h_case with ⟨k, rfl⟩
+    have : (2 ^ (3 * k + 1)) % 7 = 2 := by
+      have h_cycle : ∀ m : ℕ, (2 ^ (3 * m + 1)) % 7 = 2 := by
+        intro m
+        induction m with
+        | zero => simp
+        | succ m ih =>
+          simp [pow_add, pow_mul, Nat.mul_succ, Nat.pow_succ] at ih ⊢
+          norm_num at ih ⊢
+          omega
+      exact h_cycle k
+    omega
+  · -- Case n ≡ 2 (mod 3)
+    have h_case : ∃ k, n = 3 * k + 2 := by
+      use n / 3
+      omega
+    rcases h_case with ⟨k, rfl⟩
+    have : (2 ^ (3 * k + 2)) % 7 = 4 := by
+      have h_cycle : ∀ m : ℕ, (2 ^ (3 * m + 2)) % 7 = 4 := by
+        intro m
+        induction m with
+        | zero => simp
+        | succ m ih =>
+          simp [pow_add, pow_mul, Nat.mul_succ, Nat.pow_succ] at ih ⊢
+          norm_num at ih ⊢
+          omega
+      exact h_cycle k
+    omega
