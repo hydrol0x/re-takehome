@@ -172,6 +172,15 @@ Phase-2 eval results:
 | B4 typed-fills | 11/16 ($0.262, `20260826T194007Z`) | no — same failure profile as B3's noise row (c03/m01/h01 held; h05/m04 lost; structurals missed) at second-highest cost. The class-conditioned technique blocks lengthen every fill prompt without converting anything; m04 failed at the run's highest per-problem spend ($0.041), consistent with the block steering fills rather than helping |
 | B7 strengthen-IH | 11/16 ($0.203, `20260826T202214Z`) | no — mechanism near-inert: fired once all run (h01, which passed but usually passes anyway); its trigger (fill_failures≥2 + induction-like goal) is rare on this set. m02's fail is infra, not capability: a transport drop chopped its LLM calls early (released under the dev knob, $0.0014 spent) and the worker never recovered — capability read is ~12 within noise. c03/m01/m04/h01 held; h05 + structurals missed as usual |
 | B8 critic-notes | 12/16 ($0.191, `20260826T210416Z`) | weak maybe — second-best single-flag score, tied with B10. Critic fired in 9/16 problems (heaviest on c03: 7 events, which passed; h04: 6, which didn't), c03/m01/m04/h01/m02 all held, h05 lost, structurals missed. Cheap (one gptoss-med call/problem) and no observed harm, but no structural conversion either — same tier as B10: opt-in, combo candidate behind B5 |
+| B5 premise-hints seed-2 | 10/16 ($0.259, `20260826T214916Z`) | **not confirmed** — lost m01 + h05 flippers and h01; only c03 held. Two-seed average 11.5 sits inside the defaults' noise band, so seed-1's "all flippers held" 13 was substantially seed luck, not mechanism. Held-set check skipped per protocol (seed-2 ≤ 11). B5 stays opt-in, not promoted |
+
+**Phase-2 verdict (all ten single-flag branches + confirmation seed):** no
+mechanism beat the tuned defaults on dev-16. The three structural opens
+(h02/h04/m06) survived every variant at 20-min windows; observed spread
+(9–13) is flipper churn within the ±2 noise band. The promoted defaults
+from the first selection loop (shortcap + fill-breadth + compare-precheck)
+remain the configuration of record; B5/B8/B10 stay available as opt-in
+flags with kept negative/neutral evidence.
 
 Eval order by expected value: B5, B6, B1, B2, B9, B10, B3, B4, B7, B8;
 then second seeds for the top three, a combination eval of compatible
