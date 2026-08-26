@@ -30,6 +30,7 @@ Environment knobs (defaults are the submission configuration):
 from __future__ import annotations
 
 import asyncio
+import difflib
 import hashlib
 import json
 import os
@@ -116,6 +117,10 @@ class Config:
     # SUBMISSION_PREMISE_HINTS (research branch B5): REPL-verified Mathlib
     # premise names injected into S4 fill prompts; default off.
     premise_hints: bool = False
+    # SUBMISSION_CLUSTER_REPAIR (research branch B3): S2 groups near-misses by
+    # error fingerprint, repairs one representative per cluster, and replays
+    # an accepted fix textually on the siblings (no LLM calls); default off.
+    cluster_repair: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -169,6 +174,8 @@ class Config:
             # SUBMISSION_PREMISE_HINTS (research branch B5): default off.
             premise_hints=os.environ.get(
                 "SUBMISSION_PREMISE_HINTS", "").strip() == "1",
+            # SUBMISSION_CLUSTER_REPAIR (research branch B3): default off.
+            cluster_repair=os.environ.get("SUBMISSION_CLUSTER_REPAIR", "").strip() == "1",
         )
 
     @property
@@ -690,6 +697,58 @@ class Candidate:
 
     def score(self) -> tuple:
         return (self.accepted, -self.error_count, -self.sorry_count, -len(self.source))
+
+
+# SUBMISSION_CLUSTER_REPAIR (research branch B3): pure clustering/transfer
+# helpers — no I/O, unit-tested offline.
+
+
+def cluster_near_misses(candidates: list[Candidate]) -> list[list[Candidate]]:
+    """Group near-misses by `error_signature` fingerprint of their messages.
+
+    Near-misses sharing a fingerprint are the same underlying mistake.
+    Clusters come back largest first (stable on ties); within a cluster
+    candidates are sorted by ascending error count (stable), so cluster[0]
+    is the repair representative and cluster[1:] are the siblings a
+    successful fix may be transferred to.
+    """
+
+    groups: dict[str, list[Candidate]] = {}
+    for candidate in candidates:
+        groups.setdefault(error_signature(candidate.messages), []).append(candidate)
+    clusters = [sorted(group, key=lambda c: c.error_count)
+                for group in groups.values()]
+    clusters.sort(key=len, reverse=True)
+    return clusters
+
+
+def transfer_fix(failed_rep: str, repaired_rep: str, sibling: str) -> str | None:
+    """Replay a representative's repair on a cluster sibling, textually.
+
+    When the line diff failed_rep -> repaired_rep is a single contiguous
+    replaced block and the removed block occurs verbatim (as whole lines)
+    in `sibling`, return the sibling with its first occurrence substituted
+    by the added block. Return None otherwise (multi-block or pure
+    insert/delete diffs, or removed block absent from the sibling) — the
+    fix is then not mechanically transferable. Pure text: callers must
+    still guard and verify the result.
+    """
+
+    failed_lines = failed_rep.splitlines()
+    repaired_lines = repaired_rep.splitlines()
+    matcher = difflib.SequenceMatcher(a=failed_lines, b=repaired_lines, autojunk=False)
+    edits = [op for op in matcher.get_opcodes() if op[0] != "equal"]
+    if len(edits) != 1 or edits[0][0] != "replace":
+        return None
+    _tag, i1, i2, j1, j2 = edits[0]
+    removed = failed_lines[i1:i2]
+    added = repaired_lines[j1:j2]
+    sibling_lines = sibling.splitlines()
+    for at in range(len(sibling_lines) - len(removed) + 1):
+        if sibling_lines[at: at + len(removed)] == removed:
+            patched = sibling_lines[:at] + added + sibling_lines[at + len(removed):]
+            return "\n".join(patched) + ("\n" if sibling.endswith("\n") else "")
+    return None
 
 
 class Deadline:
@@ -1408,7 +1467,17 @@ class SubmissionAgent:
     async def stage2_repair(self, tb: Toolbox,
                             candidates: list[Candidate]) -> Candidate | None:
         candidates = sorted(candidates, key=lambda c: c.error_count)
-        for candidate in candidates[:2]:
+        targets = candidates[:2]
+        clusters: list[list[Candidate]] = []
+        if self.config.cluster_repair:
+            # SUBMISSION_CLUSTER_REPAIR (research branch B3): near-misses that
+            # share an error fingerprint are the same underlying mistake — put
+            # the unchanged repair budget on one representative per cluster
+            # (fewest errors in it), largest cluster first, instead of burning
+            # repair dialogues on duplicates.
+            clusters = cluster_near_misses(candidates)
+            targets = [cluster[0] for cluster in clusters[:2]]
+        for index, candidate in enumerate(targets):
             result = await self.repair_with_handoff(
                 tb, candidate,
                 origin_model=QWEN if candidate.origin.startswith("qwen") else GPTOSS,
@@ -1416,6 +1485,11 @@ class SubmissionAgent:
                 guard=lambda src: guard_candidate(src, tb.parsed)[0],
                 stage="S2")
             if result is not None:
+                if clusters and result.accepted:
+                    # B3: an accepted repair may transfer to the siblings that
+                    # failed the same way — textual replay, no LLM calls.
+                    await self._transfer_cluster_fix(
+                        tb, candidate.source, result, clusters[index][1:])
                 return result
         tb.log(stage="S2", solved=False)
         # SUBMISSION_CRITIC_NOTES (research branch B8): a repair pass that
@@ -1425,6 +1499,31 @@ class SubmissionAgent:
         if self.config.critic_notes and candidates:
             await self._critic_note(tb, candidates[0])
         return None
+
+    async def _transfer_cluster_fix(self, tb: Toolbox, failed_rep: str,
+                                    repaired: Candidate,
+                                    siblings: list[Candidate]) -> None:
+        """SUBMISSION_CLUSTER_REPAIR (B3): replay an accepted repair on up to
+        three cluster siblings — a textual transplant plus one REPL check
+        each, never an LLM call. Accepted transfers are recorded (and so
+        checkpointed) as spare proofs; the caller still returns the
+        representative's own repair."""
+
+        for sibling in siblings[:3]:
+            if not tb.deadline.allows(120):
+                return
+            patched = transfer_fix(failed_rep, repaired.source, sibling.source)
+            if patched is None:
+                continue
+            guarded, _reason = guard_candidate(patched, tb.parsed)
+            if guarded is None:
+                continue
+            transferred = Candidate(source=guarded,
+                                    origin=sibling.origin + ":transfer")
+            await tb.check(transferred)
+            tb.record(transferred, "S2")
+            tb.log(stage="S2", transfer=transferred.origin,
+                   accepted=transferred.accepted, errors=transferred.error_count)
 
     async def _critic_note(self, tb: Toolbox, near_miss: Candidate) -> None:
         """One capped gpt-oss diagnosis per problem (SUBMISSION_CRITIC_NOTES).
