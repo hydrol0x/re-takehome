@@ -92,6 +92,9 @@ class Config:
     fill_reasoning: bool = False
     skeleton_keep: bool = False
     compare_precheck: bool = True
+    # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
+    # cycling + short-window wave growth; default off.
+    wave_spread: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -119,6 +122,8 @@ class Config:
             # the comparator's cold build — only the real gate can see that.
             compare_precheck=os.environ.get(
                 "SUBMISSION_COMPARE_PRECHECK", "1").strip() != "0",
+            # SUBMISSION_WAVE_SPREAD (research branch B1): default off.
+            wave_spread=os.environ.get("SUBMISSION_WAVE_SPREAD", "").strip() == "1",
         )
 
     @property
@@ -151,6 +156,23 @@ class Config:
         if self.models == "gptoss":
             return GPTOSS
         return GPTOSS if model == QWEN else QWEN
+
+
+# ---------------------------------------------------------------------------
+# SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature cycle
+
+WAVE_SPREAD_TEMPS: tuple[float, ...] = (0.5, 0.8, 1.1)
+
+
+def wave_spread_temperature(index: int) -> float:
+    """Temperature for the index-th qwen-fast sample of an S1 wave.
+
+    Cycling conservative/default/adventurous decoding decorrelates a wave
+    that n draws at a fixed t=0.8 leave clustered — the dev-set flippers
+    (c03/m01/h05, RESEARCH_LOOP.md) flip pass/fail on exactly that S1
+    sampling luck.
+    """
+    return WAVE_SPREAD_TEMPS[index % len(WAVE_SPREAD_TEMPS)]
 
 
 # ---------------------------------------------------------------------------
@@ -563,8 +585,12 @@ class Toolbox:
         return candidate
 
     async def sample(self, model: str, messages: list[dict[str, str]], *,
-                     kind: str) -> str | None:
-        """One guarded LLM call. kind: qwen-fast | qwen-think | gptoss-med | gptoss-high."""
+                     kind: str, temperature: float | None = None) -> str | None:
+        """One guarded LLM call. kind: qwen-fast | qwen-think | gptoss-med | gptoss-high.
+
+        `temperature`, when set, overrides the kind profile's value
+        (SUBMISSION_WAVE_SPREAD); None keeps the profile unchanged.
+        """
 
         if not self.llm_alive:
             raise LLMDead
@@ -585,6 +611,9 @@ class Toolbox:
                                 reasoning={"effort": "high"},
                                 timeout_s=int(scaled(self.config.gptoss_call_s + 300))),
         }[kind]
+        # SUBMISSION_WAVE_SPREAD (research branch B1): per-call override.
+        if temperature is not None:
+            params["temperature"] = temperature
         gate = self.gptoss_gate if model == GPTOSS else self.semaphore
         async with gate:
             if model == GPTOSS:
@@ -853,6 +882,10 @@ class SubmissionAgent:
         waves: list[list[tuple[str, str]]] = []
         if QWEN in tb.models_arm:
             fast = self.config.qwen_samples + (self.config.gptoss_samples if solo else 0)
+            # SUBMISSION_WAVE_SPREAD (research branch B1): short windows fit
+            # few cycles, so buy 2 extra ~$0.001 qwen-fast draws of coverage.
+            if self.config.wave_spread and self.config.agent_time_s < 2400:
+                fast += 2
             waves.append([(QWEN, "qwen-fast")] * fast + [(QWEN, "qwen-think")])
         # On long-cap runs, gpt-oss joins from cycle 2: its channel carries the
         # transport-mortality risk, and qwen still has cycles of value to bank
@@ -872,10 +905,18 @@ class SubmissionAgent:
         seen: set[str] = set()
         for wave in waves:
             history = "\n".join(tb.history_notes[-6:]) if tb.cycle > 1 else ""
+            # SUBMISSION_WAVE_SPREAD (research branch B1): the qwen-fast
+            # samples (the wave prefix) cycle the temperature spread; None
+            # entries keep each kind profile's own temperature.
+            temps: list[float | None] = [
+                wave_spread_temperature(i)
+                if self.config.wave_spread and kind == "qwen-fast" else None
+                for i, (_model, kind) in enumerate(wave)]
             texts = await asyncio.gather(
                 *(tb.sample(model, whole_proof_messages(tb.problem, tb.challenge,
-                                                        history=history), kind=kind)
-                  for model, kind in wave),
+                                                        history=history), kind=kind,
+                            temperature=temp)
+                  for (model, kind), temp in zip(wave, temps)),
                 return_exceptions=True)
             for item in texts:
                 if isinstance(item, LLMDead):
