@@ -115,6 +115,17 @@ saving the point live** (two REPL-accepted proofs rejected on real-gate
 timeouts before a 52 s-build proof shipped); rmo_2000_2 regressed to
 incomplete across a restart-split window; details in EXPERIMENTS.md.
 
+Tactic mining vs archived failed holes (subagent, Lean-only,
+2026-08-26): corpus 57 sorried files / 209 holes inventoried, 6 files /
+27 holes measured under host caps. Three additions won holes nothing in
+FILL_SWEEP closed — a pow-normalization+omega combo (m01 induction
+step), a pow-mod simp set (p09 mod-cycle family), and `Nat.sq_sub_sq`
+(h04 difference-of-squares); 13 other candidates closed nothing. Also
+measured: 17/27 holes resist every generic tactic (fills need real
+proofs), and existing entries omega/nlinarith dominate the closable
+remainder. Additions landed in FILL_SWEEP as iter-6; eval queued behind
+the p10 precheck-validation run.
+
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
 h01, h02, h04, m06. Single-run totals carry ±2 noise — promotions need a

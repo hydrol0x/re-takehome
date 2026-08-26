@@ -352,6 +352,14 @@ FILL_SWEEP = ["linarith", "norm_num", "omega", "simp", "simp_all", "positivity",
               "nlinarith", "ring", "aesop", "norm_num [Nat.factorial]", "decide",
               "try norm_cast\ntry norm_num\ntry simp_all\nnlinarith",
               "try push_cast\ntry field_simp\ntry ring_nf\nnlinarith",
+              # Mined against archived failed holes (RESEARCH_LOOP.md,
+              # 2026-08-26): the first two close the recurring
+              # modular-power/induction-step family; nothing above touched
+              # those goals.
+              "try intros\ntry simp only [pow_succ, pow_add, pow_mul, "
+              "pow_zero, pow_one] at *\nomega",
+              "try intros\nsimp [pow_add, pow_mul, Nat.pow_mod, Nat.mul_mod]",
+              "simp [Nat.sq_sub_sq, Nat.mul_comm]",
               "exact?"]
 
 TRY_THIS = "Try this:"
