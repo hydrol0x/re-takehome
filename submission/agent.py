@@ -98,6 +98,10 @@ class Config:
     plan_first: bool = False
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
+    # SUBMISSION_STRENGTHEN_IH (research branch B7): re-sketch notes tell the
+    # sketcher to STRENGTHEN repeatedly-unfilled induction-shaped helpers
+    # instead of only shrinking them; default off.
+    strengthen_ih: bool = False
     # SUBMISSION_CRITIC_NOTES (research branch B8): after a repair pass that
     # closed nothing, one bounded gpt-oss diagnosis of the best near-miss is
     # appended to history_notes for later S1 waves. A hint, never a judge
@@ -134,6 +138,9 @@ class Config:
             # depth-first-only fills.
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
             fill_reasoning=os.environ.get("SUBMISSION_FILL_REASONING", "").strip() == "1",
+            # SUBMISSION_STRENGTHEN_IH (research branch B7): default off.
+            strengthen_ih=os.environ.get(
+                "SUBMISSION_STRENGTHEN_IH", "").strip() == "1",
             skeleton_keep=os.environ.get("SUBMISSION_SKELETON_KEEP", "").strip() == "1",
             # B10 (default off): deterministic intro + interval_cases
             # templates for bounded-∀ statements, tried before FILL_SWEEP.
@@ -205,6 +212,63 @@ def wave_spread_temperature(index: int) -> float:
     sampling luck.
     """
     return WAVE_SPREAD_TEMPS[index % len(WAVE_SPREAD_TEMPS)]
+
+
+# ---------------------------------------------------------------------------
+# SUBMISSION_STRENGTHEN_IH (research branch B7): induction-hole triage
+
+STRENGTHEN_IH_TEXT = (
+    "For {name}: the induction hypothesis as stated appears too weak — "
+    "restate the helper with a STRONGER induction hypothesis (more general "
+    "n, an explicit bound, or a conjunction capturing the needed "
+    "invariant), then derive the original.")
+
+
+def induction_like(decl_statement: str) -> bool:
+    """Cheap pure predicate: does this statement look induction-shaped?
+
+    Textual only, no elaboration: a `∀` binder ascribed over ℕ/Nat, or an
+    operator whose goals usually fall to induction — `Finset.sum` /
+    `Finset.prod` (including their `∑`/`∏` notations, which signatures
+    preserve), `^`, or factorial `!`. A false positive merely adds one
+    advice line to a re-sketch note.
+    """
+
+    import re as _re
+    if _re.search(r"∀[^,]*:\s*(?:ℕ|Nat(?![A-Za-z0-9_'.]))", decl_statement):
+        return True
+    return bool(_re.search(r"Finset\.(?:sum|prod)|[∑∏^!]", decl_statement))
+
+
+def strengthen_ih_note(tb: Toolbox, source: str) -> str:
+    """Flag-guarded addendum for stage4's re-sketch note ("" when off).
+
+    Measured failure family (m01/h03 class): induction holes fail
+    repeatedly because the stated induction hypothesis is too weak, yet the
+    generic note asks for SMALLER lemmas — the opposite of the hand-proof
+    fix, which strengthens the statement being inducted on. For each decl
+    still unfilled after >= 2 failed fill dialogues whose statement is
+    induction_like, append an explicit strengthen-the-IH instruction.
+    """
+
+    if not tb.config.strengthen_ih:
+        return ""
+    import re as _re
+    signatures = parse_challenge(source).signatures
+    picked: list[str] = []
+    for name in tb.last_unfilled:
+        if tb.fill_failures.get(name, 0) < 2:
+            continue
+        statement = next(
+            (s for s in signatures
+             if _re.match(rf"\S+\s+{_re.escape(name)}(?![A-Za-z0-9_'.])", s)),
+            "")
+        if induction_like(statement):
+            picked.append(name)
+    if not picked:
+        return ""
+    tb.log(stage="S4", strengthen_ih=picked)
+    return "".join("\n" + STRENGTHEN_IH_TEXT.format(name=name) for name in picked)
 
 
 # ---------------------------------------------------------------------------
@@ -650,6 +714,10 @@ class Toolbox:
         self.sorrify_seen: set = set()
         self.sorrify_used = 0
         self.last_unfilled: list[str] = []
+        # Per-decl fill-failure counts (SUBMISSION_STRENGTHEN_IH): how many
+        # times a hole in that decl ended its LLM rounds unfilled. Written
+        # only when the flag is on; never persisted.
+        self.fill_failures: dict[str, int] = {}
         # Verified Mathlib premise names for fill prompts (B5): None until
         # computed on the first fill pass; "" caches a failed/empty attempt.
         self._premise_hints: str | None = None
@@ -1527,6 +1595,8 @@ class SubmissionAgent:
                         "stalled on these subgoals, which were evidently too hard as "
                         "stated — replace them with smaller or different lemmas: "
                         + ", ".join(tb.last_unfilled or ["(unknown)"]))
+                # B7 (SUBMISSION_STRENGTHEN_IH): "" unless the flag is on.
+                note += strengthen_ih_note(tb, filled.source)
             else:
                 note = "The previous decomposition stalled; try a different lemma structure."
         tb.log(stage="S4", solved=False)
@@ -1697,6 +1767,11 @@ class SubmissionAgent:
                 else:
                     kind = "qwen-deep" if tb.config.fill_reasoning else "qwen-think"
 
+        # B7 bookkeeping (SUBMISSION_STRENGTHEN_IH): this hole's LLM rounds
+        # ended without closing it — a mid-round deadline abort above says
+        # nothing about the statement, so it deliberately skips the count.
+        if tb.config.strengthen_ih and decl_name:
+            tb.fill_failures[decl_name] = tb.fill_failures.get(decl_name, 0) + 1
         if best_block and best_fail:
             return await self._sorrify_progress(tb, current, index, best_block, best_fail)
         return None
