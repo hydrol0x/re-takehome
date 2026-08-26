@@ -47,7 +47,6 @@ from re_harness.models import MODEL_A as QWEN, MODEL_B as GPTOSS
 from submission.lean_text import (
     Parsed,
     axiom_violations,
-    bounded_intro_templates,
     error_signature,
     extract_lean,
     format_messages,
@@ -93,7 +92,6 @@ class Config:
     fill_reasoning: bool = False
     skeleton_keep: bool = False
     compare_precheck: bool = True
-    bound_templates: bool = False
     plan_first: bool = False
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
@@ -121,10 +119,6 @@ class Config:
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
             fill_reasoning=os.environ.get("SUBMISSION_FILL_REASONING", "").strip() == "1",
             skeleton_keep=os.environ.get("SUBMISSION_SKELETON_KEEP", "").strip() == "1",
-            # B10 (default off): deterministic intro + interval_cases
-            # templates for bounded-∀ statements, tried before FILL_SWEEP.
-            bound_templates=os.environ.get(
-                "SUBMISSION_BOUND_TEMPLATES", "").strip() == "1",
             # Default on: three p10 proofs were REPL-accepted yet timed out
             # Research branch B2 (DSP-lite): majority-pick an informal plan
             # before the cycle-1 S1 wave and condition qwen-fast samples on it.
@@ -1374,25 +1368,10 @@ class SubmissionAgent:
 
     async def _cascade_hole(self, tb: Toolbox, current: str, index: int,
                             decl_name: str) -> str | None:
-        """Try each FILL_SWEEP tactic on one hole; return the filled file.
-
-        With SUBMISSION_BOUND_TEMPLATES, statements led by a bounded ∀
-        (`∀ n, n ≤ K → …`, `∀ n < K, …`, `∀ n ∈ Finset.range K, …`) first
-        get intro + interval_cases exhaustion templates, which the generic
-        one-tactic entries cannot express (they lack the intro/bound
-        scaffolding); same accept rule and deadline guards.
-        """
+        """Try each FILL_SWEEP tactic on one hole; return the filled file."""
 
         holes_before = len(parse_challenge(current).holes)
-        tactics = FILL_SWEEP
-        if tb.config.bound_templates and decl_name:
-            import re as _re
-            statement = next(
-                (s for s in parse_challenge(current).signatures
-                 if _re.match(rf"\S+\s+{_re.escape(decl_name)}(?![A-Za-z0-9_'.])", s)),
-                "")
-            tactics = bounded_intro_templates(statement) + tactics
-        for tactic in tactics:
+        for tactic in FILL_SWEEP:
             if not tb.deadline.allows(90):
                 return None
             spliced = splice_holes(current, {index: tactic})

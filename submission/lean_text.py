@@ -86,6 +86,58 @@ def parse_challenge(source: str) -> Parsed:
     return Parsed(imports, holes, [d.group("name") for d in decls], signatures, numeric_answers)
 
 
+_BOUND_VAR = r"(?P<var>[A-Za-z_][A-Za-z0-9_']*)"
+_BOUND_NUM = r"(?P<k>[0-9]+)"
+_FORALL_RANGE_RE = re.compile(  # ∀ n ∈ Finset.range K,
+    rf"∀\s*{_BOUND_VAR}\s*∈\s*Finset\.range\s+{_BOUND_NUM}\s*,")
+_FORALL_BINDER_RE = re.compile(  # ∀ n < K,  /  ∀ n ≤ K,
+    rf"∀\s*{_BOUND_VAR}\s*(?:<=|≤|<)\s*{_BOUND_NUM}\s*,")
+_FORALL_ARROW_RE = re.compile(  # ∀ n, n < K →  /  ∀ n, n ≤ K →  (opt. : ℕ)
+    rf"∀\s*{_BOUND_VAR}(?:\s*:\s*(?:ℕ|Nat))?\s*,\s*(?P=var)\s*(?:<=|≤|<)"
+    rf"\s*{_BOUND_NUM}\s*(?:→|->)")
+
+
+def bounded_intro_templates(decl_statement: str, max_bound: int = 300) -> list[str]:
+    """Brute-force tactic scripts for statements led by a bounded universal.
+
+    Given a declaration's statement text (up to `:=`, e.g. one entry of
+    `Parsed.signatures`), detect a leading bounded `∀` of the forms
+    `∀ n, n ≤ K →`, `∀ n, n < K →`, `∀ n ≤ K,`, `∀ n < K,` or
+    `∀ n ∈ Finset.range K,` (arbitrary variable name; K a decimal numeral
+    ≤ max_bound) and return deterministic intro + interval_cases scripts
+    that can close such goals by exhaustion. Returns [] when no supported
+    form leads the statement. Purely textual and best-effort: callers must
+    verify the scripts — a false positive simply fails to check.
+    """
+
+    text = normalize_ws(decl_statement)
+    at = text.find("∀")
+    if at < 0:
+        return []
+    tail = text[at:]
+    match = _FORALL_RANGE_RE.match(tail)
+    is_range = match is not None
+    if match is None:
+        match = _FORALL_BINDER_RE.match(tail) or _FORALL_ARROW_RE.match(tail)
+    if match is None or int(match.group("k")) > max_bound:
+        return []
+    var = match.group("var")
+    intro = f"intro {var} h{var}"
+    cases = f"interval_cases {var}"
+    if is_range:
+        unfold = f"simp only [Finset.mem_range] at h{var}"
+        return [
+            f"{intro}\n{unfold}\n{cases} <;> decide",
+            f"{intro}\n{unfold}\n{cases} <;> omega",
+            f"{intro}\n{unfold}\n{cases} <;> simp_all <;> omega",
+        ]
+    return [
+        f"{intro}\n{cases} <;> omega",
+        f"{intro}\n{cases} <;> decide",
+        f"{intro}\n{cases} <;> simp_all <;> omega",
+    ]
+
+
 def splice_holes(source: str, replacements: dict[int, str]) -> str:
     """Replace holes (by index into parse order) with tactic blocks."""
 

@@ -1,9 +1,10 @@
 """Offline tests for the agent's durable per-problem state (resume support)."""
 
+import asyncio
 import json
 
-from re_harness import Problem, Services
-from submission.agent import Config, Toolbox
+from re_harness import LeanCheck, Problem, Services
+from submission.agent import Config, SubmissionAgent, Toolbox
 
 CHALLENGE = """import Mathlib
 
@@ -129,3 +130,60 @@ def test_no_state_dir_is_inert(tmp_path):
     tb = Toolbox(problem, services, Config.from_env())
     tb.save_state()  # must not raise
     assert tb.state_path is None
+
+
+def test_bound_templates_flag(monkeypatch):
+    monkeypatch.delenv("SUBMISSION_BOUND_TEMPLATES", raising=False)
+    assert not Config.from_env().bound_templates  # default off
+    monkeypatch.setenv("SUBMISSION_BOUND_TEMPLATES", "1")
+    assert Config.from_env().bound_templates
+    monkeypatch.setenv("SUBMISSION_BOUND_TEMPLATES", "0")
+    assert not Config.from_env().bound_templates
+
+
+BOUNDED = """import Mathlib
+
+theorem bounded : ∀ n, n ≤ 12 → n * 0 = 0 := by
+  sorry
+"""
+
+
+class _AcceptAllLean:
+    """Fake REPL that accepts every file and records what was checked."""
+
+    def __init__(self):
+        self.sources = []
+
+    async def check_file(self, source, *, timeout_s=None):
+        self.sources.append(source)
+        return LeanCheck(accepted=True, messages=[], has_sorry=False,
+                         timed_out=False, duration_ms=1)
+
+
+def _cascade(tmp_path):
+    lean = _AcceptAllLean()
+    problem = Problem(id="t", description="d", challenge=BOUNDED)
+    services = Services(
+        llm=None, lean=lean, checkpoint=lambda s, m: None, state_dir=tmp_path
+    )
+    tb = Toolbox(problem, services, Config.from_env())
+    agent = SubmissionAgent(tb.config)
+    filled = asyncio.run(agent._cascade_hole(tb, BOUNDED, 0, "bounded"))
+    return filled, lean
+
+
+def test_cascade_tries_bound_templates_first(tmp_path, monkeypatch):
+    monkeypatch.setenv("SUBMISSION_BOUND_TEMPLATES", "1")
+    filled, lean = _cascade(tmp_path)
+    assert filled is not None
+    assert "intro n hn" in filled and "interval_cases n <;> omega" in filled
+    assert len(lean.sources) == 1  # template accepted before any FILL_SWEEP entry
+
+
+def test_cascade_unchanged_when_flag_off(tmp_path, monkeypatch):
+    monkeypatch.delenv("SUBMISSION_BOUND_TEMPLATES", raising=False)
+    filled, lean = _cascade(tmp_path)
+    assert filled is not None
+    assert "linarith" in filled  # FILL_SWEEP[0], exactly as before
+    assert "interval_cases" not in filled
+    assert len(lean.sources) == 1
