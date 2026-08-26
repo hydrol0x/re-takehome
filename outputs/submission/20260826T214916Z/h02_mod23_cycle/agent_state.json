@@ -1,1 +1,1 @@
-{"challenge_sha": "6e3ab07d48d42572", "s0_done": true, "cycles_done": 0, "lemma_pool": "", "history_notes": [], "pinned_answers": {}}
+{"challenge_sha": "6e3ab07d48d42572", "s0_done": true, "cycles_done": 2, "lemma_pool": "lemma pow2_11_mod_23 : 2 ^ 11 \u2261 1 [MOD 23] := by norm_num\n\n/-- For all k < 11, `2 ^ k \u2262 1 [MOD 23]` - establishes minimality of order 11. -/", "history_notes": ["cycle 1, qwen-fast x9: best had 3 errors; first: failed to synthesize", "cycle 2, qwen-fast x9: best had 7 errors; first: Type mismatch"], "pinned_answers": {}}
