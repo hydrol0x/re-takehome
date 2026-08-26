@@ -1,22 +1,16 @@
 {
   "schema_version": 1,
-  "run_id": "06abc36e2e8b43179b18d931dcecbe1d",
+  "run_id": "94ed681f5c9840c9b7158c9c2922c8c6",
   "set": "custom-problems-dev",
-  "started_at": "2026-08-26T06:24:10.314342+00:00",
+  "started_at": "2026-08-26T08:02:52.107775+00:00",
   "agent": "submission.agent:create_agent",
   "agent_name": "submission",
-  "timestamp": "20260826T062410Z",
+  "timestamp": "20260826T080252Z",
   "n_workers": 4,
   "budget_usd_per_problem": 1.0,
   "time_limit_s_per_problem": 1200.0,
   "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
   "api_key_configured": true,
   "python": "3.11.15",
-  "platform": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
-  "resumed_at": "2026-08-26T08:01:39.661107+00:00",
-  "finished_at": "2026-08-26T08:01:02.941446+00:00",
-  "wall_s": 2251.826,
-  "resumed": true,
-  "resumed_skipped_problems": 0,
-  "executed_problems": 1
+  "platform": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39"
 }
