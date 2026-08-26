@@ -136,6 +136,32 @@ precheck-equipped stack ships a verified point. The comparator-timeout
 class is now handled end-to-end: reject-heavy-and-keep-hunting at S5,
 confirmed live on both p09 (reject path) and p10 (accept path).
 
+## Phase 2 — parallel research branches (2026-08-26 →)
+
+Up to a dozen independent branches, architecture: **fan-out
+implementation** (worktree subagents, one flag each, offline tests,
+patch review) → **serialized eval funnel** (the box fits one 4-worker
+eval; ~45 min and ~$0.3 per slot) → promotion by composition with
+held-set checks, unchanged. All flags default off until promoted.
+
+| branch | flag | method | targets |
+| --- | --- | --- | --- |
+| B1 | `SUBMISSION_WAVE_SPREAD` | temperature spread (0.5/0.8/1.1) across the qwen-fast wave, +2 samples at short caps | flipper variance (c03/m01/h05) |
+| B2 | `SUBMISSION_PLAN_FIRST` | sample 3 short informal plans, majority-pick strategy, condition proof samples on it (DSP-lite for whole proofs) | wrong-strategy waves |
+| B3 | `SUBMISSION_CLUSTER_REPAIR` | cluster S2 near-misses by error signature; repair the representative; apply the winning fix pattern to siblings | repair efficiency |
+| B4 | `SUBMISSION_TYPED_FILLS` | classify hole goals syntactically (arith/induction/divisibility/inequality/cast) → class-specialized fill prompts | fill quality |
+| B5 | `SUBMISSION_PREMISE_HINTS` | model proposes Mathlib lemma names for the statement; batch-verify existence via REPL `#check`; inject only verified names into fill prompts | name-hallucination fill errors |
+| B6 | `SUBMISSION_SUGGEST_HARVEST` | run `exact?`/`apply?` on stuck holes, harvest "Try this:" suggestions into fill prompts (per-hole; S0 only had whole-file) | stuck holes |
+| B7 | `SUBMISSION_STRENGTHEN_IH` | after two failed induction-hole fills, re-sketch note explicitly asks to strengthen the induction hypothesis | m01/h03-class inductions |
+| B8 | `SUBMISSION_CRITIC_NOTES` | on S2 plateau, gpt-oss-high writes a bounded diagnosis note (not a proof) injected into the next wave's history | cross-model critique, bounded |
+| B9 | `SUBMISSION_SKELETON_PORTFOLIO` | keep the 2 best distinct skeletons; alternate fill effort between them | wrong-first-skeleton (h02/h04) |
+| B10 | `SUBMISSION_BOUND_TEMPLATES` | deterministic templates: derive bounds for bounded-quantifier goals → `interval_cases`/`decide` reformulations in the per-hole cascade | bounded goals, zero LLM cost |
+| B12 | (eval-only) | skeleton-keep + tuned knobs at 60-min caps on kit hard4 | long-window transfer |
+
+Eval order by expected value: B5, B6, B1, B2, B9, B10, B3, B4, B7, B8;
+then second seeds for the top three, a combination eval of compatible
+winners, held-set on any promotion, and B12.
+
 **Loop close-out (2026-08-26).** Seven iterations, ~$1.6 of eval spend.
 Final configuration: shortcap + fill-breadth promoted defaults, mined
 cascade entries, comparator precheck default-on; fill-reasoning and
