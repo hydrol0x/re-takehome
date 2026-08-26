@@ -85,6 +85,7 @@ Held rate 75% ≥ dev 62%: no overfitting signal, promotion stands.
 
 | 3 | 2026-08-25 | `SUBMISSION_FILL_BREADTH` (cascade all holes first; window-scaled dialogues) | 10 → **13/16** ($0.155, 28 min, `20260825T180137Z`) | **yes — default on** | +2 over best-ever with structural gain: h01 closed (first time), all three flippers (c03, m01, h05) held simultaneously, m04 repeated. Remaining: h02, h04, m06 (full windows, fills fail on the real math) |
 
+| 6 | 2026-08-26 | mined FILL_SWEEP entries (pow-normalization, pow-mod, sq_sub_sq) | 13 → 11/16 ($0.257, 43 min, `20260826T080252Z`) | kept (already default) | delta = flippers c03/m01 exactly; h01/m04/h05 held; no live structural win this seed — entries stand on their archived-hole evidence, cost bounded to cascade seconds |
 | 4 | 2026-08-25 | `SUBMISSION_FILL_REASONING` (16k-thought fills) | 13 → 12/16 ($0.180, 33 min, `20260825T184602Z`) | no | within noise (delta = flipper m01); no structural gain — h02/h04/m06 resist deeper thinks at short caps; costs +16%. The structural three likely need window, not thought budget |
 
 Held-set validation of the fill-breadth promotion (`20260825T183009Z`):
