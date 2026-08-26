@@ -86,6 +86,7 @@ Held rate 75% ≥ dev 62%: no overfitting signal, promotion stands.
 | 3 | 2026-08-25 | `SUBMISSION_FILL_BREADTH` (cascade all holes first; window-scaled dialogues) | 10 → **13/16** ($0.155, 28 min, `20260825T180137Z`) | **yes — default on** | +2 over best-ever with structural gain: h01 closed (first time), all three flippers (c03, m01, h05) held simultaneously, m04 repeated. Remaining: h02, h04, m06 (full windows, fills fail on the real math) |
 
 | 6 | 2026-08-26 | mined FILL_SWEEP entries (pow-normalization, pow-mod, sq_sub_sq) | 13 → 11/16 ($0.257, 43 min, `20260826T080252Z`) | kept (already default) | delta = flippers c03/m01 exactly; h01/m04/h05 held; no live structural win this seed — entries stand on their archived-hole evidence, cost bounded to cascade seconds |
+| 7 | 2026-08-26 | `SUBMISSION_SKELETON_KEEP` (resume best partial skeleton) | 13 → 12/16 ($0.185, 45 min, `20260826T084608Z`) | no — stays opt-in | within noise (flippers c03/m01 in, h05 out; structural three unmoved). Its regime is long windows (cross-cycle/restart continuity) — short-cap evals cannot show it; left available for full-cap use |
 | 4 | 2026-08-25 | `SUBMISSION_FILL_REASONING` (16k-thought fills) | 13 → 12/16 ($0.180, 33 min, `20260825T184602Z`) | no | within noise (delta = flipper m01); no structural gain — h02/h04/m06 resist deeper thinks at short caps; costs +16%. The structural three likely need window, not thought budget |
 
 Held-set validation of the fill-breadth promotion (`20260825T183009Z`):
@@ -134,6 +135,15 @@ winning proof cleared the precheck (97 s) and the final comparator
 precheck-equipped stack ships a verified point. The comparator-timeout
 class is now handled end-to-end: reject-heavy-and-keep-hunting at S5,
 confirmed live on both p09 (reject path) and p10 (accept path).
+
+**Loop close-out (2026-08-26).** Seven iterations, ~$1.6 of eval spend.
+Final configuration: shortcap + fill-breadth promoted defaults, mined
+cascade entries, comparator precheck default-on; fill-reasoning and
+skeleton-keep available as opt-in flags. Dev-set trajectory 11 → 13 with
+±2 seed noise; held set stable at 6/8 throughout; the precheck — the
+loop's chief product — is validated live in both directions (p09 saves,
+p10 conversion). Remaining structural opens: h02/h04/m06 (dev),
+rmo_2001_2 (kit) — all fills-need-real-proofs cases.
 
 Noise calibration (iters 0–2): per-problem flippers at 20-min caps are
 c03, h05, m01 (S1 sampling luck); structural never-solved at short caps:
