@@ -21,7 +21,14 @@ lemma dvd_add_one_iff_mod_eq_neg_one (n : ℕ) : 23 ∣ 2 ^ n + 1 ↔ 2 ^ n % 23
 
 /-- Main theorem (a): 23 ∣ 2^n - 1 iff 11 ∣ n, for positive n -/
 theorem h02_a (n : ℕ) (hn : 0 < n) : 23 ∣ 2 ^ n - 1 ↔ 11 ∣ n := by
-  sorry
+  calc
+      23 ∣ 2 ^ n - 1 ↔ 2 ^ n % 23 = 1 := dvd_sub_one_iff_mod_eq_one n
+      _ ↔ 11 ∣ n := by
+        constructor
+        · intro h
+          exact pow2_eq_one_implies_div11 n h
+        · intro h
+          exact div11_implies_pow2_eq_one n h
 
 /-- Main theorem (b): no positive n has 23 ∣ 2^n + 1 -/
 theorem h02_b (n : ℕ) (hn : 0 < n) : ¬23 ∣ 2 ^ n + 1 := by

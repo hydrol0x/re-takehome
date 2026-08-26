@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "set": "custom-problems-dev",
+  "problems": [
+    {
+      "problem_id": "c01_quad_roots",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.002466165,
+      "wall_s": 308.68,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c02_amgm_frac",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0023672349999999997,
+      "wall_s": 308.602,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c03_coprime_linear",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.018598905,
+      "wall_s": 680.049,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c05_pow_sum_div",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 266.093,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c06_three_pow",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00183278,
+      "wall_s": 144.108,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c08_count_congr",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00186528,
+      "wall_s": 143.811,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c10_tau_360",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0007492050000000001,
+      "wall_s": 105.957,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "h01_legendre100",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.02642772,
+      "wall_s": 755.568,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "h02_mod23_cycle",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.03728510500000001,
+      "wall_s": 761.852,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- h02_a h02_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- h02_a h02_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    },
+    {
+      "problem_id": "h04_square_shift",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.027497665,
+      "wall_s": 733.791,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- h04_square_shift propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- h04_square_shift propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    },
+    {
+      "problem_id": "h05_telescope_prod",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.0038023049999999997,
+      "wall_s": 767.141,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- h05_telescope_prod propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- h05_telescope_prod propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    },
+    {
+      "problem_id": "m01_dvd13",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0037477049999999996,
+      "wall_s": 202.763,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m02_ord25",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.001946425,
+      "wall_s": 244.572,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m04_sumfact",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.020451240000000006,
+      "wall_s": 846.957,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    },
+    {
+      "problem_id": "m06_factcop",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.02483533,
+      "wall_s": 805.782,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- m06_factcop propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- m06_factcop propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    },
+    {
+      "problem_id": "m08_amgm8",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 139.416,
+      "models_used": [],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 11,
+  "max_points": 16,
+  "actual_cost_usd": 0.173873065,
+  "wall_s_sum": 7215.142,
+  "run_id": "d0f5b2ff80dd45cbb46aa82c6c19ca04",
+  "wall_s": 2188.106,
+  "finished_at": "2026-08-26T19:39:29.718890+00:00"
+}
