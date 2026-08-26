@@ -4,6 +4,7 @@ from pathlib import Path
 
 from submission.lean_text import (
     bounded_intro_templates,
+    classify_goal,
     error_signature,
     eval_nat_literal,
     extract_lean,
@@ -198,3 +199,76 @@ def test_bounded_templates_from_parsed_signature():
     parsed = parse_challenge(source)
     scripts = bounded_intro_templates(parsed.signatures[0])
     assert scripts and scripts[0] == "intro n hn\ninterval_cases n <;> omega"
+
+
+# ---- classify_goal (SUBMISSION_TYPED_FILLS, research branch B4) ------------
+
+
+def test_classify_induction_forall_nat_both_sides():
+    assert classify_goal(
+        "theorem t : ∀ n : ℕ, n * (n + 1) = n ^ 2 + n :=") == "induction"
+    assert classify_goal("theorem t : ∀ n : ℕ, n + 1 ≤ 2 ^ n + n :=") == "induction"
+    # bound variable on one side only: not induction-shaped
+    assert classify_goal("theorem t : ∀ n : ℕ, n + 0 = 7 :=") != "induction"
+
+
+def test_classify_induction_markers():
+    assert classify_goal("theorem t : Nat.rec h0 hs k = f k :=") == "induction"
+    assert classify_goal(
+        "theorem t : Finset.sum (Finset.range 9) f = 45 :=") == "induction"
+    assert classify_goal(
+        "theorem t : ∑ i in Finset.range n, (2 * i + 1) = n ^ 2 :=") == "induction"
+    assert classify_goal("theorem t : ∏ i in Finset.range n, c = c ^ n :=") == "induction"
+    assert classify_goal("theorem t (n : ℕ) : 0 < n ! :=") == "induction"
+
+
+def test_classify_divisibility():
+    assert classify_goal("theorem t (n : ℕ) : 2 ∣ n * (n + 1) :=") == "divisibility"
+    assert classify_goal("theorem t : Nat.gcd 12 18 = 6 :=") == "divisibility"
+    assert classify_goal("theorem t (h : Nat.Coprime a b) : P :=") == "divisibility"
+    assert classify_goal("theorem t (n : ℕ) : n % 3 = n % 3 :=") == "divisibility"
+
+
+def test_classify_cast():
+    assert classify_goal("theorem t (n : ℕ) : (↑n : ℤ) + 1 = ↑(n + 1) :=") == "cast"
+    assert classify_goal("theorem t (n : ℕ) (x : ℝ) : Nat.cast n * x = x * n :=") == "cast"
+    # mixes ℕ and ℝ even without an explicit ↑ marker
+    assert classify_goal("theorem t (n : ℕ) (x : ℝ) : f n = x :=") == "cast"
+
+
+def test_classify_inequality_outermost_relation():
+    assert classify_goal("theorem t (a b : ℤ) : a * b ≤ a * b + 1 :=") == "inequality"
+    assert classify_goal("theorem t (x y : ℝ) : x ^ 2 + y ^ 2 ≥ 2 * x * y :=") == "inequality"
+    assert classify_goal("theorem t (h : P) : 0 < f x :=") == "inequality"
+    # ≤ only in a hypothesis binder: conclusion is an equality, not inequality
+    assert classify_goal("theorem t (h : a ≤ b) : a + c = c + a :=") == "arith"
+    # < only in a quantifier bound, conclusion an equality: not inequality
+    assert classify_goal("theorem t : ∀ m < 5, m + m = 2 * m :=") == "arith"
+
+
+def test_classify_arith_fallback():
+    assert classify_goal("theorem t : 2 + 2 = 4 :=") == "arith"
+    assert classify_goal("abbrev t_answer : ℕ :=") == "arith"
+    assert classify_goal("") == "arith"
+
+
+def test_classify_precedence_most_specific_wins():
+    # induction markers beat divisibility, cast, and inequality tokens
+    assert classify_goal(
+        "theorem t : 2 ∣ ∑ i in Finset.range n, i ^ 3 :=") == "induction"
+    assert classify_goal("theorem t (n : ℕ) : (↑(n !) : ℤ) ≤ ↑(n ^ n) :=") == "induction"
+    # divisibility beats cast and inequality
+    assert classify_goal("theorem t (a b : ℤ) : (↑k : ℤ) ∣ a * b :=") == "divisibility"
+    assert classify_goal("theorem t (a b : ℕ) : Nat.gcd a b ≤ a + b :=") == "divisibility"
+    # cast beats inequality: a mixed-type relation wants cast discipline first
+    assert classify_goal("theorem t (n : ℕ) : (↑n : ℝ) ≤ ↑n + 1 :=") == "cast"
+    assert classify_goal("theorem t (n : ℕ) (x : ℝ) : f n ≤ x :=") == "cast"
+
+
+def test_classify_on_parsed_signature():
+    source = ("import Mathlib\n\n"
+              "theorem s : ∀ n : ℕ, n + 0 = n := by\n  sorry\n\n"
+              "theorem u (a b : ℤ) : a + b ≤ b + a + 1 := by\n  sorry\n")
+    parsed = parse_challenge(source)
+    assert classify_goal(parsed.signatures[0]) == "induction"
+    assert classify_goal(parsed.signatures[1]) == "inequality"

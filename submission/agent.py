@@ -48,6 +48,7 @@ from submission.lean_text import (
     Parsed,
     axiom_violations,
     bounded_intro_templates,
+    classify_goal,
     error_signature,
     extract_lean,
     format_messages,
@@ -98,6 +99,9 @@ class Config:
     plan_first: bool = False
     # SUBMISSION_WAVE_SPREAD (research branch B1): S1 qwen-fast temperature
     # cycling + short-window wave growth; default off.
+    # SUBMISSION_TYPED_FILLS (research branch B4): goal-class-specific
+    # technique block appended to S4 fill dialogues; default off.
+    typed_fills: bool = False
     # SUBMISSION_STRENGTHEN_IH (research branch B7): re-sketch notes tell the
     # sketcher to STRENGTHEN repeatedly-unfilled induction-shaped helpers
     # instead of only shrinking them; default off.
@@ -134,6 +138,8 @@ class Config:
             # skeletons resumed on alternating S4 rounds; default off.
             skeleton_portfolio=os.environ.get(
                 "SUBMISSION_SKELETON_PORTFOLIO", "").strip() == "1",
+            # SUBMISSION_TYPED_FILLS (research branch B4): default off.
+            typed_fills=os.environ.get("SUBMISSION_TYPED_FILLS", "").strip() == "1",
             # Promoted default (RESEARCH_LOOP.md iter-3); "0" restores
             # depth-first-only fills.
             fill_breadth=os.environ.get("SUBMISSION_FILL_BREADTH", "1").strip() != "0",
@@ -309,6 +315,37 @@ RULES_BLOCK = """Hard rules:
 - Never use admit, axiom, native_decide, or Lean 3 syntax.
 - Numeric answer abbrevs (`abbrev … : ℕ :=`) must be plain decimal literals."""
 
+# SUBMISSION_TYPED_FILLS (research branch B4): per-goal-class technique blocks
+# appended to S4 fill dialogues. Keys match lean_text.classify_goal; generic
+# Mathlib guidance only — no problem-specific content.
+FILL_TECHNIQUES: dict[str, str] = {
+    "induction": """Goal-class hints (induction):
+- `induction n` for goals from 0; `induction n, hn using Nat.le_induction` for `∀ n ≥ k`; `Nat.strong_induction_on` for two-step recurrences.
+- If the induction hypothesis is too weak, strengthen it: prove a sharper auxiliary claim (`suffices` or a helper `have` generalizing the statement) and specialize.
+- Unfold one step via `Finset.sum_range_succ`/`Finset.prod_range_succ`/`Nat.factorial_succ`, then close the step with `ring_nf`, `omega`, or `nlinarith` fed the IH.
+- Discharge the base case separately with `norm_num` or `decide`.""",
+    "divisibility": """Goal-class hints (divisibility):
+- Build `∣` facts by chaining `dvd_mul_of_dvd_left/right`, `dvd_add`, `Nat.dvd_sub'`, and `Dvd.dvd.trans`.
+- `Nat.Prime.dvd_mul` splits `p ∣ a * b`; `Nat.Prime.coprime_iff_not_dvd` and `Nat.Coprime.dvd_of_dvd_mul_left/right` exploit coprimality.
+- For gcd goals use `Nat.dvd_gcd` and `Nat.gcd_dvd_left/right`; `Nat.Coprime` unfolds to `gcd = 1`.
+- `Nat.dvd_iff_mod_eq_zero` links `∣` to `%`; on concrete moduli, case-split on the residue and finish with `omega` or `decide`.""",
+    "inequality": """Goal-class hints (inequality):
+- Try `omega` (linear ℕ/ℤ) and `positivity` (`0 < e`, `0 ≤ e`, `e ≠ 0`) first; `gcongr` closes monotonicity goals (sums, products, powers, divisions) and discharges side conditions itself.
+- `nlinarith` needs hints for products and squares: pass facts like `[sq_nonneg (a - b), sq_nonneg (a + b), mul_pos ha hb]`.
+- Chain estimates with `calc` plus `le_trans`/`lt_of_le_of_lt`/`lt_of_lt_of_le`.
+- Clear denominators before comparing: `div_le_iff`/`le_div_iff` (positivity side goals) or `field_simp`.""",
+    "cast": """Goal-class hints (mixed ℕ/ℤ/ℝ casts):
+- Pick the widest type once: `zify [h₁, …]` (supplying the `≤` facts ℕ-subtraction needs) or `rify`, then stay there.
+- `push_cast` pushes `↑` inward through `+ * ^`; `norm_cast` collapses a goal that is really single-type; `exact_mod_cast h` transports hypotheses across casts.
+- Lemma-level moves: `Nat.cast_le`, `Nat.cast_lt`, `Nat.cast_inj`, `Int.toNat_of_nonneg`.
+- Rewrite ℕ subtraction/division away first (`Nat.sub_add_cancel`, `Nat.div_mul_cancel` under the right hypotheses) — casts do not commute with truncating operations.""",
+    "arith": """Goal-class hints (arithmetic/computation):
+- `omega` decides linear ℕ/ℤ goals including `%` and `/` by constants — try it first; `decide` settles small closed decidable facts (`native_decide` is forbidden).
+- `norm_num` evaluates numeric (in)equalities; extend it as `norm_num [lemma₁, …]` when definitions block it.
+- `ring`/`ring_nf` proves commutative-(semi)ring identities; `simp [...]` to normalize, then finish with `omega`/`norm_num`.
+- If a computation times out, shrink it first (`Nat.pow_mod`, `set_option maxHeartbeats 1000000` above the theorem) before retrying `decide`.""",
+}
+
 
 def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
                          history: str = "", plan: str = "") -> list[dict[str, str]]:
@@ -429,7 +466,8 @@ def sketch_messages(problem: Problem, challenge: str, lemma_pool: str,
 
 
 def fill_messages(problem: Problem, sketch: str, decl_name: str,
-                  feedback: str = "", hints: str = "") -> list[dict[str, str]]:
+                  feedback: str = "", hints: str = "",
+                  technique: str = "") -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover. The file below compiles except "
         "for `sorry` placeholders. Your job is ONE hole: the `sorry` inside the "
@@ -454,6 +492,8 @@ def fill_messages(problem: Problem, sketch: str, decl_name: str,
     if feedback:
         user += ["", "Lean feedback on the previous attempt at this hole:",
                  "```", feedback, "```"]
+    if technique:  # SUBMISSION_TYPED_FILLS (B4): goal-class-specific guidance.
+        user += ["", technique]
     return [{"role": "system", "content": system},
             {"role": "user", "content": "\n".join(user)}]
 
@@ -1686,6 +1726,19 @@ class SubmissionAgent:
             if fill is not None:
                 return fill
 
+        technique = ""
+        if tb.config.typed_fills and decl_name:
+            # SUBMISSION_TYPED_FILLS (research branch B4): classify the hole's
+            # enclosing declaration statement and append the matching
+            # goal-class technique block to the fill dialogue.
+            import re as _re
+            statement = next(
+                (s for s in parse_challenge(current).signatures
+                 if _re.match(rf"\S+\s+{_re.escape(decl_name)}(?![A-Za-z0-9_'.])", s)),
+                "")
+            if statement:
+                technique = FILL_TECHNIQUES.get(classify_goal(statement), "")
+
         suggest_note = ""
         if tb.config.suggest_harvest and tactic_only and tb.deadline.allows(180):
             # SUBMISSION_SUGGEST_HARVEST: the cascade's bare `exact?` closer
@@ -1730,7 +1783,7 @@ class SubmissionAgent:
             try:
                 text = await tb.sample(
                     model, fill_messages(tb.problem, current, decl_name, feedback,
-                                         hints=hints),
+                                         hints=hints, technique=technique),
                     kind=kind)
             except LLMDead:
                 break

@@ -138,6 +138,88 @@ def bounded_intro_templates(decl_statement: str, max_bound: int = 300) -> list[s
     ]
 
 
+# ---------------------------------------------------------------------------
+# Goal classification (SUBMISSION_TYPED_FILLS, research branch B4)
+
+_INDUCTION_MARKERS_RE = re.compile(
+    r"Nat\.rec|Nat\.factorial|Finset\.sum|Finset\.prod|∑|∏"
+    r"|[A-Za-z0-9_'\)\]]\s*!(?!=)")  # factorial `n !`, not ASCII `!=`
+_REL_CHARS = ("=", "≤", "<", "≥", ">")
+_CAST_TYPES = ("ℕ", "ℤ", "ℝ")
+_OPEN_BRACKETS, _CLOSE_BRACKETS = "([{⟨", ")]}⟩"
+
+
+def _conclusion(text: str) -> str:
+    """Best-effort conclusion of a statement: the segment after the first
+    bracket-depth-0 `:` (past name and binders) and after the last depth-0
+    `,`/`→`/`->` (past quantifier heads and hypotheses). Crude but pure."""
+
+    depth = 0
+    seen_colon = False
+    cut = 0
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if char in _OPEN_BRACKETS:
+            depth += 1
+        elif char in _CLOSE_BRACKETS:
+            depth = max(0, depth - 1)
+        elif depth == 0:
+            if char == ":" and not seen_colon:
+                seen_colon = True
+                cut = i + 1
+            elif char in ",→":
+                cut = i + 1
+            elif char == "-" and text.startswith("->", i):
+                cut = i + 2
+                i += 1
+        i += 1
+    return text[cut:]
+
+
+def classify_goal(decl_statement: str) -> str:
+    """Crude, deterministic goal class of one declaration statement.
+
+    `decl_statement` is a statement's text up to `:=` (e.g. one entry of
+    `Parsed.signatures`); bare goal text also works. Returns one of
+    "induction", "divisibility", "cast", "inequality", "arith". Checks run
+    most-specific-first, so listing order is precedence:
+      induction     recursion/aggregation markers (Nat.rec, Nat.factorial,
+                    Finset.sum/∑, Finset.prod/∏, factorial `!`), or a `∀ n`
+                    over ℕ with the bound variable on both sides of an
+                    equality/inequality;
+      divisibility  `∣`, `Nat.gcd`, `Coprime`, or `% `;
+      cast          two of ℕ/ℤ/ℝ mixed, or `↑`/`Nat.cast`/`Int.cast`
+                    (checked before "inequality": a mixed-type relation
+                    needs cast discipline first);
+      inequality    ≤/</≥/> in the outermost relation position (i.e. in
+                    the conclusion, past binders and hypotheses);
+      arith         everything else.
+    Purely textual: misclassification only costs prompt aptness.
+    """
+
+    text = re.sub(r":=\s*$", "", normalize_ws(decl_statement)).strip()
+    if _INDUCTION_MARKERS_RE.search(text):
+        return "induction"
+    forall = re.search(r"∀\s*\(?\s*([A-Za-z_][A-Za-z0-9_']*)", text)
+    if forall is not None and ("ℕ" in text or re.search(r"\bNat\b", text)):
+        var_re = rf"(?<![A-Za-z0-9_']){re.escape(forall.group(1))}(?![A-Za-z0-9_'])"
+        tail = text[forall.end():]
+        for rel in _REL_CHARS:
+            at = tail.find(rel)
+            if at >= 0 and re.search(var_re, tail[:at]) \
+                    and re.search(var_re, tail[at + 1:]):
+                return "induction"
+    if "∣" in text or "Nat.gcd" in text or "Coprime" in text or "% " in text:
+        return "divisibility"
+    if sum(marker in text for marker in _CAST_TYPES) >= 2 or "↑" in text \
+            or "Nat.cast" in text or "Int.cast" in text:
+        return "cast"
+    if any(rel in _conclusion(text) for rel in ("≤", "<", "≥", ">")):
+        return "inequality"
+    return "arith"
+
+
 def splice_holes(source: str, replacements: dict[int, str]) -> str:
     """Replace holes (by index into parse order) with tactic blocks."""
 
