@@ -12,10 +12,10 @@ lemma m01_dvd13_step_relation (n : ℕ) :
 
 -- Helper lemma: key algebraic identity showing difference is divisible by 13
 lemma m01_dvd13_key_identity (n : ℕ) : 
-  16 * (4 ^ (2 * n + 1)) + 3 * (3 ^ (n + 2)) = 3 * (4 ^ (2 * n + 1) + 3 ^ (n + 2)) + 13 * (4 ^ (2 * n + 1)) := by sorry
+  16 * (4 ^ (2 * n + 1)) + 3 * (3 ^ (n + 2)) = 3 * (4 ^ (2 * n + 1) + 3 ^ (n + 2)) + 13 * (4 ^ (2 * n + 1)) := by linarith
 
 -- Helper lemma: if 13 divides A, then 13 divides 3*A
-lemma m01_dvd13_mul_three {A : ℕ} (h : 13 ∣ A) : 13 ∣ 3 * A := by sorry
+lemma m01_dvd13_mul_three {A : ℕ} (h : 13 ∣ A) : 13 ∣ 3 * A := by omega
 
 -- Helper lemma: if 13 divides B, then 13 divides 13*B
 lemma m01_dvd13_mul_thirteen {B : ℕ} (h : 13 ∣ B) : 13 ∣ 13 * B := by sorry
