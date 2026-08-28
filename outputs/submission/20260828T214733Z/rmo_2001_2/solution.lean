@@ -36,19 +36,24 @@ lemma helper_prime_square_cases (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q
 
 lemma helper_q_ge_13_impossible (q : ℕ) (hq : Nat.Prime q) (h_ge_13 : q ≥ 13) :
     ¬(∃ p : ℕ, Nat.Prime p ∧ p < q ∧ ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) := by
+  intro h
   sorry
 
 lemma helper_small_q_cases (q : ℕ) (hq : Nat.Prime q) (h_le_11 : q ≤ 11) :
     ∀ p : ℕ, Nat.Prime p → p ≠ q → (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) → p = 3 ∨ p = 11 := by
+  intro p hp hne h_sq
   sorry
 
 lemma helper_p_eq_q_implies_square (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (h_eq : p = q) :
     ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2 := by
-  sorry
+  use 3 * p
+  rw [h_eq]
+  ring
 
 lemma helper_p3_q11_square :
     ∃ m : ℕ, 3^2 + 7*3*11 + 11^2 = m^2 := by
-  sorry
+  use 19
+  norm_num
 
 lemma helper_p11_q3_square :
     ∃ m : ℕ, 11^2 + 7*11*3 + 3^2 = m^2 := by
