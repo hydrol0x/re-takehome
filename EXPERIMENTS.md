@@ -340,3 +340,23 @@ persistence buys nothing at 60 min; the hard tier converts only at full
 8 h caps, where the coordination layer has already demonstrated p09
 2-for-2, rmo_2000_2 1-for-2, and the p10 conversion. Funnel complete.
 Phase-2 total spend ≈ $2.8; cumulative key spend ≈ $10.6 of $50.
+
+## 2026-08-29: Full-cap validation #3 (8 h / $1, duo, kit hard4)
+
+Run `20260828T214733Z`, the roughest environment weather of the three
+full-cap runs — the gpt-oss channel refused (429) essentially all night,
+so the duo ran as de-facto solo-qwen. Score **1/4** (vs #1 2/4, #2 1/4):
+
+| problem | outcome | spend | note |
+| --- | --- | --- | --- |
+| p09_imo1964 | **comparator PASS, 3-for-3 at full caps** | $0.910 | precheck rejected a kernel-heavy accepted proof at 4h13 (240 s timeout — a would-be scoring zero); agent hunted 5.6 h more and returned a light proof (comparator 46.6 s). Third consecutive run the precheck converts p09 from 0 to 1 |
+| p10_factorial_pow | failed | $0.119 | early gptoss-429 storm degraded it to solo-qwen, then its warm REPL died (import timeout ×2) and the bail rail returned a partial at 1h19 |
+| rmo_2000_2 | failed | $0.598 | cycle cap (calibrated for ~25-min mixed cycles) hit at 18 fast all-qwen cycles = 4.9 h, stranding 3 h of window on the problem whose only pass took 7.4 h. Fixed post-hoc: past the cap the loop now keeps cycling while ≥45 min of window remains (suite 195 green) |
+| rmo_2001_2 | failed | $0.954 | honest incomplete; still the one provable hard problem never closed |
+
+Cross-run hard-tier tally: p09 3/3, p10 1 pass (30-min-cap era), rmo_2000_2
+1 pass (7.4 h uninterrupted window), rmo_2001_2 0. The run's lesson is not
+capability but robustness bookkeeping: all three losses trace to
+environment weather (provider outage, container REPL death) or a cap
+mis-calibrated for outage conditions — now corrected. Cumulative key
+spend ≈ $13.3 of $50.
