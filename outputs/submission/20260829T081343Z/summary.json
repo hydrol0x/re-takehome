@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "set": "rmo2001",
+  "problems": [
+    {
+      "problem_id": "rmo_2001_2",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.08539910699999997,
+      "wall_s": 3349.501,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    }
+  ],
+  "total_points": 0,
+  "max_points": 1,
+  "actual_cost_usd": 0.085399107,
+  "wall_s_sum": 3349.501,
+  "run_id": "6c1e4c08770544dcb1ba97508e266e8f",
+  "wall_s": 3350.019,
+  "finished_at": "2026-08-29T09:09:33.410745+00:00"
+}

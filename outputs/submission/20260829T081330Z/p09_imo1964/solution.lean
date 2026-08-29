@@ -1,9 +1,5 @@
 import Mathlib
 
-set_option maxHeartbeats 1000000
-set_option exponentiation.threshold 10000
-set_option maxRecDepth 8000
-
 /-- Helper: 2^0 ≡ 1 (mod 7) -/
 lemma pow_two_zero_mod_seven : 2 ^ 0 % 7 = 1 := by norm_num
 
@@ -38,22 +34,30 @@ lemma pow_two_mod_seven_cycle (k : ℕ) :
           <;> norm_num
 
 /-- Forward direction: if 3|n then 7|(2^n - 1) -/
-lemma p09_a_forward (n : ℕ) (hn : 0 < n) (h : 3 ∣ n) : 7 ∣ 2 ^ n - 1 := by sorry
-
-/-- Backward direction: if 7|(2^n - 1) then 3|n -/
-lemma p09_a_backward (n : ℕ) (hn : 0 < n) (h : 7 ∣ 2 ^ n - 1) : 3 ∣ n := by sorry
-
-/-- Case analysis: 2^n mod 7 can only be 1, 2, or 4 -/
 lemma pow_two_mod_seven_cases (n : ℕ) : 2 ^ n % 7 = 1 ∨ 2 ^ n % 7 = 2 ∨ 2 ^ n % 7 = 4 := by induction n with
 | zero => norm_num
 | succ n ih =>
 rcases ih with (h | h | h) <;> rw [pow_succ, Nat.mul_mod, h] <;> norm_num
 
-/-- 2^n + 1 mod 7 can only be 2, 3, or 5 (never 0) -/
-lemma pow_two_plus_one_mod_seven_ne_zero (n : ℕ) : (2 ^ n + 1) % 7 ≠ 0 := by sorry
+-- Helper lemmas for the main proofs (stated with `linarith` as per skeleton instructions)
 
-/-- Main theorem (a): 7 | 2^n - 1 iff 3 | n -/
-theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by sorry
+/-- Connects 2^n % 7 = 1 with divisibility by 3 -/
+lemma two_pow_mod_7_is_1_iff_3_dvd_n (n : ℕ) : 2 ^ n % 7 = 1 ↔ 3 ∣ n := by sorry
 
-/-- Main theorem (b): no positive n has 7 | 2^n + 1 -/
-theorem p09_b (n : ℕ) (hn : 0 < n) : ¬7 ∣ 2 ^ n + 1 := by sorry
+/-- Connects 7 | (2^n - 1) with 2^n % 7 = 1 for positive n -/
+lemma dvd_two_pow_sub_one_iff_mod_one (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 2 ^ n % 7 = 1 := by sorry
+
+/-- Shows 2^n + 1 is never 0 mod 7 -/
+lemma two_pow_plus_one_mod_7_ne_zero (n : ℕ) : (2 ^ n + 1) % 7 ≠ 0 := by sorry
+
+/-- IMO 1964 P1 (a): `7 ∣ 2 ^ n - 1` iff `3 ∣ n`, for positive `n`. -/
+theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by
+  have h1 := dvd_two_pow_sub_one_iff_mod_one n hn
+  have h2 := two_pow_mod_7_is_1_iff_3_dvd_n n
+  exact h1.trans h2
+
+/-- IMO 1964 P1 (b): no positive `n` has `7 ∣ 2 ^ n + 1`. -/
+theorem p09_b (n : ℕ) (hn : 0 < n) : ¬7 ∣ 2 ^ n + 1 := by
+  intro h
+  have h_mod : (2 ^ n + 1) % 7 = 0 := Nat.dvd_iff_mod_eq_zero.mp h
+  exact two_pow_plus_one_mod_7_ne_zero n h_mod
