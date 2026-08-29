@@ -418,3 +418,29 @@ segments (10 holes → 5 → 1); the last hole — that a solution's p and q
 are distinct primes — resisted every fill wave. gpt-oss refused (429)
 through this run as well, so the assault ran solo-qwen. rmo_2001_2
 remains the one provable hard problem never closed.
+
+**E3a — solo-qwen long-horizon arm** (`20260829T081330Z`, 4 h caps,
+p09 + rmo_2000_2, $1.03, resumed once across a container restart):
+**1/2 — solo-qwen PASSED p09** ($0.541, comparator 36.9 s). The arc
+mirrors the duo's: a kernel-heavy skeleton proof was precheck-rejected
+(timed out) at 12:03, the arm kept hunting, and a lighter filled variant
+of the same skeleton was accepted at 14:18 and passed the real gate.
+rmo_2000_2 failed at 4 h (the duo's one pass needed 7.4 h — horizon
+caveat, not a clean comparison). Reading, stated honestly: **at long
+horizons the scaffold is the main carrier** — the verifier-centric
+ladder + comparator precheck + stash-don't-discard fallback converts p09
+in a solo arm too. The duo's measured edges are what they always were:
++1 over the best solo on both matched-budget seeds, union coverage in
+one run, one-half to one-third the cost of solo-qwen, one skeleton
+(p09 full-cap #1) that only gpt-oss produced — plus, newly visible this
+week, **robustness**: gpt-oss's channel refused for ~14 h straight, a
+weather event that would have zeroed a solo-gptoss submission entirely
+while the duo degraded gracefully to solo-qwen behavior.
+
+**Extended-experiments totals.** Five experiments (~$2.6): one first-ever
+solve (h04 at 2 h), one flat scaling curve (dev-16 at 20 vs 40 min), one
+solo long-horizon pass (p09) with the scaffold credited, rmo_2001_2
+narrowed to a single unfilled hole, and a fixed cycle-cap bug found by
+the runs themselves. Cumulative key spend ≈ $16 of $50. Cross-run
+hard-tier tally: p09 duo 3/3 + solo-qwen 1/1 at ≥4 h; p10 1 pass;
+rmo_2000_2 1 pass (7.4 h); rmo_2001_2 0, best distance 1 hole.
