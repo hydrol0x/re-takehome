@@ -1160,8 +1160,13 @@ class SubmissionAgent:
             cycle = toolbox.cycles_done
             prechecks = 0
             while True:
+                # The cycle cap is calibrated for ~25-min mixed-model cycles; when
+                # one channel is refusing, all-qwen cycles run far faster and the
+                # cap would strand hours of window — so past the cap, keep cycling
+                # while ≥45 min of window remains (short windows are unaffected:
+                # they exhaust the deadline check before the cap matters).
                 while solved is None and toolbox.llm_alive and toolbox.lean_alive \
-                        and cycle < max_cycles \
+                        and (cycle < max_cycles or toolbox.deadline.allows(2700.0)) \
                         and toolbox.deadline.allows(toolbox.config.scaled(600)):
                     cycle += 1
                     toolbox.cycle = cycle
