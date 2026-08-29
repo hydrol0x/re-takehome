@@ -214,6 +214,29 @@ bear on the collaboration question:
   The tuned defaults are a real local optimum, and the remaining
   headroom on structurally hard problems is at longer time horizons,
   not cleverer prompting.
+- **The long-horizon claim was then tested directly** (extended
+  experiments, `EXPERIMENTS.md` Aug 29). Doubling the short window
+  (20→40 min) moved nothing — the curve is flat where iteration is the
+  input. But at 2-hour caps one of the three never-solved custom
+  problems (h04) fell — a first-ever, and the win itself validated the
+  fallback design: its proof was *precheck-rejected* (the precheck
+  comparator timed out under box load), held as fallback rather than
+  discarded, and passed the real gate at finalize. Meanwhile p09's
+  third full-cap run re-ran the precheck save end-to-end (heavy proof
+  rejected at 4 h, lighter proof found 5.6 h later, passed in 47 s),
+  and rmo_2001_2 — never solved — was driven to a single unfilled hole.
+- **An honest attribution correction from the long-horizon solo arm:**
+  given 4 hours and the same scaffold, solo-qwen also converted p09
+  (heavy proof precheck-rejected, lighter fill passed). At long
+  horizons the *scaffold* — verifier-centric ladder, comparator
+  precheck, stash-don't-discard fallback — is the main carrier, not
+  model pairing per se. The duo's edges are the measured ones: +1 over
+  the best solo at matched budgets on both seeds, union coverage, cost
+  (half to a third of solo-qwen), one p09 skeleton only gpt-oss
+  produced — and robustness, demonstrated the hard way when gpt-oss's
+  provider refused requests for ~14 straight hours of these runs: a
+  solo-gptoss submission would have scored zero that night, while the
+  duo degraded gracefully to qwen-only behavior and kept solving.
 
 ## Verdict
 
