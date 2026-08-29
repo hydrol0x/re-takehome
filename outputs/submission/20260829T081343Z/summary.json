@@ -7,20 +7,20 @@
       "status": "failed",
       "passed": false,
       "points": 0,
-      "actual_cost_usd": 0.08539910699999997,
-      "wall_s": 3349.501,
+      "actual_cost_usd": 0.4208712840000001,
+      "wall_s": 11302.931,
       "models_used": [
         "openai/gpt-oss-120b",
         "qwen/qwen3.5-flash-02-23"
       ],
-      "failure_reason": "Comparator timed out after 180s"
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
     }
   ],
   "total_points": 0,
   "max_points": 1,
-  "actual_cost_usd": 0.085399107,
-  "wall_s_sum": 3349.501,
+  "actual_cost_usd": 0.420871284,
+  "wall_s_sum": 11302.931,
   "run_id": "6c1e4c08770544dcb1ba97508e266e8f",
-  "wall_s": 3350.019,
-  "finished_at": "2026-08-29T09:09:33.410745+00:00"
+  "wall_s": 11303.756,
+  "finished_at": "2026-08-29T13:46:23.462159+00:00"
 }

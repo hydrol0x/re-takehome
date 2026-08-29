@@ -407,3 +407,14 @@ pass standing. (b) rmo_2001_2 attempt 1 (`20260829T081343Z`): REPL
 Mathlib-import timeout ×2 under load killed it at 53 min with a 10-hole
 sketch 5 filled; resumed solo (same run dir, skeleton preserved) once
 box load dropped.
+
+**E3b — rmo_2001_2 assault** (`20260829T081343Z`, duo + skeleton-keep +
+fill-reasoning, resumed twice across a REPL-contention death and a
+container restart; ~4 h total agent time, $0.421): **failed, but the
+closest approach yet** — the kept skeleton ended at **one unfilled hole**
+(`forward_distinct_primes`), against the historical best of two
+never-closed subgoals. Skeleton persistence did its job across three
+segments (10 holes → 5 → 1); the last hole — that a solution's p and q
+are distinct primes — resisted every fill wave. gpt-oss refused (429)
+through this run as well, so the assault ran solo-qwen. rmo_2001_2
+remains the one provable hard problem never closed.
