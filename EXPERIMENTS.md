@@ -392,3 +392,18 @@ made the save cut both ways. h02 ($0.194) and m06 ($0.237) ran full
 honest windows without closing. Note: the gpt-oss channel refused (429)
 through this run too — every gptoss-med wave came back unusable — so
 these are effectively solo-qwen results.
+
+**E3 long-horizon arms (4 h caps).** (c) p10 duo retry
+(`20260829T081351Z`): failed at 59 min, $0.096 — but two notable facts:
+the **gpt-oss channel recovered** mid-run (its S4 skeleton was
+REPL-accepted at 08:36, first useful gpt-oss output after ~12 h of 429s),
+and both comparator prechecks timed out at 240 s under 4-worker box load,
+exhausting the per-problem precheck budget so the final filled skeleton
+shipped unvetted and timed out at scoring. On this shared box a precheck
+timeout cannot distinguish a kernel-heavy proof from a loaded machine —
+at judge conditions (dedicated resources per worker) the precheck verdict
+is meaningful; here it is confounded. p10 remains 1-for-many, its one
+pass standing. (b) rmo_2001_2 attempt 1 (`20260829T081343Z`): REPL
+Mathlib-import timeout ×2 under load killed it at 53 min with a 10-hole
+sketch 5 filled; resumed solo (same run dir, skeleton preserved) once
+box load dropped.
