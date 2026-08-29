@@ -375,3 +375,20 @@ more cycles of the same search, and what blocks the opens is structure,
 not iteration count. Consistent with the kit hard-tier evidence, where
 wins came at multi-hour horizons via accumulated lemma pools rather than
 at 2× short windows.
+
+**E2 — structural opens at 2 h caps** (`20260829T063044Z`, h02/h04/m06
+only, one worker each, $0.59): **1/3 — h04_square_shift comparator PASS,
+a FIRST-EVER.** The problem that survived all ~19 short-window evals fell
+with 6× the window ($0.159, comparator 43.1 s). The win doubles as a
+design validation: the accepted proof (qwen S2 repair, round 4) was
+*precheck-rejected* — the 240 s precheck comparator timed out while all
+three workers loaded the box — but the stash-don't-discard fallback
+returned it at finalize and the real comparator passed it in 43 s. Two
+lessons recorded: (1) capability×time is real on the custom set, not
+just the kit set — the structural opens are long-horizon problems, not
+unsolvable ones; (2) a precheck timeout under heavy box load is not
+proof-weight evidence — the fallback posture, not a discard, is what
+made the save cut both ways. h02 ($0.194) and m06 ($0.237) ran full
+honest windows without closing. Note: the gpt-oss channel refused (429)
+through this run too — every gptoss-med wave came back unusable — so
+these are effectively solo-qwen results.
