@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "set": "rmo2001",
+  "problems": [
+    {
+      "id": "rmo_2001_2",
+      "theorem_names": [
+        "rmo_2001_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    }
+  ]
+}

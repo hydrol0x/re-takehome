@@ -99,4 +99,6 @@ lemma helper_implication_backward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime
 theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
   (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) ↔
     (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by
-  sorry
+  constructor
+  · exact fun h => helper_implication_forward _ _ hp hq h
+  · exact fun h => helper_implication_backward _ _ hp hq h

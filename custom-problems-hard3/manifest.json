@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "set": "custom-hard3",
+  "problems": [
+    {
+      "id": "m06_factcop",
+      "theorem_names": [
+        "m06_factcop"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "h02_mod23_cycle",
+      "theorem_names": [
+        "h02_a",
+        "h02_b"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "h04_square_shift",
+      "theorem_names": [
+        "h04_square_shift"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    }
+  ]
+}
