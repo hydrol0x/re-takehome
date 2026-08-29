@@ -360,3 +360,18 @@ capability but robustness bookkeeping: all three losses trace to
 environment weather (provider outage, container REPL death) or a cap
 mis-calibrated for outage conditions — now corrected. Cumulative key
 spend ≈ $13.3 of $50.
+
+## 2026-08-29: Extended experiments (post-funnel, user-requested)
+
+**E1 — scaling-curve point, dev-16 at 40-min caps** (`20260829T052916Z`,
+$0.244, cycle-cap fix active): **11/16** — doubling the window did not
+move the dev set. Structural opens h02/h04/m06 still unsolved (h02 was
+additionally lost to a malformed HTTP-200 body — truncated JSON from the
+provider, correctly fatal under the kit's fail-closed accounting — so its
+cell is infra, not capability; capability read ≈ 11–12, inside the 20-min
+band of 11–13). Flippers: c03/m01 held, h05/h01 lost. Reading: on this
+problem mix the 20→40 min curve is FLAT — the marginal minutes go into
+more cycles of the same search, and what blocks the opens is structure,
+not iteration count. Consistent with the kit hard-tier evidence, where
+wins came at multi-hour horizons via accumulated lemma pools rather than
+at 2× short windows.
