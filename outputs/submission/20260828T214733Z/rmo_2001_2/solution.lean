@@ -2,59 +2,101 @@ import Mathlib
 
 open Nat
 
-theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
-  (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) ↔
-    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by
-  constructor
-  · intro h
-    have h_main : p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) := by sorry
-    exact h_main
-  · intro h
-    rcases h with (h | ⟨h3, h11⟩ | ⟨h11, h3⟩)
-    · -- Case p = q
-      use 3 * p
-      rw [h]
-      ring_nf
-      <;> simp [Nat.mul_comm, Nat.pow_succ]
-      <;> ring_nf
-    · -- Case p = 3 and q = 11
-      use 19
-      norm_num [h3, h11]
-      <;> rfl
-    · -- Case p = 11 and q = 3
-      use 19
-      norm_num [h11, h3]
-      <;> rfl
+lemma helper_prime_gt_zero (p : ℕ) (hp : Nat.Prime p) : 0 < p := by
+  exact?
 
--- Helper lemmas for the forward direction
--- These lemmas are individually easy to prove and together imply the main theorem.
+lemma helper_prime_ge_two (p : ℕ) (hp : Nat.Prime p) : 2 ≤ p := by
+  exact?
 
-lemma helper_prime_square_cases (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) 
-    (h_sq : ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) :
-    p = q ∨ p = 3 ∨ q = 3 ∨ p = 11 ∨ q = 11 := by
+lemma helper_compare_primes (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
+    p ≤ q ∨ q ≤ p := by
+  omega
+
+lemma helper_square_lower_bound (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (m : ℕ) 
+    (h_eq : p^2 + 7*p*q + q^2 = m^2) :
+    m ≥ p + q := by
+  nlinarith
+
+lemma helper_square_upper_bound (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (m : ℕ) 
+    (h_eq : p^2 + 7*p*q + q^2 = m^2) :
+    m ≤ 3 * max p q := by
+  have hp_pos : 0 < p := Nat.Prime.pos hp
+  have hq_pos : 0 < q := Nat.Prime.pos hq
+  cases le_total p q with
+  | inl h_pq =>
+    have : max p q = q := by simp [h_pq]
+    rw [this]
+    have : m^2 ≤ (3*q)^2 := by
+      nlinarith [h_pq, mul_le_mul_of_nonneg_left h_pq (Nat.zero_le p)]
+    nlinarith
+  | inr h_qp =>
+    have : max p q = p := by simp [h_qp]
+    rw [this]
+    have : m^2 ≤ (3*p)^2 := by
+      nlinarith [h_qp, mul_le_mul_of_nonneg_right h_qp (Nat.zero_le q)]
+    nlinarith
+
+lemma helper_discriminant_nonneg (a b c : ℤ) :
+    b^2 - 4*a*c ≥ 0 → ∃ k : ℤ, b^2 - 4*a*c = k^2 := by
   sorry
 
-lemma helper_q_ge_13_impossible (q : ℕ) (hq : Nat.Prime q) (h_ge_13 : q ≥ 13) :
-    ¬(∃ p : ℕ, Nat.Prime p ∧ p < q ∧ ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) := by
-  intro h
-  sorry
-
-lemma helper_small_q_cases (q : ℕ) (hq : Nat.Prime q) (h_le_11 : q ≤ 11) :
-    ∀ p : ℕ, Nat.Prime p → p ≠ q → (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) → p = 3 ∨ p = 11 := by
-  intro p hp hne h_sq
-  sorry
-
-lemma helper_p_eq_q_implies_square (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (h_eq : p = q) :
+lemma helper_case_p_eq_q (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) (h_eq : p = q) :
     ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2 := by
   use 3 * p
   rw [h_eq]
   ring
 
-lemma helper_p3_q11_square :
+lemma helper_case_p3_q11_square :
     ∃ m : ℕ, 3^2 + 7*3*11 + 11^2 = m^2 := by
   use 19
   norm_num
 
-lemma helper_p11_q3_square :
+lemma helper_case_p11_q3_square :
     ∃ m : ℕ, 11^2 + 7*11*3 + 3^2 = m^2 := by
-  exact?
+  use 19
+  norm_num
+
+lemma helper_no_other_solutions (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) 
+    (h_neq : p ≠ q) (h_sol : ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) :
+    (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) := by
+  obtain ⟨m, hm⟩ := h_sol
+  sorry
+
+lemma helper_implication_forward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) 
+    (h_exists : ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) :
+    p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) := by
+  by_cases h_pq : p = q
+  · left
+    exact h_pq
+  · right
+    have h_neq : p ≠ q := h_pq
+    obtain ⟨m, hm⟩ := h_exists
+    have h_sol : (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) := 
+      helper_no_other_solutions p q hp hq h_neq ⟨m, hm⟩
+    cases h_sol
+    · left
+      exact ‹_›
+    · right
+      exact ‹_›
+
+lemma helper_implication_backward (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) 
+    (h_disj : p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) :
+    ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2 := by
+  cases h_disj with
+    | inl h_pq =>
+      exact helper_case_p_eq_q p q hp hq h_pq
+    | inr h_or =>
+      cases h_or with
+      | inl h_and =>
+        obtain ⟨h1, h2⟩ := h_and
+        subst_vars
+        exact helper_case_p3_q11_square
+      | inr h_and =>
+        obtain ⟨h1, h2⟩ := h_and
+        subst_vars
+        exact helper_case_p11_q3_square
+
+theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
+  (∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2) ↔
+    (p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3)) := by
+  sorry
