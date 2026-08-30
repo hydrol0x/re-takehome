@@ -9,30 +9,40 @@ theorem rmo_2001_2 (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
   · -- Forward direction
     intro h
     rcases h with ⟨m, hm⟩
-    by_cases h_eq : p = q
-    · exact Or.inl h_eq
-    · -- p ≠ q
-      have h_ne : p ≠ q := h_eq
-      -- WLOG assume p < q
-      cases lt_or_gt_of_ne h_ne with h_lt h_gt
-      · -- p < q
-        -- We need to show p = 3 ∧ q = 11
-        have h_main : p = 3 ∧ q = 11 := by sorry
-        exact Or.inr (Or.inl h_main)
-      · -- p > q
-        -- Symmetric case, swap p and q
-        have h_swap : q = 3 ∧ p = 11 := by sorry
-        exact Or.inr (Or.inr ⟨h_swap.2, h_swap.1⟩)
+    have h₁ : p = q ∨ (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) := by
+      -- Use the factorization approach
+      have h₂ : (2 * p + 7 * q - 2 * m) * (2 * p + 7 * q + 2 * m) = 45 * q ^ 2 := by
+        have h₃ : (2 * p + 7 * q) ^ 2 - (2 * m) ^ 2 = 45 * q ^ 2 := by
+          calc
+            (2 * p + 7 * q) ^ 2 - (2 * m) ^ 2 = 4 * p ^ 2 + 28 * p * q + 49 * q ^ 2 - 4 * m ^ 2 := by ring
+            _ = 4 * (p ^ 2 + 7 * p * q + q ^ 2) + 45 * q ^ 2 - 4 * m ^ 2 := by ring
+            _ = 4 * m ^ 2 + 45 * q ^ 2 - 4 * m ^ 2 := by rw [hm]
+            _ = 45 * q ^ 2 := by ring
+        have h₄ : (2 * p + 7 * q - 2 * m) * (2 * p + 7 * q + 2 * m) = (2 * p + 7 * q) ^ 2 - (2 * m) ^ 2 := by
+          have h₅ : 2 * p + 7 * q ≥ 2 * m := by
+            nlinarith [Nat.Prime.two_le hp, Nat.Prime.two_le hq]
+          rw [← sub_eq_zero]
+          have h₆ : (2 * p + 7 * q) ^ 2 - (2 * m) ^ 2 = (2 * p + 7 * q - 2 * m) * (2 * p + 7 * q + 2 * m) := by
+            have h₇ : 2 * p + 7 * q ≥ 2 * m := by
+              nlinarith [Nat.Prime.two_le hp, Nat.Prime.two_le hq]
+            rw [Nat.mul_sub_left_distrib, Nat.mul_sub_right_distrib]
+            ring_nf
+            omega
+          rw [h₆]
+          omega
+        linarith
+      sorry
+    exact h₁
   · -- Backward direction
     intro h
-    rcases h with (⟨h_eq⟩ | ⟨h_p3, h_q11⟩ | ⟨h_p11, h_q3⟩)
-    · -- p = q
-      use 3 * p
-      rw [h_eq]
-      ring
-    · -- p = 3, q = 11
-      use 19
-      norm_num [h_p3, h_q11]
-    · -- p = 11, q = 3
-      use 19
-      norm_num [h_p11, h_q3]
+    rcases h with (rfl | ⟨h₃, h₁₁⟩ | ⟨h₁₁, h₃⟩)
+    · -- Case p = q
+      refine' ⟨3 * p, _⟩
+      ring_nf
+      simp [pow_two]
+    · -- Case p = 3, q = 11
+      refine' ⟨19, _⟩
+      norm_num [pow_two]
+    · -- Case p = 11, q = 3
+      refine' ⟨19, _⟩
+      norm_num [pow_two]
