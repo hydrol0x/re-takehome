@@ -17,5 +17,5 @@
   "comparator_timeout_s": 180,
   "verify_reserve_s": 120,
   "agent": "baselines.simple_agent:create_agent",
-  "session_id": "e0608e95a18a413c8cc32968ccbef5b9"
+  "session_id": "371b841854d84e31ae699b11b515b6f0"
 }
