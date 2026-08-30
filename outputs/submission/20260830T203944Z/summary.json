@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "set": "putnam2018",
+  "problems": [
+    {
+      "problem_id": "putnam_2018_a1",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.055376489999999993,
+      "wall_s": 1471.25,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 1,
+  "max_points": 1,
+  "actual_cost_usd": 0.05537649,
+  "wall_s_sum": 1471.25,
+  "run_id": "01dcadbca1db4de98ef9d03941efb2b0",
+  "wall_s": 1471.5,
+  "finished_at": "2026-08-30T21:04:15.680858+00:00"
+}
