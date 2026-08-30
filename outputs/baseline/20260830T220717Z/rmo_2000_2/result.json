@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2000_2",
+  "status": "cost_unknown",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 20427,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (6.2s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n✖ [2997/2999] Running Mathlib.Data.Nat.Pow\nerror: no such file or directory (error code: 4294967294)\n  file: /opt/mathlib/Mathlib/Data/Nat/Pow.lean\n✖ [2998/2999] Running Solution\nerror: Solution.lean: bad import 'Mathlib.Data.Nat.Pow'\nSome required targets logged failures:\n- Mathlib.Data.Nat.Pow\n- Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.013970214,
+    "reserved_usd": 0,
+    "accounting_complete": false
+  },
+  "within_time": true,
+  "wall_s": 1054.821,
+  "models_used": [
+    "openai/gpt-oss-120b"
+  ],
+  "both_required_models_used": false,
+  "agent_error": {
+    "type": "LLMCallError",
+    "message": "OpenRouter response omitted required usage accounting: 'usage'",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/user/re-takehome/src/re_harness/llm.py\", line 222, in complete\n    usage = data[\"usage\"]\n            ~~~~^^^^^^^^^\nKeyError: 'usage'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/user/re-takehome/src/re_harness/worker.py\", line 128, in _run\n    result = await asyncio.wait_for(agent.solve(problem, services), timeout=agent_time)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.11/asyncio/tasks.py\", line 489, in wait_for\n    return fut.result()\n           ^^^^^^^^^^^^\n  File \"/home/user/re-takehome/baselines/simple_agent.py\", line 118, in solve\n    response = await services.llm.complete(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/user/re-takehome/src/re_harness/llm.py\", line 239, in complete\n    raise LLMCallError(f\"OpenRouter response omitted required usage accounting: {exc}\") from exc\nre_harness.llm.LLMCallError: OpenRouter response omitted required usage accounting: 'usage'\n"
+  },
+  "agent_metadata": {
+    "baseline_turn": 7,
+    "model": "openai/gpt-oss-120b"
+  }
+}

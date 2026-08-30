@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option exponentiation.threshold 10000
+
 /-- The last two digits of `7 ^ 2026`. Must be a numeric literal. -/
 abbrev p06_answer : ℕ := 49
 
