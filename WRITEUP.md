@@ -240,9 +240,9 @@ control.
 | raw qwen (kit baseline) | 7 | — | thrash loops; missed a free `norm_num` problem in 25 paid turns |
 | raw gpt-oss (kit baseline) | 8 | — | stuck loops; 18-min effective cap |
 | **union of raw baselines** | **10** | — | the portfolio floor |
-| our ladder, solo-qwen | 8 → 9 | $0.45 / $0.40 | seed 2 solved hard-tier p10 at a 30-min cap |
-| our ladder, solo-gptoss | 8 → 9 | $0.04 / $0.01 | cheapest arm by ~10× |
-| **our ladder, duo** | **9 → 10** | $0.16 / $0.17 | equals the union of its own solo arms, at ⅓–½ solo-qwen's cost |
+| our ladder, solo-qwen | 8 / 9 | $0.45 / $0.40 | seed 2 solved hard-tier p10 at a 30-min cap |
+| our ladder, solo-gptoss | 8 / 9 | $0.04 / $0.01 | cheapest arm by ~10× |
+| **our ladder, duo** | **9 / 10** | $0.16 / $0.17 | equals the union of its own solo arms, at ⅓–½ solo-qwen's cost |
 
 Three readings. First, the scaffold alone is worth ≈+1–2 problems to *each* model at
 short caps (and the free deterministic sweep covers 6/16 at $0.00 before any model is
@@ -275,7 +275,7 @@ baselines' hard-tier score was 0.
 
 ### 6.3 The custom set: selection, plateau, and a first-ever solve
 
-On the dev-16 the selection loop lifted the promoted configuration **11 → 13/16**
+On the dev-16 the selection loop lifted the promoted configuration **from 11/16 to 13/16**
 (held set stable at 6/8 on both checks). The ten-branch sweep then failed to beat
 13 — instructively. The best first seed (REPL-verified premise hints, 13/16 with
 every coin-flip problem held) collapsed to 10/16 on its confirmation seed: seed luck,
@@ -286,7 +286,7 @@ more. At short windows, cycle count and sample diversity beat guidance; the tune
 defaults are a genuine local optimum.
 
 Where is the remaining headroom, then? We measured it: doubling the short window
-(20→40 min) moved *nothing* — the curve is flat where iteration is the input. But at
+(20 to 40 min) moved *nothing* — the curve is flat where iteration is the input. But at
 **2-hour caps, h04 — one of three dev problems that had survived all ~19 short-window
 evaluations — fell** (comparator 43 s, $0.16). Structure yields to time, not to
 prompting. This mirrors the kit hard tier exactly and is the empirical basis for the
