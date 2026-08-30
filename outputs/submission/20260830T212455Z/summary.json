@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "set": "putnam2018",
+  "problems": [
+    {
+      "problem_id": "putnam_2018_a1",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.009550702,
+      "wall_s": 917.331,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 1,
+  "max_points": 1,
+  "actual_cost_usd": 0.009550702,
+  "wall_s_sum": 917.331,
+  "run_id": "cc68e6a5b27049c88f5c05c2e2e6abc8",
+  "wall_s": 917.603,
+  "finished_at": "2026-08-30T21:40:13.518671+00:00"
+}
