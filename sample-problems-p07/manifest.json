@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "set": "p07",
+  "problems": [
+    {
+      "id": "p07_least_divisible",
+      "theorem_names": [
+        "p07_least_divisible"
+      ],
+      "definition_names": [
+        "p07_answer"
+      ],
+      "numeric_answer_names": [
+        "p07_answer"
+      ]
+    }
+  ]
+}

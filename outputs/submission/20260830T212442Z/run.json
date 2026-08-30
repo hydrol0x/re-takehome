@@ -1,21 +1,16 @@
 {
   "schema_version": 1,
-  "run_id": "2dd4ef86d46d4b33b15f069db7d70a9f",
-  "set": "putnam2018",
-  "started_at": "2026-08-30T21:00:06.633329+00:00",
+  "run_id": "390056e4d57641aab0517135fcab5e26",
+  "set": "p07",
+  "started_at": "2026-08-30T21:24:42.443715+00:00",
   "agent": "submission.agent:create_agent",
   "agent_name": "submission",
-  "timestamp": "20260830T210006Z",
+  "timestamp": "20260830T212442Z",
   "n_workers": 1,
   "budget_usd_per_problem": 1.0,
   "time_limit_s_per_problem": 1800.0,
   "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
   "api_key_configured": true,
   "python": "3.11.15",
-  "platform": "Linux-6.18.44-fc-v22-x86_64-with-glibc2.39",
-  "finished_at": "2026-08-30T21:24:01.289063+00:00",
-  "wall_s": 1434.656,
-  "resumed": false,
-  "resumed_skipped_problems": 0,
-  "executed_problems": 1
+  "platform": "Linux-6.18.44-fc-v22-x86_64-with-glibc2.39"
 }
