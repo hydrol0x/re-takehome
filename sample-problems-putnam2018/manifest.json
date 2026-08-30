@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "set": "putnam2018",
+  "problems": [
+    {
+      "id": "putnam_2018_a1",
+      "theorem_names": [
+        "putnam_2018_a1"
+      ],
+      "definition_names": [
+        "putnam_2018_a1_solution"
+      ],
+      "numeric_answer_names": []
+    }
+  ]
+}
