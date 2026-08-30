@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Two Models, One Compiler</title>
+<style>
+  @page { size: letter; margin: 1in 1in 0.9in 1in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Liberation Serif", "Times New Roman", serif;
+    font-size: 10pt; line-height: 1.32; color: #111;
+    text-align: justify; hyphens: auto;
+  }
+  .titleblock { text-align: center; margin: 0 0 14pt; }
+  h1.title { font-size: 17pt; font-weight: bold; line-height: 1.2; margin: 0 0 10pt; }
+  .authors { font-size: 11pt; margin: 0 0 2pt; }
+  .affil { font-size: 9.5pt; font-style: italic; color: #333; margin: 0 0 6pt; }
+  .datepre { font-size: 9pt; color: #444; }
+  .abstract { margin: 10pt 34pt 14pt; font-size: 9.5pt; line-height: 1.3; }
+  .abstract .ah { text-align: center; font-weight: bold; font-size: 10.5pt; margin-bottom: 4pt; }
+  h2 { font-size: 11.5pt; font-weight: bold; margin: 12pt 0 4pt; text-align: left; }
+  h3 { font-size: 10pt; font-weight: bold; margin: 8pt 0 2pt; text-align: left; }
+  p { margin: 0 0 5pt; }
+  p.noindent { text-indent: 0; }
+  ul, ol { margin: 2pt 0 6pt; padding-left: 18pt; }
+  li { margin-bottom: 2pt; }
+  code, .tt { font-family: "Liberation Mono", "DejaVu Sans Mono", monospace; font-size: 8.4pt; }
+  .figure { margin: 8pt 0 10pt; page-break-inside: avoid; text-align: center; }
+  .figure svg { max-width: 100%; }
+  .caption { font-size: 8.8pt; line-height: 1.25; text-align: justify; margin: 4pt 6pt 0; color: #111; }
+  .caption b { font-weight: bold; }
+  table.res { border-collapse: collapse; margin: 6pt auto 4pt; font-size: 8.8pt; line-height: 1.25; }
+  table.res th { border-top: 1.2pt solid #111; border-bottom: 0.6pt solid #111; padding: 2.5pt 6pt; text-align: left; font-weight: bold; }
+  table.res td { padding: 2.5pt 6pt; text-align: left; vertical-align: top; border-bottom: 0.3pt solid #bbb; }
+  table.res tr:last-child td { border-bottom: 1.2pt solid #111; }
+  .refs { font-size: 8.6pt; line-height: 1.25; }
+  .refs p { margin: 0 0 3pt; padding-left: 16pt; text-indent: -16pt; text-align: left; }
+  .cite { color: #111; }
+  .sec-num { margin-right: 5pt; }
+  .footer-note { font-size: 8.6pt; color: #333; border-top: 0.5pt solid #999; margin-top: 10pt; padding-top: 4pt; text-align: left; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <h1 class="title">Two Models, One Compiler:<br>A Verifier-Centric Coordination Layer for Small LLMs<br>Proving Competition Mathematics in Lean&nbsp;4</h1>
+  <div class="authors">Jacob (jr4682@columbia.edu)</div>
+  <div class="affil">Columbia University</div>
+  <div class="datepre">Preprint &middot; Verified Mechanisms take-home submission &middot; August 30, 2026</div>
+</div>
+
+<div class="abstract">
+  <div class="ah">Abstract</div>
+  We present a coordination layer that drives two fixed small models &mdash; <span class="tt">qwen/qwen3.5-flash-02-23</span> and <span class="tt">openai/gpt-oss-120b</span> &mdash; to solve competition mathematics and formally verify the results in Lean&nbsp;4 under strict budget caps ($1.00 and 8 hours per problem, kernel-level Comparator scoring). Treating the task as a coverage problem attached to a perfect verifier, we reject dialogue-style multi-agent coordination on published evidence and instead build a staged escalation ladder with exactly three narrow cross-model interfaces: pooled candidate sampling, an answer-consensus gate, and plateau handoff with distilled error history, plus sketch-and-fill decomposition for the hard tail. A comparator precheck that validates accepted proofs against the real scoring gate &mdash; not the development REPL &mdash; proved decisive, converting three otherwise-lost runs. Against the kit's raw single-model baselines (7/16 and 8/16), the same ladder lifts each solo model to 8&ndash;9/16 and the duo to 9&ndash;10/16 at matched short budgets, and at judge settings solves 3 of the 4 provable hard-tier problems the baselines never touched (cumulative coverage 13 of 14 scorable). A ten-mechanism falsification sweep on a 24-problem custom benchmark shows the tuned defaults are a genuine local optimum, and controlled long-horizon runs locate the remaining headroom in capability&times;time rather than prompting. We conclude that with an exact verifier, collaboration pays through coverage, one compact consensus decision, and portfolio robustness &mdash; not through models talking to each other.
+</div>
+
+<h2><span class="sec-num">1</span>Introduction</h2>
+<p>Formal theorem proving offers the rare experimental setting in which a language-model system's output can be judged exactly: a Lean&nbsp;4 proof either type-checks against the stated theorem or it does not. The Verified Mechanisms task instantiates this setting with two deliberately modest, fixed models served through OpenRouter &mdash; Qwen&nbsp;3.5 Flash (fast, inexpensive, February-2026 training cutoff) and GPT-OSS-120B (slow on the accessible provider tier, cheaper still, strong at high reasoning effort, June-2024 cutoff) &mdash; and asks two questions. <i>Part One:</i> build the coordination layer that makes them jointly solve and prove competition math under caps of $1.00 and 8 hours per problem, scored by the official Comparator at the kernel level. <i>Part Two:</i> determine scientifically whether the collaboration beats either model alone, and where one model fills the other's gaps.</p>
+<p>Our design thesis, formed by reading the harness before the literature and stress-tested across roughly thirty scored evaluations: <b>the task is a coverage problem attached to a perfect verifier, and nearly every design decision follows from taking the verifier seriously.</b> The verifier makes candidate selection free, which collapses the value of most published &ldquo;collaboration&rdquo; patterns (debate, synthesis, critique) and concentrates it in three places a two-model system gets almost for free: candidate diversity across model families, consensus on the one decision the verifier cannot check cheaply, and a second set of priors when the first model stalls.</p>
+<p>Contributions: (1) a verifier-centric staged ladder (Fig.&nbsp;1) whose components are individually ablatable, including a <i>comparator precheck</i> that aligns search with the true scoring gate and repeatedly converted losing runs into scoring ones; (2) a matched-budget experimental design &mdash; identical scaffold, model set switched &mdash; that separates scaffold effects from coordination effects, plus a 24-problem custom benchmark with machine-verified reference proofs and a dev/held split; (3) results showing the ladder lifts each solo model above its raw baseline and the duo above the best solo at matched budgets, and unlocks the hard tier entirely at judge settings (Figs.&nbsp;2&ndash;4, Table&nbsp;1); and (4) an honest decomposition of <i>why</i>, including a ten-mechanism falsification sweep, a long-horizon solo control, and a natural robustness experiment supplied by a 14-hour provider outage.</p>
+
+<h2><span class="sec-num">2</span>Task and constraints: what the harness dictates</h2>
+<p>A problem scores one point iff the Comparator accepts every required declaration, numeric answers are decimal literals, spend is at most $1.00, and the problem finishes in time. Three properties of the provided harness shaped the design more than any prior work.</p>
+<p><b>The iteration oracle is not the scoring gate.</b> The development REPL strips imports, checks in a warm full-Mathlib environment, and never compares statements; the Comparator builds a real file cold and demands kernel-level statement equality under a three-axiom whitelist. We therefore splice model output into the pristine challenge so statement equality holds by construction, lexically ban <span class="tt">sorry</span>/<span class="tt">native_decide</span>/<span class="tt">axiom</span> and audit with <span class="tt">#print axioms</span>, and &mdash; the deepest consequence, discovered mid-project &mdash; treat REPL acceptance as necessary but not sufficient, because a proof can be REPL-accepted yet exceed the Comparator's cold-build time limit (&sect;4.3).</p>
+<p><b>Budget accounting is fail-closed.</b> An unaccounted transport failure permanently closes a problem's ledger; the problem then scores zero even with a correct checkpointed proof. This dictates the rails: self-imposed deadlines with margin, generous explicit per-call timeouts, checkpointing every improvement, and a degraded LLM-free mode that still finalizes.</p>
+<p><b>Time, not money, binds.</b> Observed per-problem spend is $0.01&ndash;$0.10 against the $1.00 cap even on 8-hour runs (worst case $0.95). GPT-OSS arrives on a slow provider tier (2&ndash;8 minutes per high-effort call [28]), and REPL checks are serial. Every allocation decision in the ladder is a time decision.</p>
+<p><b>The kit's baselines are a ready-made controlled experiment.</b> The provided single-model repair-loop baselines exhibit complementary pathologies: GPT-OSS is <i>stable-but-stuck</i> (25 consecutive turns with a byte-identical error on one problem, holding the right numeric answer from turn&nbsp;1), Qwen is <i>diverse-but-thrashing</i> (a different error signature nearly every turn, hallucinated lemma names). They solve 7/16 and 8/16 respectively; their union solves 10/16. A pooled taxonomy of ~3,900 REPL checks shows proof-script misalignment (&ldquo;no goals&rdquo;) dominating (2,530 occurrences) and hallucinated constants second (622) &mdash; both directly actionable (&sect;4).</p>
+
+<h2><span class="sec-num">3</span>Related work and rejected designs</h2>
+<p><b>Adopted evidence.</b> Repeated sampling against a verifier converts coverage into accuracy log-linearly [1]; it is the null hypothesis every richer mechanism must beat at equal cost. Pooling candidates across model families captures most of the ensemble benefit with only two models [2], and diversity pays precisely when the selector is strong [3] &mdash; ours is exact. Compiler-feedback repair is worth roughly an order of magnitude of samples when kept shallow: one round approximates pass@1024 for Kimina [4]; two rounds add +2.4pp at ~25% extra tokens for Goedel-Prover-V2 [5]; APOLLO lifts general models from 3&ndash;7% to 40%+ on miniF2F [6]; and at a fixed sample budget repair beats best-of-N in the Delta-Prover-style ablation [7]. But equal-budget <i>self</i>-repair can lose to resampling [8], and models locate their own errors poorly while fixing located errors well [9] &mdash; the compiler locates for free, so a cross-model handoff transfers a candidate plus distilled error history, not critique. For the hard tail, sketch-then-fill decomposition is the through-line of the strongest systems: Draft-Sketch-Prove [10], its reasoning-model revival [11], DeepSeek-Prover-V2's subgoal RL [12], Hilbert's two-prover recursion [13], Prover Agent [14], and Seed-Prover's depth ladder [15]. Verifier-gated cascades allocate cheap effort first [16]. Self-consistency [17] is reserved for the single verifier-blind decision (answer commitment). Agentic loops around unmodified general models &mdash; our exact regime &mdash; now match or beat fine-tuned provers [7, 23, 24], and GPT-OSS-120B itself appears as the informal reasoner in an open hard-mode pipeline [25] and among the most cost-efficient provers in an independent evaluation [26].</p>
+<p><b>Rejected designs (a choice, not an omission).</b> Multi-agent debate repeatedly fails compute-matched replication [18, 19, 20], and additional rounds can hurt [21]. Mixture-of-Agents synthesis loses to self-mixtures [22] and won 0/42 tasks in the selection-bottleneck study [3]; union plus exact selection captures the value without an aggregator. Free-form critics are redundant beside a compiler. Learned routers require training we cannot do. Tactic-level tree search fights this kit's file-level, serial REPL interface. Consequently <i>the models never converse</i>: they share artifacts &mdash; candidate files, error histories, skeletons &mdash; across three narrow interfaces, with the compiler between them. Our evaluation methodology (matched budgets, cost curves, per-problem attribution) follows [27].</p>
+
+<div class="figure">
+  <!-- FIGURE 1: architecture diagram -->
+  <svg width="624" height="452" viewBox="0 0 624 452" font-family="Liberation Sans, Arial, sans-serif">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+      </marker>
+      <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/>
+      </marker>
+      <marker id="arrO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/>
+      </marker>
+    </defs>
+    <!-- outer rails box -->
+    <rect x="6" y="6" width="418" height="440" rx="8" fill="none" stroke="#999" stroke-width="1.2" stroke-dasharray="5 3"/>
+    <text x="16" y="21" font-size="9.5" fill="#555" font-style="italic">Anytime loop &#183; rails: self-deadline &#8226; checkpointing &#8226; ledger-death degradation &#8226; durable state</text>
+
+    <!-- model lanes -->
+    <rect x="446" y="30" width="76" height="330" rx="6" fill="#eaf2fc" stroke="#2a78d6" stroke-width="1.2"/>
+    <text x="484" y="46" font-size="10" font-weight="bold" fill="#1c5aa8" text-anchor="middle">Qwen 3.5</text>
+    <text x="484" y="58" font-size="10" font-weight="bold" fill="#1c5aa8" text-anchor="middle">Flash</text>
+    <text x="484" y="72" font-size="8" fill="#1c5aa8" text-anchor="middle">fast &#183; 2026 cutoff</text>
+    <rect x="536" y="30" width="76" height="330" rx="6" fill="#fdeee6" stroke="#eb6834" stroke-width="1.2"/>
+    <text x="574" y="46" font-size="10" font-weight="bold" fill="#b74417" text-anchor="middle">GPT-OSS</text>
+    <text x="574" y="58" font-size="10" font-weight="bold" fill="#b74417" text-anchor="middle">120B</text>
+    <text x="574" y="72" font-size="8" fill="#b74417" text-anchor="middle">deep &#183; slow &#183; 2024</text>
+
+    <!-- stages -->
+    <!-- S0 -->
+    <rect x="30" y="34" width="200" height="34" rx="4" fill="#f2f2ef" stroke="#444" stroke-width="1"/>
+    <text x="40" y="48" font-size="9.5" font-weight="bold">S0&#8194;Deterministic tactic sweep</text>
+    <text x="40" y="60" font-size="8.5" fill="#444">~15 spliced templates &#8226; $0 &#8226; solves easy third</text>
+    <!-- S0.5 -->
+    <rect x="30" y="80" width="200" height="34" rx="4" fill="#f2f2ef" stroke="#444" stroke-width="1"/>
+    <text x="40" y="94" font-size="9.5" font-weight="bold">S0.5&#8194;Answer-consensus gate</text>
+    <text x="40" y="106" font-size="8.5" fill="#444">agree &#8594; commit; disagree &#8594; adjudicate + probe</text>
+    <!-- cycle container -->
+    <rect x="22" y="126" width="216" height="196" rx="6" fill="none" stroke="#666" stroke-width="1"/>
+    <text x="32" y="140" font-size="8.5" fill="#555" font-style="italic">escalation cycle (repeats until solve / window low)</text>
+    <!-- S1 -->
+    <rect x="34" y="148" width="192" height="30" rx="4" fill="#fff" stroke="#444" stroke-width="1"/>
+    <text x="44" y="160" font-size="9.5" font-weight="bold">S1&#8194;Pooled diverse sampling</text>
+    <text x="44" y="171" font-size="8.5" fill="#444">both models &#8594; one pool; REPL selects</text>
+    <!-- S4 -->
+    <rect x="34" y="186" width="192" height="40" rx="4" fill="#fff" stroke="#444" stroke-width="1"/>
+    <text x="44" y="198" font-size="9.5" font-weight="bold">S4&#8194;Sketch &amp; fill decomposition</text>
+    <text x="44" y="209" font-size="8.5" fill="#444">skeleton of typed lemmas + sorry holes;</text>
+    <text x="44" y="219" font-size="8.5" fill="#444">breadth-first fills &#8226; persistent lemma pool</text>
+    <!-- S2 -->
+    <rect x="34" y="234" width="192" height="30" rx="4" fill="#fff" stroke="#444" stroke-width="1"/>
+    <text x="44" y="246" font-size="9.5" font-weight="bold">S2&#8194;Targeted repair (&#8804;2&#8211;3 rounds)</text>
+    <text x="44" y="257" font-size="8.5" fill="#444">deterministic error&#8594;fix rules first</text>
+    <!-- S3 -->
+    <rect x="34" y="272" width="192" height="40" rx="4" fill="#fff" stroke="#444" stroke-width="1"/>
+    <text x="44" y="284" font-size="9.5" font-weight="bold">S3&#8194;Plateau handoff</text>
+    <text x="44" y="295" font-size="8.5" fill="#444">error signature repeats &#8594; other model gets</text>
+    <text x="44" y="305" font-size="8.5" fill="#444">candidate + distilled error history</text>
+    <!-- cycle back arrow -->
+    <path d="M 238 300 C 252 300 252 160 238 160" fill="none" stroke="#666" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- flow arrows down -->
+    <line x1="130" y1="68" x2="130" y2="80" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+    <line x1="130" y1="114" x2="130" y2="148" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+    <line x1="130" y1="178" x2="130" y2="186" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+    <line x1="130" y1="226" x2="130" y2="234" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+    <line x1="130" y1="264" x2="130" y2="272" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+    <line x1="130" y1="322" x2="130" y2="336" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+
+    <!-- precheck -->
+    <rect x="30" y="336" width="200" height="46" rx="4" fill="#e7f0e9" stroke="#2e6b45" stroke-width="1.2"/>
+    <text x="40" y="350" font-size="9.5" font-weight="bold" fill="#20492f">Comparator precheck (real gate)</text>
+    <text x="40" y="361" font-size="8.5" fill="#20492f">REPL-accepted winner &#8594; fresh scoring container</text>
+    <text x="40" y="372" font-size="8.5" fill="#20492f">pass &#8594; return &#8226; timeout &#8594; stash fallback, re-hunt</text>
+    <!-- fallback loop -->
+    <path d="M 30 364 C 8 364 8 240 22 226" fill="none" stroke="#2e6b45" stroke-width="1" stroke-dasharray="4 2.5" marker-end="url(#arr)"/>
+    <text x="14" y="300" font-size="7.8" fill="#2e6b45" transform="rotate(-90 14 300)">timeout: keep as fallback, continue</text>
+    <!-- S5 -->
+    <line x1="130" y1="382" x2="130" y2="394" stroke="#444" stroke-width="1.1" marker-end="url(#arr)"/>
+    <rect x="30" y="394" width="200" height="34" rx="4" fill="#f2f2ef" stroke="#444" stroke-width="1"/>
+    <text x="40" y="408" font-size="9.5" font-weight="bold">S5&#8194;Finalize</text>
+    <text x="40" y="420" font-size="8.5" fill="#444">restore statements/imports &#8226; literal answers</text>
+
+    <!-- cross-model interface arrows -->
+    <!-- S0.5: both -->
+    <line x1="446" y1="97" x2="234" y2="97" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrB)"/>
+    <line x1="536" y1="103" x2="238" y2="103" stroke="#eb6834" stroke-width="1.2" marker-end="url(#arrO)"/>
+    <!-- S1: both -->
+    <line x1="446" y1="158" x2="230" y2="158" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrB)"/>
+    <line x1="536" y1="166" x2="234" y2="166" stroke="#eb6834" stroke-width="1.2" marker-end="url(#arrO)"/>
+    <!-- S4: alternating sketchers -->
+    <line x1="446" y1="200" x2="230" y2="200" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrB)"/>
+    <line x1="536" y1="210" x2="234" y2="210" stroke="#eb6834" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arrO)"/>
+    <!-- S3 handoff: crossing arrows between lanes -->
+    <path d="M 484 290 C 484 306 530 306 560 296" fill="none" stroke="#444" stroke-width="1.2" marker-end="url(#arr)"/>
+    <path d="M 574 276 C 574 260 520 260 495 272" fill="none" stroke="#444" stroke-width="1.2" marker-end="url(#arr)"/>
+    <line x1="446" y1="290" x2="230" y2="290" stroke="#444" stroke-width="1.2" marker-end="url(#arr)"/>
+    <text x="529" y="252" font-size="8" fill="#444" text-anchor="middle">handoff exploits cutoff gap +</text>
+    <text x="529" y="262" font-size="8" fill="#444" text-anchor="middle">stuck-vs-thrash asymmetry</text>
+
+    <!-- interface labels -->
+    <text x="336" y="90" font-size="8" fill="#333" font-style="italic">interface 2: answer votes</text>
+    <text x="336" y="151" font-size="8" fill="#333" font-style="italic">interface 1: candidates</text>
+    <text x="336" y="193" font-size="8" fill="#333" font-style="italic">sketchers (alternating)</text>
+    <text x="336" y="283" font-size="8" fill="#333" font-style="italic">interface 3: handoff</text>
+
+    <!-- lane bottom note -->
+    <text x="529" y="345" font-size="8" fill="#555" text-anchor="middle" font-style="italic">no model-to-model dialogue:</text>
+    <text x="529" y="355" font-size="8" fill="#555" text-anchor="middle" font-style="italic">artifacts only, compiler between</text>
+  </svg>
+  <div class="caption"><b>Figure 1:</b> The coordination layer. A single anytime escalation ladder (left) runs inside safety rails dictated by the harness's fail-closed accounting. The two models (right) never converse; they meet at three narrow interfaces &mdash; pooled candidates into S1, independent answer votes into S0.5, and plateau handoff at S3 (candidate + distilled error history to the other model) &mdash; plus alternating sketch duty in S4. Every REPL-accepted winner must survive a <i>comparator precheck</i> against the real scoring gate; timeouts are stashed as fallbacks (dashed) while the hunt continues.</div>
+</div>
+
+<h2><span class="sec-num">4</span>Architecture</h2>
+<p>Figure&nbsp;1 shows the system. We describe the components that carry the results; full detail is in the repository (<span class="tt">submission/agent.py</span>, ~1,900 lines over the kit's services; every mechanism has an on/off switch).</p>
+<h3>4.1 The ladder</h3>
+<p><b>S0, deterministic sweep ($0).</b> ~15 statement-spliced tactic templates solve the easy third of the kit set before any model is called; three cascade entries were later mined offline against archived failed subgoals from real runs. <b>S0.5, answer consensus.</b> For answer-type problems both models independently produce the numeric answer (closed forms evaluated to decimal literals); agreement commits, disagreement triggers one adjudication round plus cheap REPL falsification probes. This is the one verifier-blind decision, and a wrong commitment means unbounded wasted search. <b>S1, pooled sampling.</b> A wave of cheap Qwen candidates plus thinking-Qwen and GPT-OSS samples enter one deduplicated, lexically-guarded pool; the REPL selects. <b>S2, capped repair.</b> At most 2&ndash;3 error-informed rounds with the authoring model, deterministic error&#8594;fix rewrites applied first. <b>S3, plateau handoff.</b> A repeating error signature routes the candidate and a distilled error history to the other model &mdash; a fresh attempt with more information, exploiting the training-cutoff gap and the stuck-vs-thrash asymmetry of &sect;2. <b>S4, decomposition.</b> The long-window weapon: a sketcher (Qwen-think primary, GPT-OSS alternating) emits an informal solution and a skeleton of standalone, explicitly-typed helper lemmas with <span class="tt">sorry</span> bodies; broken skeleton lines are masked rather than discarded [11]; holes are filled breadth-first (every hole gets a cheap pass before any hole gets a deep dialogue); proven lemmas persist in a per-problem pool across re-sketches and restarts. <b>S5, finalize.</b> Restore pristine statements and imports, enforce literal answers, re-verify, return.</p>
+<h3>4.2 Time constants that respect the window</h3>
+<p>Two of the highest-value fixes were embarrassingly simple. All stage and model time constants scale with the window: a fixed 960-second GPT-OSS timeout can never fit a 20-minute evaluation window and had silently disabled decomposition at short caps. And the outer loop's cycle cap &mdash; calibrated for slow mixed-model cycles &mdash; must yield to remaining time: during a provider outage that made cycles fast, the original cap stranded three hours of an eight-hour window; past the cap the loop now keeps cycling while &ge;45 minutes remain.</p>
+<h3>4.3 The comparator precheck: aligning search with the gate</h3>
+<p>The project's most valuable component was found by chasing a silent failure: REPL-accepted proofs kept timing out the Comparator's cold build &mdash; three times on one problem, then again on another &mdash; kernel cost invisible to warm checking. The agent now verifies accepted winners against the <i>actual</i> Comparator in a fresh scoring container before returning; a timeout demotes the proof to a stash-don't-discard fallback and the hunt continues for a lighter proof. Validated in both directions, repeatedly: one full-cap validation ships 0/4 without it (two would-be-fatal proofs rejected before a light one passed); a chronically lost problem converted immediately after it landed; and in the final runs the <i>fallback</i> half paid &mdash; a precheck that timed out under machine load had rejected a perfectly good proof, which shipped and passed only because rejected winners are kept (&sect;6.3). When the search-time checker and the scoring gate disagree, only the gate is real.</p>
+
+<h2><span class="sec-num">5</span>Experimental setup</h2>
+<p><b>Matched-budget arms.</b> <span class="tt">solo-qwen</span>, <span class="tt">solo-gptoss</span>, and <span class="tt">duo</span> run the <i>same</i> ladder with only the model set switched, at identical caps, isolating coordination from scaffolding; the kit's raw baselines supply a scaffold-free floor per model. <b>Custom benchmark.</b> To avoid overfitting the 16 public problems we authored 24 new problems in kit format (number theory, modular arithmetic, divisor counts, factorial valuations, inequalities, telescoping products), each admitted only after a reference proof was machine-verified through the REPL; 16 form a development set, 8 are held out. The agent never sees reference proofs. <b>Noise discipline.</b> Repeated identical-config runs established a &plusmn;2 band on the dev-16 driven by three coin-flip problems; three problems are structurally unsolved at short windows. Variants were judged on per-problem composition, promotions required a repeat plus a held-set check. <b>Scale.</b> ~30 scored evaluations: a seven-iteration selection loop; a ten-mechanism single-flag falsification sweep with confirmation seeds; scaling-curve, structural-opens, and long-horizon controls; and three full-cap validations at exact judge settings. Total key spend &asymp; $16 of $50.</p>
+
+<h2><span class="sec-num">6</span>Results</h2>
+<h3>6.1 Scaffold vs. raw model, and duo vs. solo</h3>
+<div class="figure">
+  <!-- FIGURE 2: solve rates grouped bars -->
+  <svg width="560" height="252" viewBox="0 0 560 252" font-family="Liberation Sans, Arial, sans-serif">
+    <!-- plot area x:70..540 y:18..210 ; y scale 0..16 => 192px, 12px per unit -->
+    <!-- gridlines -->
+    <g stroke="#ddd" stroke-width="1">
+      <line x1="70" y1="162" x2="540" y2="162"/><line x1="70" y1="114" x2="540" y2="114"/><line x1="70" y1="66" x2="540" y2="66"/><line x1="70" y1="18" x2="540" y2="18"/>
+    </g>
+    <g font-size="9" fill="#555" text-anchor="end">
+      <text x="64" y="213">0</text><text x="64" y="165">4</text><text x="64" y="117">8</text><text x="64" y="69">12</text><text x="64" y="21">16</text>
+    </g>
+    <text x="20" y="130" font-size="9.5" fill="#333" transform="rotate(-90 20 130)" text-anchor="middle">problems solved / 16</text>
+    <!-- reference lines -->
+    <line x1="70" y1="90" x2="540" y2="90" stroke="#888" stroke-width="1" stroke-dasharray="6 3"/>
+    <text x="74" y="86" font-size="8.5" fill="#666">union of raw baselines (10)</text>
+    <line x1="70" y1="42" x2="540" y2="42" stroke="#888" stroke-width="1" stroke-dasharray="2 3"/>
+    <text x="74" y="52" font-size="8.5" fill="#666">scorable ceiling (14: two kit problems are broken, &#167;6.2)</text>
+    <!-- baseline -->
+    <line x1="70" y1="210" x2="540" y2="210" stroke="#444" stroke-width="1.2"/>
+    <!-- groups: solo-qwen center 155, solo-gptoss 305, duo 455 ; bars w=34 gap 4 -->
+    <!-- solo-qwen: raw 7 => h84 y126 ; s1 8 => h96 y114 ; s2 9 => h108 y102 -->
+    <g>
+      <rect x="98" y="126" width="34" height="84" rx="2.5" fill="#8f8f8a"/>
+      <rect x="136" y="114" width="34" height="96" rx="2.5" fill="#7fa8dc"/>
+      <rect x="174" y="102" width="34" height="108" rx="2.5" fill="#2a78d6"/>
+      <text x="115" y="120" font-size="9" text-anchor="middle" fill="#333">7</text>
+      <text x="153" y="108" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <text x="191" y="96" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="153" y="226" font-size="9.5" text-anchor="middle" fill="#111">Qwen only</text>
+    </g>
+    <!-- solo-gptoss: raw 8 -->
+    <g>
+      <rect x="248" y="114" width="34" height="96" rx="2.5" fill="#8f8f8a"/>
+      <rect x="286" y="114" width="34" height="96" rx="2.5" fill="#7fa8dc"/>
+      <rect x="324" y="102" width="34" height="108" rx="2.5" fill="#2a78d6"/>
+      <text x="265" y="108" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <text x="303" y="108" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <text x="341" y="96" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="303" y="226" font-size="9.5" text-anchor="middle" fill="#111">GPT-OSS only</text>
+    </g>
+    <!-- duo: no raw; s1 9 s2 10 -->
+    <g>
+      <rect x="417" y="102" width="34" height="108" rx="2.5" fill="#7fa8dc"/>
+      <rect x="455" y="90" width="34" height="120" rx="2.5" fill="#2a78d6"/>
+      <text x="434" y="96" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="472" y="84" font-size="9" text-anchor="middle" fill="#333">10</text>
+      <text x="453" y="226" font-size="9.5" text-anchor="middle" fill="#111">Duo (ours)</text>
+    </g>
+    <!-- legend -->
+    <g font-size="8.8" fill="#333">
+      <rect x="72" y="26" width="10" height="10" fill="#8f8f8a" rx="2"/><text x="86" y="34.5">raw kit baseline</text>
+      <rect x="160" y="26" width="10" height="10" fill="#7fa8dc" rx="2"/><text x="174" y="34.5">our ladder, seed 1</text>
+      <rect x="262" y="26" width="10" height="10" fill="#2a78d6" rx="2"/><text x="276" y="34.5">our ladder, seed 2</text>
+    </g>
+    <text x="70" y="245" font-size="8" fill="#666">Kit sample set (16 problems). Raw baselines: kit's single-model repair loop (&#8776;20-min caps). Ladder arms: matched 30-min caps, two seeds.</text>
+  </svg>
+  <div class="caption"><b>Figure 2:</b> Holding the model fixed and swapping the scaffold. The ladder is worth +1&ndash;2 problems to each solo model over its raw baseline; the duo beats the best solo arm by +1 on both seeds and, in a single run, matches the union of its own solo arms (the solos fail <i>different</i> problems) at one-half to one-third of solo-Qwen's cost ($0.16&ndash;0.17 vs.\ $0.40&ndash;0.45 per run). Caps differ slightly between raw and ladder rows, so raw bars are a floor rather than an exact control.</div>
+</div>
+<p>Figure&nbsp;2 summarizes the matched-budget comparison the task asks for. Three readings: the scaffold alone lifts <i>each</i> model above its raw baseline (with the free S0 sweep covering 6/16 before any model call); the duo leads the best solo by +1 on both seeds while spending gpt-oss only where Qwen and free tactics failed; and the duo reproduces the union of its solo arms within one run. The short-cap picture nonetheless understates the scaffold: nothing raw ever touched the hard tier.</p>
+
+<h3>6.2 The hard tier at judge settings</h3>
+<p>Six kit problems were unsolved by both baselines. Writing machine-verified reference proofs revealed that only four are provable: one problem is mathematically false as formalized, and one cannot elaborate under the Comparator's true imports &mdash; a flaw invisible to the import-stripping REPL &mdash; so the true ceiling is 14/16 (documented with certificates in the repository). Table&nbsp;1 gives the record against the provable four at exact judge settings.</p>
+<table class="res">
+  <tr><th>Problem</th><th>Best outcome</th><th>Evidence</th></tr>
+  <tr><td>p09 (IMO 1964)</td><td><b>Comparator pass, 3-for-3</b> at full caps</td><td>$0.10&ndash;0.91, 2&ndash;7.6 h; every pass required the precheck to reject kernel-heavy proofs first</td></tr>
+  <tr><td>p10 (factorial powers)</td><td><b>Comparator pass</b></td><td>first hard solve at 2 h caps ($0.05); converted under judge-compatible checking ($0.029, 38 min) once the precheck landed</td></tr>
+  <tr><td>rmo_2000_2 (cube sandwich)</td><td><b>Comparator pass</b></td><td>$0.75; 7.4 h of accumulated lemma-building in one uninterrupted window</td></tr>
+  <tr><td>rmo_2001_2 (divisor pairs)</td><td>unsolved</td><td>best attempt ended one unfilled hole from a complete skeleton</td></tr>
+</table>
+<div class="caption" style="margin-top:2pt"><b>Table 1:</b> Hard-tier record at exact judge settings (8 h / $1.00, duo arm, three validation runs plus long-horizon experiments). Cumulative demonstrated coverage across all runs: 13 of 14 scorable kit problems. The raw baselines score 0 on this tier.</div>
+
+<h3>6.3 Selection, plateau, and where the headroom lives</h3>
+<div class="figure">
+  <!-- FIGURE 3: variant sweep dot plot -->
+  <svg width="560" height="240" viewBox="0 0 560 240" font-family="Liberation Sans, Arial, sans-serif">
+    <!-- x scale: score 8..14 -> x 170..530 (60px per unit) ; rows y from 34 step 17 -->
+    <!-- defaults band 11..13 => x 350..470 -->
+    <rect x="350" y="22" width="120" height="186" fill="#efefec"/>
+    <text x="410" y="18" font-size="8.5" fill="#666" text-anchor="middle">tuned-defaults band (11&#8211;13, &#177;2 noise)</text>
+    <!-- axis -->
+    <line x1="170" y1="208" x2="530" y2="208" stroke="#444" stroke-width="1.1"/>
+    <g font-size="9" fill="#555" text-anchor="middle">
+      <text x="170" y="222">8</text><text x="230" y="222">9</text><text x="290" y="222">10</text><text x="350" y="222">11</text><text x="410" y="222">12</text><text x="470" y="222">13</text><text x="530" y="222">14</text>
+    </g>
+    <text x="350" y="236" font-size="9" fill="#333" text-anchor="middle">dev-16 score (single-flag evaluation)</text>
+    <g stroke="#ddd" stroke-width="0.8">
+      <line x1="230" y1="22" x2="230" y2="208"/><line x1="290" y1="22" x2="290" y2="208"/><line x1="410" y1="22" x2="410" y2="208"/><line x1="470" y1="22" x2="470" y2="208"/>
+    </g>
+    <!-- rows -->
+    <g font-size="8.8" fill="#111" text-anchor="end">
+      <text x="162" y="37">premise hints (B5)</text>
+      <text x="162" y="54">bounded-goal templates (B10)</text>
+      <text x="162" y="71">critic notes (B8)</text>
+      <text x="162" y="88">plan-then-sample (B2)</text>
+      <text x="162" y="105">cluster repair (B3)&#8201;&#8224;</text>
+      <text x="162" y="122">typed fill prompts (B4)</text>
+      <text x="162" y="139">suggestion harvest (B6)</text>
+      <text x="162" y="156">strengthen-IH (B7)&#8201;&#8224;</text>
+      <text x="162" y="173">skeleton portfolio (B9)</text>
+      <text x="162" y="190">temperature spread (B1)</text>
+    </g>
+    <!-- dots: score->x = 170+(s-8)*60 -->
+    <!-- B5: 13 -> 470 seed1 ; 10 -> 290 seed2 (orange, connected) -->
+    <line x1="470" y1="34" x2="296" y2="34" stroke="#eb6834" stroke-width="1.4" marker-end="url(#arrO2)"/>
+    <defs><marker id="arrO2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker></defs>
+    <circle cx="470" cy="34" r="4.5" fill="#eb6834"/>
+    <circle cx="290" cy="34" r="4.5" fill="#fff" stroke="#eb6834" stroke-width="1.6"/>
+    <text x="470" y="30" font-size="8" fill="#b74417" text-anchor="middle">seed 1</text>
+    <text x="290" y="30" font-size="8" fill="#b74417" text-anchor="middle">confirmation seed</text>
+    <!-- others (blue) -->
+    <circle cx="410" cy="51" r="4.5" fill="#2a78d6"/>
+    <circle cx="410" cy="68" r="4.5" fill="#2a78d6"/>
+    <circle cx="350" cy="85" r="4.5" fill="#2a78d6"/>
+    <circle cx="350" cy="102" r="4.5" fill="#2a78d6"/>
+    <circle cx="350" cy="119" r="4.5" fill="#2a78d6"/>
+    <circle cx="350" cy="136" r="4.5" fill="#2a78d6"/>
+    <circle cx="350" cy="153" r="4.5" fill="#2a78d6"/>
+    <circle cx="350" cy="170" r="4.5" fill="#2a78d6"/>
+    <circle cx="230" cy="187" r="4.5" fill="#2a78d6"/>
+  </svg>
+  <div class="caption"><b>Figure 3:</b> The ten-mechanism falsification sweep. Each of ten literature- and failure-analysis-motivated mechanisms was built behind an independent flag and evaluated single-flag on the dev-16. None beat the tuned defaults; the one candidate above the band (premise hints, holding every coin-flip problem on seed&nbsp;1) collapsed to 10/16 on its confirmation seed &mdash; seed luck, not mechanism. &#8224;&nbsp;=&nbsp;mechanism's trigger condition fired at most once (rare at 20-minute windows). Every mechanism that added prompt material scored at or below defaults while costing more.</div>
+</div>
+<p>The first selection loop promoted two changes (window-proportional time constants; breadth-first hole filling), lifting the dev set from 11/16 to 13/16 with the held-out set stable at 6/8 on both checks. The subsequent sweep (Fig.&nbsp;3) established that the tuned defaults are a genuine local optimum: at short windows, cycle count and sample diversity beat guidance.</p>
+<div class="figure">
+  <!-- FIGURE 4: capability x time horizon -->
+  <svg width="560" height="210" viewBox="0 0 560 210" font-family="Liberation Sans, Arial, sans-serif">
+    <!-- x: log2 minutes 20..480 -> map: x = 130 + (log2(m/20))*82 ; 20:130, 40:212, 80:294(~1.3h), 160:376(2.7h), 320:458(5.3h), 480: 130+82*log2(24)=130+82*4.585=506 -->
+    <line x1="130" y1="170" x2="540" y2="170" stroke="#444" stroke-width="1.1"/>
+    <g font-size="9" fill="#555" text-anchor="middle">
+      <text x="130" y="184">20 min</text><text x="212" y="184">40 min</text><text x="294" y="184">80 min</text><text x="376" y="184">2.7 h</text><text x="458" y="184">5.3 h</text><text x="524" y="184">8 h</text>
+    </g>
+    <g stroke="#e2e2df" stroke-width="0.8">
+      <line x1="212" y1="24" x2="212" y2="170"/><line x1="294" y1="24" x2="294" y2="170"/><line x1="376" y1="24" x2="376" y2="170"/><line x1="458" y1="24" x2="458" y2="170"/><line x1="524" y1="24" x2="524" y2="170"/>
+    </g>
+    <text x="335" y="202" font-size="9" fill="#333" text-anchor="middle">time until first Comparator pass (log scale)</text>
+    <!-- rows: p10 64min -> x=130+82*log2(3.2)=130+82*1.678=268 ; p09 115min -> 130+82*log2(5.75)=130+82*2.524=337 ; h04 ~120min -> 130+82*2.585=342 ; rmo_2000_2 444min -> 130+82*log2(22.2)=130+82*4.472=497 ; rmo_2001_2 open -->
+    <g font-size="8.8" fill="#111" text-anchor="end">
+      <text x="122" y="41">p10 (kit hard)</text>
+      <text x="122" y="68">p09 (kit hard)</text>
+      <text x="122" y="95">h04 (custom structural)</text>
+      <text x="122" y="122">rmo_2000_2 (kit hard)</text>
+      <text x="122" y="149">rmo_2001_2 (kit hard)</text>
+    </g>
+    <g stroke="#b9cfec" stroke-width="2">
+      <line x1="130" y1="38" x2="262" y2="38"/>
+      <line x1="130" y1="65" x2="331" y2="65"/>
+      <line x1="130" y1="92" x2="336" y2="92"/>
+      <line x1="130" y1="119" x2="491" y2="119"/>
+    </g>
+    <line x1="130" y1="146" x2="516" y2="146" stroke="#c9c9c4" stroke-width="2" stroke-dasharray="4 3"/>
+    <circle cx="268" cy="38" r="4.5" fill="#2a78d6"/><text x="278" y="41" font-size="8.5" fill="#333">64 min, $0.05</text>
+    <circle cx="337" cy="65" r="4.5" fill="#2a78d6"/><text x="347" y="68" font-size="8.5" fill="#333">115 min, $0.10 (3-for-3 at 8 h caps)</text>
+    <circle cx="342" cy="92" r="4.5" fill="#2a78d6"/><text x="352" y="95" font-size="8.5" fill="#333">2 h caps; survived all 19 short-window evals</text>
+    <circle cx="497" cy="119" r="4.5" fill="#2a78d6"/><text x="440" y="112" font-size="8.5" fill="#333">7.4 h, $0.75</text>
+    <circle cx="524" cy="146" r="4.5" fill="#fff" stroke="#8f8f8a" stroke-width="1.6"/>
+    <text x="440" y="140" font-size="8.5" fill="#666">unsolved (best: 1 unfilled hole)</text>
+    <!-- flat-curve annotation -->
+    <text x="130" y="18" font-size="8.5" fill="#666">dev-16 total is flat from 20 to 40 min (11&#8211;13 &#8594; 11): iteration alone does not crack structure.</text>
+  </svg>
+  <div class="caption"><b>Figure 4:</b> Capability&times;time on the hard tier. Each row shows the time at which a hard problem first passed the Comparator (blue dot; line marks search time before the solve). Doubling the <i>short</i> window moved nothing, yet every structural problem that fell did so at multi-hour horizons under S4 decomposition &mdash; including h04, a custom problem that had survived every one of ~19 short-window configurations. The remaining open problem is the same claim seen from below.</div>
+</div>
+<p>Where does remaining headroom live? Doubling the short window (20 to 40 min) moved nothing &mdash; the curve is flat where iteration is the input. But at 2-hour caps, h04 &mdash; one of three custom problems no configuration had ever solved &mdash; fell (Comparator 43 s, $0.16), and its winning proof had itself been precheck-rejected under machine load, surviving only through the stash-don't-discard fallback. Structure yields to time, not to prompting (Fig.&nbsp;4).</p>
+<h3>6.4 Reliability</h3>
+<p>Under adversarial dev conditions &mdash; container restarts severing every in-flight connection, a ~14-hour provider outage on the GPT-OSS channel, REPL container deaths under memory contention &mdash; the final configuration recorded zero unaccounted-cost failures, and every full-cap point traces causally through the rails. The precheck alone flipped one 0/4 validation to 1/4, converted p10's chronic loss, and rescued the h04 first-ever from its own false negative.</p>
+
+<h2><span class="sec-num">7</span>Part Two: does collaboration beat either model alone, and why?</h2>
+<p><b>At matched budgets: yes, modestly and consistently.</b> The duo was never worse than the best solo arm, beat it by one problem on both seeds, matched the union of the solos in a single run, and cost a fraction of the stronger solo (Fig.&nbsp;2). The attribution, from ablations, per-problem event logs, and one natural experiment:</p>
+<ol>
+  <li><b>The verifier-centric scaffold is the largest term</b> &mdash; larger than any pairing effect. It lifts each solo model above its raw baseline, unlocks the hard tier at long horizons, and its most valuable component (the precheck) involves no second model at all. The controlled check: given 4 hours and the same scaffold, <i>solo-Qwen also converted p09</i> via the same reject-then-re-hunt arc. At long horizons the scaffold carries p09; the pairing does not.</li>
+  <li><b>Union coverage is the reliable collaboration gain.</b> Different families fail different problems at every scale we measured (raw baselines 7/8&#8594;10; our solo arms miss disjoint problems the duo holds). It needs no dialogue: one candidate pool, a compiler selecting [1, 2, 3].</li>
+  <li><b>Skeleton diversity occasionally decides a problem.</b> The first full-cap p09 pass grew from a <i>GPT-OSS</i> sketch that Qwen repaired and filled &mdash; a proof structure the solo-Qwen arm did not produce. This is &ldquo;one model filling the other's gaps&rdquo; at its most concrete: different priors propose different proof structures, and the compiler is indifferent to whose structure wins.</li>
+  <li><b>The answer-consensus gate is cheap insurance</b> on exactly the decision the verifier cannot check; cross-model disagreement caught wrong answers before proof spend in live runs.</li>
+  <li><b>Robustness is a collaboration benefit we measured by accident.</b> During final validation the GPT-OSS provider refused requests for ~14 consecutive hours. A solo-GPT-OSS submission would have scored zero that night; the duo degraded gracefully to Qwen-only behavior and kept solving. This is the portfolio argument in its bluntest form.</li>
+  <li><b>What does not help, measured:</b> conversation-style coordination (never built, on the negative evidence of &sect;3, then corroborated by the sweep of Fig.&nbsp;3 &mdash; every guidance-flavored mechanism at-or-below defaults); deeper per-hole reasoning at short windows (+16% cost, no structural gain); GPT-OSS inside short-window sampling waves (its latency halves Qwen's cycle count).</li>
+</ol>
+<p><b>Summary.</b> With a perfect verifier, collaboration pays through <i>coverage</i> (candidate and skeleton diversity across families), one <i>compact consensus decision</i> (answer commitment), and <i>portfolio robustness</i> &mdash; not through inter-model dialogue. Depth on hard problems is capability&times;time under a decomposition scaffold: p09 needed ~2 hours, h04 needed 2, rmo_2000_2 needed 7.4, and no prompting trick at 20 minutes substituted for any of them. The one provable problem still open (one hole short after ~4 hours) restates the same claim from below: the pair's joint capability at this time budget, not the coordination between them, is the binding constraint.</p>
+
+<h2><span class="sec-num">8</span>Limitations</h2>
+<p>Sample sizes are small (16 kit + 24 custom problems); we report exact per-problem outcomes and treat &plusmn;2 as noise rather than claiming significance. Development-environment weather (provider outages, container restarts, shared-box REPL contention) cost several runs; each incident is documented, and the one dev-only mitigation is never active at judging &mdash; default behavior is the kit's fail-closed semantics. The long-horizon solo control ran at 4 h against the duo's 8 h full-caps, a floor rather than a matched comparison. Finally, these are small models: the demonstrated band &mdash; all of the easy/medium tier plus several genuinely hard problems, IMO-tier still out of reach &mdash; is consistent with published results for similar-scale backbones [6, 14, 25, 26].</p>
+
+<h2><span class="sec-num">9</span>Conclusion</h2>
+<p>The coordination layer is unglamorous by design: let a compiler judge, buy coverage from two model families, spend consensus only on compact decisions, escalate depth &mdash; not chatter &mdash; on hard problems, and align the search loop with the exact gate that scores it. Under judge settings it converts a 0-for-hard-tier baseline pair into 3 of 4 provable hard problems solved, holds 13 of 14 scorable kit problems in cumulative coverage, and survived provider outages and machine failures with its accounting intact &mdash; for about $16 of the $50 development key, spent mostly on evidence rather than solving.</p>
+
+<div class="footer-note">
+<b>Reproducibility &amp; disclosure.</b> Code, agent, custom benchmark with machine-verified reference proofs, per-run artifacts, and chronological logs are in the submission repository (<span class="tt">WRITEUP.md</span> is the plain-text version of this paper; <span class="tt">RESEARCH.md</span>, <span class="tt">PART2.md</span>, <span class="tt">EXPERIMENTS.md</span>, <span class="tt">RESEARCH_LOOP.md</span> are appendices; <span class="tt">RUNBOOK.md</span> reproduces every run; <span class="tt">scripts/judge_check.sh</span> passes on the submitted configuration). This submission was developed with substantial assistance from Claude (Anthropic) &mdash; code, experiments, analysis, and writing &mdash; as disclosed in the submission form.
+</div>
+
+<h2 style="page-break-before:auto">References</h2>
+<div class="refs">
+<p>[1] B. Brown et al. Large Language Monkeys: Scaling Inference Compute with Repeated Sampling. arXiv:2407.21787, 2024.</p>
+<p>[2] Wisdom and Delusion of LLM Ensembles for Code Generation and Repair. arXiv:2510.21513, 2025.</p>
+<p>[3] When Agents Disagree: The Selection Bottleneck in Multi-Agent LLM Pipelines. arXiv:2603.20324, 2026.</p>
+<p>[4] Kimina-Prover Preview: Towards Large Formal Reasoning Models with Reinforcement Learning. arXiv:2504.11354, 2025.</p>
+<p>[5] Goedel-Prover-V2: Scaling Formal Theorem Proving with Scaffolded Data Synthesis and Self-Correction. arXiv:2508.03613, 2025.</p>
+<p>[6] APOLLO: Automated LLM and Lean Collaboration for Advanced Formal Reasoning. arXiv:2505.05758, 2025.</p>
+<p>[7] Solving Formal Math Problems by Decomposition and Iterative Reflection. arXiv:2507.15225, 2025.</p>
+<p>[8] T. X. Olausson et al. Is Self-Repair a Silver Bullet for Code Generation? arXiv:2306.09896, 2023.</p>
+<p>[9] G. Tyen et al. LLMs cannot find reasoning errors, but can correct them given the error location. arXiv:2311.08516, 2023.</p>
+<p>[10] A. Q. Jiang et al. Draft, Sketch, and Prove: Guiding Formal Theorem Provers with Informal Proofs. arXiv:2210.12283, 2022.</p>
+<p>[11] Reviving DSP for Advanced Theorem Proving in the Era of Reasoning Models. arXiv:2506.11487, 2025.</p>
+<p>[12] DeepSeek-AI. DeepSeek-Prover-V2: Advancing Formal Mathematical Reasoning via Reinforcement Learning for Subgoal Decomposition. arXiv:2504.21801, 2025.</p>
+<p>[13] Hilbert: Recursively Building Formal Proofs with Informal Reasoning. arXiv:2509.22819, 2025.</p>
+<p>[14] Prover Agent: An Agent-Based Framework for Formal Mathematical Proofs. arXiv:2506.19923, 2025.</p>
+<p>[15] ByteDance Seed. Seed-Prover: Deep and Broad Reasoning for Automated Theorem Proving. arXiv:2507.23726, 2025.</p>
+<p>[16] L. Chen, M. Zaharia, J. Zou. FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance. arXiv:2305.05176, 2023.</p>
+<p>[17] X. Wang et al. Self-Consistency Improves Chain of Thought Reasoning in Language Models. arXiv:2203.11171, 2022.</p>
+<p>[18] J. Huang et al. Large Language Models Cannot Self-Correct Reasoning Yet. arXiv:2310.01798, 2023.</p>
+<p>[19] A. Smit et al. Should we be going MAD? A Look at Multi-Agent Debate Strategies for LLMs. arXiv:2311.17371, 2023.</p>
+<p>[20] Stop Overvaluing Multi-Agent Debate &mdash; We Must Rethink Evaluation and Embrace Model Heterogeneity. arXiv:2502.08788, 2025.</p>
+<p>[21] Voting or Consensus? Decision-Making in Multi-Agent Debate. arXiv:2502.19130, 2025.</p>
+<p>[22] Rethinking Mixture-of-Agents: Is Mixing Different Large Language Models Beneficial? arXiv:2502.00674, 2025.</p>
+<p>[23] A Minimal Agent for Automated Theorem Proving. arXiv:2602.24273, 2026.</p>
+<p>[24] LEAP: Supercharging LLMs for Formal Mathematics with Agentic Frameworks. arXiv:2606.03303, 2026.</p>
+<p>[25] Discover and Prove: An Open-source Agentic Framework for Hard Mode Automated Theorem Proving in Lean 4. arXiv:2604.15839, 2026.</p>
+<p>[26] Evaluation of LLMs for Mathematical Formalization in Lean. arXiv:2606.05632, 2026.</p>
+<p>[27] S. Kapoor et al. AI Agents That Matter. arXiv:2407.01502, 2024.</p>
+<p>[28] OpenAI. gpt-oss-120b &amp; gpt-oss-20b Model Card. arXiv:2508.10925, 2025.</p>
+</div>
+
+</body>
+</html>
