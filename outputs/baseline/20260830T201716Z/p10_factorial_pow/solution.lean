@@ -7,21 +7,22 @@ abbrev p10_answer : ℕ := 6
 theorem p10_factorial_pow :
     IsGreatest {n : ℕ | Nat.factorial n < 3 ^ n} p10_answer := by
   constructor
-  · -- Show 6 ∈ {n : ℕ | n ! < 3 ^ n}
+  · -- Show 6 ∈ S, i.e., 6! < 3^6
     norm_num [Nat.factorial]
-  · -- Show ∀ n, n ∈ {n : ℕ | n ! < 3 ^ n} → n ≤ 6
+  · -- Show ∀ n, n ∈ S → n ≤ 6
     intro n hn
     by_contra h
-    push Not at h
-    have h_ge_7 : n ≥ 7 := by omega
-    -- Prove by induction that for all k ≥ 7, k! ≥ 3^k
-    have h_ind : ∀ k ≥ 7, Nat.factorial k ≥ 3 ^ k := by
-      intro k hk
-      induction' hk with k hk IH
-      · -- Base case: k = 7
-        norm_num [Nat.factorial]
-      · -- Inductive step
-        simp_all [Nat.factorial, pow_succ]
-        nlinarith
-    have h_fact_ge : Nat.factorial n ≥ 3 ^ n := h_ind n h_ge_7
+    have h' : n ≥ 7 := by omega
+    have h_main : Nat.factorial n ≥ 3 ^ n := by
+      have : ∀ k, k ≥ 7 → Nat.factorial k ≥ 3 ^ k := by
+        intro k hk
+        induction' hk with k hk IH
+        · -- Base case: k = 7
+          norm_num [Nat.factorial]
+        · -- Inductive step: k+1
+          simp [Nat.factorial, pow_succ] at *
+          have : k + 1 ≥ 8 := by omega
+          nlinarith
+      exact this n h'
+    -- Contradiction: n ∈ S means n! < 3^n, but we proved n! ≥ 3^n
     linarith
