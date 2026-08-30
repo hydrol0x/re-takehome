@@ -12,7 +12,7 @@ lemma fraction_to_integer_eq (a b : ℤ) (ha : 0 < a) (hb : 0 < b) :
 -- Factored form of the Diophantine equation
 lemma diophantine_to_factored_form (a b : ℤ) (ha : 0 < a) (hb : 0 < b) :
     (2018 * (a + b) = 3 * a * b) ↔
-    ((3 * a - 2018) * (3 * b - 2018) = 2018 ^ 2) := by sorry
+    ((3 * a - 2018) * (3 * b - 2018) = 2018 ^ 2) := by constructor <;> intro h <;> ring_nf at h ⊢ <;> linarith
 
 -- Condition for valid divisor (ensures a, b are integers)
 lemma valid_divisor_mod_condition (d : ℤ) (hd : d ∣ (2018 : ℤ) ^ 2) :
@@ -20,7 +20,7 @@ lemma valid_divisor_mod_condition (d : ℤ) (hd : d ∣ (2018 : ℤ) ^ 2) :
 
 -- Positive integer constraint for a
 lemma positive_a_condition (d : ℤ) (hd_pos : d > 0) :
-    0 < (2018 + d) / 3 := by sorry
+    0 < (2018 + d) / 3 := by omega
 
 -- Solution set definition
 abbrev putnam_2018_a1_solution : Set (ℤ × ℤ) := 

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "set": "putnam2018",
+  "problems": [
+    {
+      "problem_id": "putnam_2018_a1",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.042846309999999985,
+      "wall_s": 1110.183,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- putnam_2018_a1 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList putnam_2018_a1_solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- putnam_2018_a1 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList putnam_2018_a1_solution\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  ],
+  "total_points": 0,
+  "max_points": 1,
+  "actual_cost_usd": 0.04284631,
+  "wall_s_sum": 1110.183,
+  "run_id": "da435a3d809549339bde22c583f52b80",
+  "wall_s": 1110.524,
+  "finished_at": "2026-08-30T20:52:14.676386+00:00"
+}
