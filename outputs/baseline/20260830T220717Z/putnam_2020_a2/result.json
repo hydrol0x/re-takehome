@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "problem_id": "putnam_2020_a2",
+  "status": "cost_unknown",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 17510,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (6.1s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[putnam_2020_a2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, putnam_2020_a2_solution] from Challenge\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- putnam_2020_a2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList putnam_2020_a2_solution\nPANIC at dumpConstant Export:237:48: Constant putnam_2020_a2_solution not found in environment.\nbacktrace:\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(+0x93a5545) [0x55c0a0de7545]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(+0x939cc67) [0x55c0a0ddec67]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(lean_panic_fn_borrowed+0x2b) [0x55c0a0dded4b]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(panic spec at dumpConstant (lean4export)+0x2ae) [0x55c09ad2289e]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(List.forIn'.loop [arity↓] spec at main (lean4export)+0x2a1) [0x55c09ad14961]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(main [λ] (lean4export)+0x167) [0x55c09ad14e37]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(main [boxed, λ] (lean4export)+0x13) [0x55c09ad150b3]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(<apply/3>+0x970) [0x55c0a0dee690]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(M.run [arity↓] (lean4export)+0x30) [0x55c09ad16ed0]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(+0x935de07) [0x55c0a0d9fe07]\n/opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export(+0x935e2d5) [0x55c0a0da02d5]\n/lib/x86_64-linux-gnu/libc.so.6(+0x891f5) [0x7feececb81f5]\n/lib/x86_64-linux-gnu/libc.so.6(__clone+0x40) [0x7feeced37b50]\nuncaught exception: Child exited with 134\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.022254536999999998,
+    "reserved_usd": 0,
+    "accounting_complete": false
+  },
+  "within_time": true,
+  "wall_s": 1698.591,
+  "models_used": [
+    "openai/gpt-oss-120b"
+  ],
+  "both_required_models_used": false,
+  "agent_error": {
+    "type": "TimeoutError",
+    "message": "agent exceeded 1680.0s"
+  },
+  "agent_metadata": {
+    "baseline_turn": 20,
+    "model": "openai/gpt-oss-120b"
+  }
+}

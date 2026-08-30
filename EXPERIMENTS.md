@@ -450,10 +450,11 @@ rmo_2000_2 1 pass (7.4 h); rmo_2001_2 0, best distance 1 hole.
 Run `outputs/baseline/20260830T220717Z` (BASELINE_MODEL=openai/gpt-oss-120b,
 30-min caps, 4 workers, sample-problems). Two confounds discovered while it ran:
 
-1. **Usage-less provider responses.** Between 22:32:13Z and 22:35:18Z,
-   OpenRouter routed five in-flight problems (p10, rmo_2000_2, rmo_2000_3,
-   rmo_2000_6, rmo_2001_2) to DeepInfra, which returned HTTP-success
-   completions with no `usage` object. The harness's fail-closed accounting
+1. **Usage-less provider responses.** Starting 22:32:13Z, OpenRouter
+   intermittently routed in-flight calls to DeepInfra, which returned
+   HTTP-success completions with no `usage` object; by run end **eight** of
+   the sixteen problems (p09, p10, both Putnams, all four RMO problems) had
+   been killed this way. The harness's fail-closed accounting
    correctly raises `LLMCallError` ("OpenRouter response omitted required
    usage accounting"), which terminates the reference baseline agent, so all
    five results are `cost_unknown`, not genuine attempts. A direct probe at
@@ -464,11 +465,12 @@ Run `outputs/baseline/20260830T220717Z` (BASELINE_MODEL=openai/gpt-oss-120b,
    rmo_2000_6 statements, while every number in the paper's Figure 2
    (including the raw-Qwen 9/16 rerun at 20:17Z) is pre-revision.
 
-Decision: Figure 2's raw-GPT-OSS bar will be assembled from pre-revision
-statements only — clean per-problem results from this run on the 13
-unchanged problems, plus a rerun of the seven affected problems
-(`sample-problems-prerev7/`, extracted from git commit 7436c4c: the five
-usage-killed problems + the two Putnams on their original statements).
+Final run-A scoring: clean results only for p01–p08 (7 passed, p08
+failed); the other eight are `cost_unknown` (usage-killed), not genuine
+attempts. Decision: Figure 2's raw-GPT-OSS bar is assembled from
+pre-revision statements only — run A's clean p01–p08, plus run B
+(`sample-problems-prerev8/`, extracted from git commit 7436c4c: the eight
+affected problems, with the Putnams on their original statements).
 Post-revision results are reported separately in the revised-problems
 section. Any rerun problem that hits the usage fault again is rerun until a
 clean attempt completes (attempt counts logged).
