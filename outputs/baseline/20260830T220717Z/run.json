@@ -1,22 +1,16 @@
 {
   "schema_version": 1,
-  "run_id": "2c47bd81e73a490b918404e2626f7548",
+  "run_id": "fd5688f193b145239af4a784bffda107",
   "set": "sample",
-  "started_at": "2026-08-30T20:17:16.161836+00:00",
+  "started_at": "2026-08-30T22:07:17.489902+00:00",
   "agent": "baselines.simple_agent:create_agent",
   "agent_name": "baseline",
-  "timestamp": "20260830T201716Z",
+  "timestamp": "20260830T220717Z",
   "n_workers": 4,
   "budget_usd_per_problem": 1.0,
   "time_limit_s_per_problem": 1800.0,
   "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
   "api_key_configured": true,
   "python": "3.11.15",
-  "platform": "Linux-6.18.44-fc-v22-x86_64-with-glibc2.39",
-  "resumed_at": "2026-08-30T21:41:10.257128+00:00",
-  "finished_at": "2026-08-30T22:06:09.921434+00:00",
-  "wall_s": 1499.664,
-  "resumed": true,
-  "resumed_skipped_problems": 10,
-  "executed_problems": 6
+  "platform": "Linux-6.18.44-fc-v22-x86_64-with-glibc2.39"
 }
