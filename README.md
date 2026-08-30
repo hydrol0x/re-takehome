@@ -210,6 +210,7 @@ its design rationale and evidence live in the applicant documents:
 
 | Document | Contents |
 | --- | --- |
+| `WRITEUP.md` | **The submission writeup** — problem, prior work, architecture, results, Part-Two answer |
 | `RESEARCH.md` | Harness analysis, model calibration, literature review, architecture |
 | `PART2.md` | Part Two answer: does collaboration beat either model alone, and why |
 | `EXPERIMENTS.md` | Chronological log of every keyed run |
