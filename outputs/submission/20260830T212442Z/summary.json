@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "set": "p07",
+  "problems": [
+    {
+      "problem_id": "p07_least_divisible",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0009574480000000001,
+      "wall_s": 214.555,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 1,
+  "max_points": 1,
+  "actual_cost_usd": 0.000957448,
+  "wall_s_sum": 214.555,
+  "run_id": "390056e4d57641aab0517135fcab5e26",
+  "wall_s": 214.876,
+  "finished_at": "2026-08-30T21:28:17.319835+00:00"
+}
