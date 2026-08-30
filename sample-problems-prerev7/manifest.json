@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "set": "sample",
+  "problems": [
+    {
+      "id": "p10_factorial_pow",
+      "theorem_names": [
+        "p10_factorial_pow"
+      ],
+      "definition_names": [
+        "p10_answer"
+      ],
+      "numeric_answer_names": [
+        "p10_answer"
+      ]
+    },
+    {
+      "id": "rmo_2000_2",
+      "theorem_names": [
+        "rmo_2000_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2000_6",
+      "theorem_names": [
+        "rmo_2000_6"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2001_2",
+      "theorem_names": [
+        "rmo_2001_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2000_3",
+      "theorem_names": [
+        "rmo_2000_3"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "putnam_2020_a2",
+      "theorem_names": [
+        "putnam_2020_a2"
+      ],
+      "definition_names": [
+        "putnam_2020_a2_solution"
+      ],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "putnam_2018_a1",
+      "theorem_names": [
+        "putnam_2018_a1"
+      ],
+      "definition_names": [
+        "putnam_2018_a1_solution"
+      ],
+      "numeric_answer_names": []
+    }
+  ]
+}

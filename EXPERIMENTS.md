@@ -444,3 +444,31 @@ narrowed to a single unfilled hole, and a fixed cycle-cap bug found by
 the runs themselves. Cumulative key spend ≈ $16 of $50. Cross-run
 hard-tier tally: p09 duo 3/3 + solo-qwen 1/1 at ≥4 h; p10 1 pass;
 rmo_2000_2 1 pass (7.4 h); rmo_2001_2 0, best distance 1 hole.
+
+## 2026-08-30 late: raw GPT-OSS baseline (30-min caps) — provider confound and rerun plan
+
+Run `outputs/baseline/20260830T220717Z` (BASELINE_MODEL=openai/gpt-oss-120b,
+30-min caps, 4 workers, sample-problems). Two confounds discovered while it ran:
+
+1. **Usage-less provider responses.** Between 22:32:13Z and 22:35:18Z,
+   OpenRouter routed five in-flight problems (p10, rmo_2000_2, rmo_2000_3,
+   rmo_2000_6, rmo_2001_2) to DeepInfra, which returned HTTP-success
+   completions with no `usage` object. The harness's fail-closed accounting
+   correctly raises `LLMCallError` ("OpenRouter response omitted required
+   usage accounting"), which terminates the reference baseline agent, so all
+   five results are `cost_unknown`, not genuine attempts. A direct probe at
+   22:45Z routed to Amazon Bedrock with full usage — the fault is
+   provider-specific and transient.
+2. **Statement revision skew.** This run started after upstream PR #9 was
+   adopted, so it saw the revised putnam_2018_a1 / putnam_2020_a2 /
+   rmo_2000_6 statements, while every number in the paper's Figure 2
+   (including the raw-Qwen 9/16 rerun at 20:17Z) is pre-revision.
+
+Decision: Figure 2's raw-GPT-OSS bar will be assembled from pre-revision
+statements only — clean per-problem results from this run on the 13
+unchanged problems, plus a rerun of the seven affected problems
+(`sample-problems-prerev7/`, extracted from git commit 7436c4c: the five
+usage-killed problems + the two Putnams on their original statements).
+Post-revision results are reported separately in the revised-problems
+section. Any rerun problem that hits the usage fault again is rerun until a
+clean attempt completes (attempt counts logged).
