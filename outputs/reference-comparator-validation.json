@@ -1,0 +1,196 @@
+{
+  "results": [
+    {
+      "id": "c01_quad_roots",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 38
+    },
+    {
+      "id": "c02_amgm_frac",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 47
+    },
+    {
+      "id": "c03_coprime_linear",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 31
+    },
+    {
+      "id": "c05_pow_sum_div",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 30
+    },
+    {
+      "id": "c06_three_pow",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 34
+    },
+    {
+      "id": "c08_count_congr",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 42
+    },
+    {
+      "id": "c10_tau_360",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 27
+    },
+    {
+      "id": "m01_dvd13",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 28
+    },
+    {
+      "id": "m02_ord25",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 30
+    },
+    {
+      "id": "m04_sumfact",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 29
+    },
+    {
+      "id": "m06_factcop",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 27
+    },
+    {
+      "id": "m08_amgm8",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 29
+    },
+    {
+      "id": "h01_legendre100",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 30
+    },
+    {
+      "id": "h02_mod23_cycle",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 26
+    },
+    {
+      "id": "h04_square_shift",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 27
+    },
+    {
+      "id": "h05_telescope_prod",
+      "set": "custom-problems-dev",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 25
+    },
+    {
+      "id": "c04_sum_odds",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 29
+    },
+    {
+      "id": "c07_order_three",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 29
+    },
+    {
+      "id": "c09_factorial_mod",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 28
+    },
+    {
+      "id": "m03_recip9",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 27
+    },
+    {
+      "id": "m05_divbash",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 28
+    },
+    {
+      "id": "m07_sumgeo",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 27
+    },
+    {
+      "id": "h03_invsq_sum",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 29
+    },
+    {
+      "id": "h06_order_mod125",
+      "set": "custom-problems-held",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 71
+    }
+  ]
+}
