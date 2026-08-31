@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "set": "sample",
+  "problems": [
+    {
+      "problem_id": "p09_imo1964",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.034018549999999995,
+      "wall_s": 1704.405,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "rmo_2000_2",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.029056521000000002,
+      "wall_s": 1706.151,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "rmo_2000_3",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.026915156000000003,
+      "wall_s": 1684.161,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "rmo_2000_6",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.03402050499999999,
+      "wall_s": 1689.544,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "rmo_2001_2",
+      "status": "agent_timeout",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.038703887,
+      "wall_s": 1701.941,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    }
+  ],
+  "total_points": 0,
+  "max_points": 5,
+  "actual_cost_usd": 0.162714619,
+  "wall_s_sum": 8486.202,
+  "run_id": "31e2abcc9c9f4e9e8a88ce169ceeb3d1",
+  "wall_s": 3374.4,
+  "finished_at": "2026-08-31T00:57:55.210155+00:00"
+}

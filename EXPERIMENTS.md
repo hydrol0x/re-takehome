@@ -484,14 +484,34 @@ solve; previously one pass in eight 30-minute controller-arm attempts),
 ($0.006, 474 s). Both Putnam solutions are pure definitional/`rfl`
 instantiations (solution.lean in the run dir), the same circular route as
 every historical Putnam pass — covered by the paper's §5.4 caveat. The
-five remaining problems (p09, rmo_2000_2/3/6, rmo_2001_2) were
-usage-killed a second time, all late in their windows (wall 1685–1712 s of
-1800 s), i.e. each had a ≥94%-complete genuine attempt with no accepted
-proof before the provider fault ended it. Attempt counts so far: p09 ×2
-killed, RMO four ×2 killed. Run C (`sample-problems-prerev5k`) reruns the
-five; if the DeepInfra usage fault recurs, further reruns follow until
-clean.
+five remaining problems (p09, rmo_2000_2/3/6, rmo_2001_2) ended
+`cost_unknown` again — but event inspection shows these were NOT provider
+faults: each is a `CancelledError` stamped exactly at wave-start + 1680 s
+(the runner's agent deadline), i.e. the runner cancelled an in-flight LLM
+call at timeout, which fail-closed accounting labels `cost_unknown`. They
+are genuine full-window failures (zero accepted REPL checks in any of
+them), distinct from run A's real DeepInfra usage faults (which carried
+provider-stamped response bodies and killed agents mid-window). Run C
+(`sample-problems-prerev5k`) reran the five anyway for confirmation.
 
 Provisional Fig-2 raw-GPT-OSS tally (pre-revision statements): p01–p07
 pass (run A) + p08 fail (run A) + p10, putnam_2018_a1, putnam_2020_a2 pass
 (run B) = **10 confirmed passes**, five problems pending clean completion.
+
+
+### Run C (20260831T000140Z) — final raw-GPT-OSS tally
+
+Run C: 0/5. rmo_2001_2 `agent_timeout` (clean, no call in flight at the
+deadline); p09, rmo_2000_2, rmo_2000_3, rmo_2000_6 again full-window
+failures ending in deadline `CancelledError` (`cost_unknown` label; zero
+accepted checks). Each hard problem therefore has two independent clean
+full 28-minute windows (runs B + C) with no accepted proof.
+
+**Final raw GPT-OSS 30-minute tally (pre-revision statements): 10/16.**
+Passes: p01–p07 (run A), p10 ($0.025, 24 min), putnam_2018_a1 (165 s),
+putnam_2020_a2 (474 s) (run B; both Putnam solutions are `rfl`-circular).
+Fails: p08 (run A, genuine repair-loop failure), p09, rmo_2000_2,
+rmo_2000_3, rmo_2000_6, rmo_2001_2 (two clean windows each, runs B/C).
+Comparison at the same caps: raw Qwen 9/16, solo-qwen arm 8–9, solo-gptoss
+arm 8–8, duo 9–10. Paper updated (Fig 2 bar 8→10 with rerun caption, §5.1,
+Tables 1–3 notes, limitations, conclusion).
