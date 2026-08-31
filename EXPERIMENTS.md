@@ -543,3 +543,13 @@ revised Putnams behave as genuine hard-tier instances for every arm, and
 the now-provable rmo_2000_6 did not fall at a short horizon either —
 consistent with the paper's finding that this tier yields at multi-hour
 horizons. Paper §5.4 updated with this result.
+
+### 8-hour full-cap attempts, launch incidents (2026-08-31 ~19:03–19:13Z)
+
+Three aborted launch attempts, all $0 / zero LLM calls, run dirs removed:
+one with dockerd down after a container restart (instant 0/3), then both
+8h runs (revised3 ×3 workers + rmo_2001_2 ×1, staggered only ~2 min) died
+at "REPL failed to import Mathlib: TIMEOUT after 180s" — four concurrent
+cold Mathlib imports on a fresh machine. Relaunched sequentially: revised3
+first, rmo_2001_2 only after all three of its REPLs pass the first
+lean_check (import complete).
