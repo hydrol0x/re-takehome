@@ -528,3 +528,13 @@ set, putnam_2020_a2 = 4^k, rmo_2000_6 IsLeast 10), 30-min/$1 caps,
 | 20260831T014844Z | solo-qwen | 1 | ✗ ($0.051, 22m) | ✗ ($0.058, 20m) | ✗ ($0.052, 19m) |
 | 20260831T021056Z | solo-qwen | 2 | ✗ ($0.043, 23m) | ✗ ($0.052, 20m) | ✗ ($0.051, 18m) |
 | 20260831T023347Z | solo-gptoss | 1 | ✗ ($0.009, 14m) | ✗ ($0.013, 14m) | ✗ ($0.013, 14m) |
+| 20260831T024807Z | solo-gptoss | 2 | ✗ ($0.010, 14m) | ✗ ($0.016, 16m) | ✗ ($0.015, 14m) |
+
+
+**Revised-statement program summary: 0-for-18** (3 problems × 3 arms × 2
+seeds, 30-minute caps, $0.009–0.058 per problem-attempt, every attempt a
+genuine 14–23-minute run). With the definitional route eliminated, both
+revised Putnams behave as genuine hard-tier instances for every arm, and
+the now-provable rmo_2000_6 did not fall at a short horizon either —
+consistent with the paper's finding that this tier yields at multi-hour
+horizons. Paper §5.4 updated with this result.
