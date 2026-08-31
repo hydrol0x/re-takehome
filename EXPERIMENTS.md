@@ -515,3 +515,12 @@ rmo_2000_3, rmo_2000_6, rmo_2001_2 (two clean windows each, runs B/C).
 Comparison at the same caps: raw Qwen 9/16, solo-qwen arm 8–9, solo-gptoss
 arm 8–8, duo 9–10. Paper updated (Fig 2 bar 8→10 with rerun caption, §5.1,
 Tables 1–3 notes, limitations, conclusion).
+## 2026-08-31: revised-statement runs (upstream PR #9 statements)
+
+All runs: sample-problems-revised3 (putnam_2018_a1 with the explicit 6-pair
+set, putnam_2020_a2 = 4^k, rmo_2000_6 IsLeast 10), 30-min/$1 caps,
+3 workers, judge-default fail-closed policy except the dev transport knob.
+
+| run | arm | seed | putnam_2018_a1 | putnam_2020_a2 | rmo_2000_6 |
+| --- | --- | --- | --- | --- | --- |
+| 20260831T010423Z | duo | 1 | ✗ ($0.057, 23m, qwen-only) | ✗ ($0.023, 18m) | ✗ ($0.034, 18m) |

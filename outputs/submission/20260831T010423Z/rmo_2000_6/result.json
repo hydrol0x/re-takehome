@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2000_6",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 6419,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [410/411] Built Challenge (979ms)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nBuild completed successfully (411 jobs).\nExporting #[rmo_2000_6, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n✖ [410/411] Building Solution (828ms)\ntrace: .> LEAN_PATH=/opt/mathlib/.lake/packages/Cli/.lake/build/lib/lean:/opt/mathlib/.lake/packages/batteries/.lake/build/lib/lean:/opt/mathlib/.lake/packages/Qq/.lake/build/lib/lean:/opt/mathlib/.lake/packages/aesop/.lake/build/lib/lean:/opt/mathlib/.lake/packages/proofwidgets/.lake/build/lib/lean:/opt/mathlib/.lake/packages/importGraph/.lake/build/lib/lean:/opt/mathlib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/opt/mathlib/.lake/packages/plausible/.lake/build/lib/lean:/opt/mathlib/.lake/build/lib/lean:/work/project/.lake/build/lib/lean /opt/elan/toolchains/leanprover--lean4---v4.32.0/bin/lean /work/project/Solution.lean -o /work/project/.lake/build/lib/lean/Solution.olean -i /work/project/.lake/build/lib/lean/Solution.ilean -c /work/project/.lake/build/ir/Solution.c --setup /work/project/.lake/build/ir/Solution.setup.json --json\nwarning: Solution.lean:12:6: declaration uses `sorry`\nwarning: Solution.lean:24:6: declaration uses `sorry`\nerror: Solution.lean:33:7: unknown tactic\nerror: Solution.lean:36:57: unknown tactic\nerror: Solution.lean:36:53: unsolved goals\n⊢ 2000 ∣ 1 ^ 2 * 10 ^ 5\nerror: Solution.lean:39:56: unknown tactic\nerror: Solution.lean:39:52: unsolved goals\n⊢ 2000 ∣ 5 ^ 3 * 2 ^ 4\nwarning: Solution.lean:42:6: declaration uses `sorry`\nwarning: Solution.lean:45:6: declaration uses `sorry`\nwarning: Solution.lean:47:8: declaration uses `sorry`\nerror: Lean exited with code 1\nSome required targets logged failures:\n- Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_6 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.03423204999999999,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 1079.85,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen:s4-skeleton:r3:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 9
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "part1_minimality",
+          "part1_no_smaller",
+          "part2_minimality",
+          "part2_no_smaller",
+          "rmo_2000_6"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 1069.8
+  }
+}
