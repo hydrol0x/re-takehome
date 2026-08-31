@@ -550,6 +550,11 @@ Three aborted launch attempts, all $0 / zero LLM calls, run dirs removed:
 one with dockerd down after a container restart (instant 0/3), then both
 8h runs (revised3 ×3 workers + rmo_2001_2 ×1, staggered only ~2 min) died
 at "REPL failed to import Mathlib: TIMEOUT after 180s" — four concurrent
-cold Mathlib imports on a fresh machine. Relaunched sequentially: revised3
-first, rmo_2001_2 only after all three of its REPLs pass the first
-lean_check (import complete).
+cold Mathlib imports on a fresh machine. Relaunched revised3 alone (run
+20260831T191439Z, healthy: all three REPLs importing then sweeping).
+A second rmo_2001_2 attempt at 19:40Z — one cold import against the three
+settled-but-CPU-saturated revised3 workers — also failed its import: the
+duo agent's S0 sweeps keep the REPLs elaboration-bound, unlike the
+baseline agents (model-latency-bound) that coexisted at 4 workers. Plan
+changed to strictly serial: rmo_2001_2 launches on the empty machine when
+revised3 completes (~03:15Z Sept 1).
