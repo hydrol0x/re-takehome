@@ -1,1 +1,1 @@
-{"challenge_sha": "8c79be849d090759", "s0_done": true, "cycles_done": 0, "lemma_pool": "", "history_notes": [], "pinned_answers": {}}
+{"challenge_sha": "8c79be849d090759", "s0_done": true, "cycles_done": 8, "lemma_pool": "", "history_notes": ["cycle 1, gptoss-med x11: best had 30 errors; first: Type mismatch: After simplification, term"], "pinned_answers": {}}
