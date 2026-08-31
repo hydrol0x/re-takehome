@@ -474,3 +474,24 @@ affected problems, with the Putnams on their original statements).
 Post-revision results are reported separately in the revised-problems
 section. Any rerun problem that hits the usage fault again is rerun until a
 clean attempt completes (attempt counts logged).
+
+### Run B (prerev8 rerun, 20260830T230426Z) and run C
+
+Run B (gpt-oss raw, 30-min caps, pre-revision statements, 4 workers):
+**p10_factorial_pow PASSED** ($0.025, 24 min — the first raw-baseline p10
+solve; previously one pass in eight 30-minute controller-arm attempts),
+**putnam_2018_a1 PASSED** ($0.003, 165 s), **putnam_2020_a2 PASSED**
+($0.006, 474 s). Both Putnam solutions are pure definitional/`rfl`
+instantiations (solution.lean in the run dir), the same circular route as
+every historical Putnam pass — covered by the paper's §5.4 caveat. The
+five remaining problems (p09, rmo_2000_2/3/6, rmo_2001_2) were
+usage-killed a second time, all late in their windows (wall 1685–1712 s of
+1800 s), i.e. each had a ≥94%-complete genuine attempt with no accepted
+proof before the provider fault ended it. Attempt counts so far: p09 ×2
+killed, RMO four ×2 killed. Run C (`sample-problems-prerev5k`) reruns the
+five; if the DeepInfra usage fault recurs, further reruns follow until
+clean.
+
+Provisional Fig-2 raw-GPT-OSS tally (pre-revision statements): p01–p07
+pass (run A) + p08 fail (run A) + p10, putnam_2018_a1, putnam_2020_a2 pass
+(run B) = **10 confirmed passes**, five problems pending clean completion.

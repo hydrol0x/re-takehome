@@ -1,85 +1,136 @@
-import Mathlib.Tactic
 import Mathlib.Data.Nat.ModEq
-import Mathlib.Data.Nat.Prime
+import Mathlib.Tactic.IntervalCases
+import Mathlib.Tactic.Linarith
+
+open Nat
 
 /-- IMO 1964 P1 (a): `7 ∣ 2 ^ n - 1` iff `3 ∣ n`, for positive `n`. -/
 theorem p09_a (n : ℕ) (hn : 0 < n) : 7 ∣ 2 ^ n - 1 ↔ 3 ∣ n := by
+  -- the useful congruence `2^3 ≡ 1 (mod 7)`
+  have h3 : (2 : ℕ) ^ 3 ≡ 1 [MOD 7] := by
+    dsimp [ModEq]
+    norm_num
   constructor
-  · intro hdiv
-    -- turn the divisibility into a `ModEq`
-    have hmod : (2 ^ n) ≡ 1 [MOD 7] := Nat.ModEq.of_dvd hdiv
-    -- write `n = 3 * (n / 3) + n % 3`
-    have hdecomp : n = 3 * (n / 3) + n % 3 := Nat.div_mod_eq_mul_add_mod n 3
-    -- rewrite the exponent using this decomposition
-    have hmod' : (2 ^ (3 * (n / 3)) * 2 ^ (n % 3)) ≡ 1 [MOD 7] := by
-      simpa [hdecomp, Nat.pow_add] using hmod
-    -- `2 ^ 3 ≡ 1 [MOD 7]`
-    have h33 : (2 ^ 3 : ℕ) ≡ 1 [MOD 7] := by norm_num
-    -- raise to the power `n / 3`
-    have hpow3 : (2 ^ (3 * (n / 3))) ≡ 1 [MOD 7] := by
-      have := h33.pow (n / 3)
-      simpa [Nat.pow_mul] using this
-    -- cancel the first factor
-    have hfinal : (2 ^ (n % 3)) ≡ 1 [MOD 7] := by
-      have hmul := hpow3.mul_right (2 ^ (n % 3))
-      have : (2 ^ (3 * (n / 3)) * 2 ^ (n % 3)) ≡ (1 * 2 ^ (n % 3)) [MOD 7] := hmul
-      have : (1 * 2 ^ (n % 3)) ≡ 1 [MOD 7] :=
-        (Nat.ModEq.trans this.symm hmod')
-      simpa using this
-    -- analyse `n % 3`
-    have hlt : n % 3 < 3 := Nat.mod_lt _ (by decide)
+  · intro h7
+    -- from the divisibility we get a congruence
+    have hmod : (2 : ℕ) ^ n ≡ 1 [MOD 7] := (Nat.ModEq.of_dvd h7)
+    -- we will compare the exponent modulo `3`
+    have hpow :
+        (2 : ℕ) ^ (3 * (n / 3)) ≡ (1 : ℕ) [MOD 7] := by
+      have := (Nat.ModEq.pow h3 (n / 3))
+      simpa [pow_mul] using this
+    have htotal :
+        (2 : ℕ) ^ n ≡ 2 ^ (n % 3) [MOD 7] := by
+      -- rewrite `n` as `3 * (n / 3) + n % 3`
+      have hn : n = 3 * (n / 3) + n % 3 := by
+        have := Nat.mod_add_div n 3
+        -- `Nat.mod_add_div` gives `n % 3 + 3 * (n / 3) = n`
+        simpa [Nat.add_comm, Nat.mul_comm] using this.symm
+      -- now use `pow_add` and the previous congruence
+      calc
+        (2 : ℕ) ^ n
+            = (2 : ℕ) ^ (3 * (n / 3) + n % 3) := by simpa [hn]
+        _ = (2 : ℕ) ^ (3 * (n / 3)) * 2 ^ (n % 3) := by
+              simpa [pow_add] using rfl
+        _ ≡ 1 * 2 ^ (n % 3) [MOD 7] := by
+              exact (Nat.ModEq.mul_right _ hpow)
+        _ = 2 ^ (n % 3) := by simp
+    have hfinal : (2 : ℕ) ^ (n % 3) ≡ 1 [MOD 7] := by
+      exact (htotal.symm.trans hmod)
+    -- analyse the possible values of `n % 3`
     have hcases : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by
-      interval_cases (n % 3) using hlt
-    rcases hcases with rfl | rfl | rfl
-    · -- case `n % 3 = 0`
-      exact Nat.dvd_of_mod_eq_zero (by
-        simpa [Nat.mod_mul_left_mod] using Nat.mod_eq_zero_of_dvd (Nat.dvd_refl 3))
-    · -- case `n % 3 = 1` leads to contradiction
-      have : (2 ^ 1 : ℕ) ≡ 1 [MOD 7] := by
-        simpa using hfinal
+      have hlt : n % 3 < 3 := Nat.mod_lt _ (by decide)
+      interval_cases (n % 3) using hlt <;> tauto
+    rcases hcases with h0 | h1 | h2
+    · -- the wanted case
+      exact Nat.dvd_of_mod_eq_zero h0
+    · -- contradiction with `hfinal`
+      have : (2 ^ (n % 3)) % 7 = 1 := by
+        dsimp [ModEq] at hfinal
+        simpa [h1] using hfinal
+      have : (2 : ℕ) % 7 = 1 := by simpa [h1] using this
       norm_num at this
-    · -- case `n % 3 = 2` leads to contradiction
-      have : (2 ^ 2 : ℕ) ≡ 1 [MOD 7] := by
-        simpa using hfinal
+    · -- another contradiction
+      have : (2 ^ (n % 3)) % 7 = 1 := by
+        dsimp [ModEq] at hfinal
+        simpa [h2] using hfinal
+      have : (4 : ℕ) % 7 = 1 := by simpa [h2] using this
       norm_num at this
-  · intro h3
-    rcases h3 with ⟨k, rfl⟩
-    -- `2 ^ (3 * k) ≡ 1 [MOD 7]`
-    have h33 : (2 ^ 3 : ℕ) ≡ 1 [MOD 7] := by norm_num
-    have hpow : (2 ^ (3 * k)) ≡ 1 [MOD 7] := by
-      have := h33.pow k
-      simpa [Nat.pow_mul] using this
-    exact (Nat.ModEq.dvd hpow)
+  · intro h3d
+    rcases h3d with ⟨k, hk⟩
+    -- `n = 3 * k`, so `2^n - 1` is divisible by `7`
+    have : (2 : ℕ) ^ (3 * k) - 1 ∣ 7 := by
+      -- use the congruence `2^3 ≡ 1`
+      have hpow : (2 : ℕ) ^ (3 * k) ≡ 1 [MOD 7] := by
+        have := (Nat.ModEq.pow h3 k)
+        simpa [pow_mul] using this
+      have : (2 : ℕ) ^ (3 * k) - 1 ≡ 0 [MOD 7] := by
+        dsimp [ModEq] at hpow
+        simpa [hpow] using rfl
+      exact (Nat.ModEq.dvd_iff_dvd_sub _ _).mp (by
+        dsimp [ModEq] at hpow
+        exact (Nat.ModEq.of_dvd ?_))
+    -- more directly, we can just use `Nat.ModEq` to get the required divisibility
+    have hmod : (2 : ℕ) ^ (3 * k) ≡ 1 [MOD 7] := by
+      have := (Nat.ModEq.pow h3 k)
+      simpa [pow_mul] using this
+    exact (Nat.ModEq.of_dvd (by
+      dsimp [ModEq] at hmod
+      exact hmod))
+    -- finally rewrite using `n = 3 * k`
+    simpa [hk, mul_comm] 
 
 /-- IMO 1964 P1 (b): no positive `n` has `7 ∣ 2 ^ n + 1`. -/
-theorem p09_b (n : ℕ) (hn : 0 < n) : ¬7 ∣ 2 ^ n + 1 := by
-  intro hdiv
-  -- turn the divisibility into a `ModEq`
-  have hmod : (2 ^ n) ≡ 6 [MOD 7] := Nat.ModEq.of_dvd hdiv
-  -- write `n = 3 * (n / 3) + n % 3`
-  have hdecomp : n = 3 * (n / 3) + n % 3 := Nat.div_mod_eq_mul_add_mod n 3
-  have hmod' : (2 ^ (3 * (n / 3)) * 2 ^ (n % 3)) ≡ 6 [MOD 7] := by
-    simpa [hdecomp, Nat.pow_add] using hmod
-  -- `2 ^ 3 ≡ 1 [MOD 7]`
-  have h33 : (2 ^ 3 : ℕ) ≡ 1 [MOD 7] := by norm_num
-  have hpow3 : (2 ^ (3 * (n / 3))) ≡ 1 [MOD 7] := by
-    have := h33.pow (n / 3)
-    simpa [Nat.pow_mul] using this
-  -- cancel the first factor
-  have hfinal : (2 ^ (n % 3)) ≡ 6 [MOD 7] := by
-    have hmul := hpow3.mul_right (2 ^ (n % 3))
-    have : (2 ^ (3 * (n / 3)) * 2 ^ (n % 3)) ≡ (1 * 2 ^ (n % 3)) [MOD 7] := hmul
-    have : (1 * 2 ^ (n % 3)) ≡ 6 [MOD 7] :=
-      (Nat.ModEq.trans this.symm hmod')
-    simpa using this
-  -- analyse `n % 3`
-  have hlt : n % 3 < 3 := Nat.mod_lt _ (by decide)
+theorem p09_b (n : ℕ) (hn : 0 < n) : ¬ 7 ∣ 2 ^ n + 1 := by
+  intro h
+  -- from the divisibility we get a congruence
+  have hmod : (2 : ℕ) ^ n ≡ 6 [MOD 7] := by
+    have : 7 ∣ 2 ^ n + 1 := h
+    have : 7 ∣ 2 ^ n - (−1) := by
+      simpa [sub_eq, add_comm, add_left_neg] using this
+    exact (Nat.ModEq.of_dvd this)
+  -- as before, reduce the exponent modulo `3`
+  have h3 : (2 : ℕ) ^ 3 ≡ 1 [MOD 7] := by
+    dsimp [ModEq]; norm_num
+  have hpow :
+      (2 : ℕ) ^ (3 * (n / 3)) ≡ (1 : ℕ) [MOD 7] := by
+    have := (Nat.ModEq.pow h3 (n / 3))
+    simpa [pow_mul] using this
+  have htotal :
+      (2 : ℕ) ^ n ≡ 2 ^ (n % 3) [MOD 7] := by
+    have hn : n = 3 * (n / 3) + n % 3 := by
+      have := Nat.mod_add_div n 3
+      simpa [Nat.add_comm, Nat.mul_comm] using this.symm
+    calc
+      (2 : ℕ) ^ n
+          = (2 : ℕ) ^ (3 * (n / 3) + n % 3) := by simpa [hn]
+      _ = (2 : ℕ) ^ (3 * (n / 3)) * 2 ^ (n % 3) := by
+            simpa [pow_add] using rfl
+      _ ≡ 1 * 2 ^ (n % 3) [MOD 7] := by
+            exact (Nat.ModEq.mul_right _ hpow)
+      _ = 2 ^ (n % 3) := by simp
+  have hfinal : (2 : ℕ) ^ (n % 3) ≡ 6 [MOD 7] :=
+    (htotal.symm.trans hmod)
+  -- analyse the possible remainders
   have hcases : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2 := by
-    interval_cases (n % 3) using hlt
-  rcases hcases with rfl | rfl | rfl
-  · have : (2 ^ 0 : ℕ) ≡ 6 [MOD 7] := by simpa using hfinal
+    have hlt : n % 3 < 3 := Nat.mod_lt _ (by decide)
+    interval_cases (n % 3) using hlt <;> tauto
+  rcases hcases with h0 | h1 | h2
+  · -- remainder `0` gives `2^0 ≡ 1`, contradiction
+    have : (2 ^ (n % 3)) % 7 = 6 := by
+      dsimp [ModEq] at hfinal
+      simpa [h0] using hfinal
+    have : (1 : ℕ) % 7 = 6 := by simpa [h0] using this
     norm_num at this
-  · have : (2 ^ 1 : ℕ) ≡ 6 [MOD 7] := by simpa using hfinal
+  · -- remainder `1` gives `2 ≡ 6`, impossible
+    have : (2 ^ (n % 3)) % 7 = 6 := by
+      dsimp [ModEq] at hfinal
+      simpa [h1] using hfinal
+    have : (2 : ℕ) % 7 = 6 := by simpa [h1] using this
     norm_num at this
-  · have : (2 ^ 2 : ℕ) ≡ 6 [MOD 7] := by simpa using hfinal
+  · -- remainder `2` gives `4 ≡ 6`, impossible
+    have : (2 ^ (n % 3)) % 7 = 6 := by
+      dsimp [ModEq] at hfinal
+      simpa [h2] using hfinal
+    have : (4 : ℕ) % 7 = 6 := by simpa [h2] using this
     norm_num at this

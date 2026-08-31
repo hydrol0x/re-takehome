@@ -1,6 +1,94 @@
 {
   "metadata": {
-    "baseline_turn": 9,
-    "model": "openai/gpt-oss-120b"
+    "baseline": "simple",
+    "model": "openai/gpt-oss-120b",
+    "turns": 14,
+    "accepted_by_repl": true,
+    "attempts": [
+      {
+        "turn": 1,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 5
+      },
+      {
+        "turn": 2,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 1
+      },
+      {
+        "turn": 3,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 4
+      },
+      {
+        "turn": 4,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 7
+      },
+      {
+        "turn": 5,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 5
+      },
+      {
+        "turn": 6,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 5
+      },
+      {
+        "turn": 7,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 7
+      },
+      {
+        "turn": 8,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 12
+      },
+      {
+        "turn": 9,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 4
+      },
+      {
+        "turn": 10,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 3
+      },
+      {
+        "turn": 11,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 2
+      },
+      {
+        "turn": 12,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 4
+      },
+      {
+        "turn": 13,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 2
+      },
+      {
+        "turn": 14,
+        "accepted": true,
+        "timed_out": false,
+        "message_count": 0
+      }
+    ]
   }
 }
