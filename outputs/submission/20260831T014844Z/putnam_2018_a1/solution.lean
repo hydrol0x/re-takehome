@@ -17,10 +17,10 @@ lemma putnam_2018_1009_prime : Nat.Prime 1009 := by norm_num
 -- Helper lemma: the six specific pairs satisfy the equation
 lemma putnam_2018_solution_1 : (3 : ℤ) * 673 * 1358114 = 2018 * (673 + 1358114) := by linarith
 lemma putnam_2018_solution_2 : (3 : ℤ) * 674 * 340033 = 2018 * (674 + 340033) := by linarith
-lemma putnam_2018_solution_3 : (3 : ℤ) * 1009 * 2018 = 2018 * (1009 + 2018) := by sorry
-lemma putnam_2018_solution_4 : (3 : ℤ) * 2018 * 1009 = 2018 * (2018 + 1009) := by sorry
-lemma putnam_2018_solution_5 : (3 : ℤ) * 340033 * 674 = 2018 * (340033 + 674) := by sorry
-lemma putnam_2018_solution_6 : (3 : ℤ) * 1358114 * 673 = 2018 * (1358114 + 673) := by sorry
+lemma putnam_2018_solution_3 : (3 : ℤ) * 1009 * 2018 = 2018 * (1009 + 2018) := by linarith
+lemma putnam_2018_solution_4 : (3 : ℤ) * 2018 * 1009 = 2018 * (2018 + 1009) := by linarith
+lemma putnam_2018_solution_5 : (3 : ℤ) * 340033 * 674 = 2018 * (340033 + 674) := by linarith
+lemma putnam_2018_solution_6 : (3 : ℤ) * 1358114 * 673 = 2018 * (1358114 + 673) := by linarith
 
 -- Helper lemma: characterize all solutions via divisors of 2018^2
 lemma putnam_2018_all_solutions_via_divisors (a b : ℤ) (ha : 0 < a) (hb : 0 < b) :
