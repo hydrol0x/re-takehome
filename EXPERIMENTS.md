@@ -710,3 +710,7 @@ gain (it rescues any proof that only added imports gratuitously), and the
 confined repair + surface-mode continuation remain a demonstrated fallback
 whose effectiveness is bounded by model capability under a restricted
 surface. Reported as such in the paper.
+
+judge_check re-run on a quiet machine (load 0.4, 21:20Z Sept 1) with the
+full surface-mode code: **PASSED** (score 1/1, $0.00) — the earlier failure
+was the load-induced final-scoring timeout diagnosed above.
