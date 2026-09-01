@@ -601,3 +601,13 @@ Note: the rmo_2001_2 8-hour run (20260901T025836Z) was interrupted at
 restart at ~07:56Z and resumed at 07:58Z with its durable agent state
 (`--resume`; fresh worker window per the kit's resume semantics). Total
 accumulated wall time will be reported with the final result.
+
+### rmo_2001_2 final 8-hour attempt (20260901T025836Z, resumed)
+
+FAILED — stopped by the agent's own budget rail at $0.893 of $1.00
+(cumulative across the interruption; ~4.96 h + 7.69 h ≈ 12.6 h total wall).
+29 decomposition cycles, 3519 REPL checks, 0 accepted candidates, 0
+prechecks triggered; final best candidate is an S4 sketch with exactly
+**one unfilled hole** — the same distance as the 4-hour attempt. rmo_2001_2
+remains the one provable kit problem outside cumulative coverage (13/14
+scorable under original statements). Paper Table 3 updated.
