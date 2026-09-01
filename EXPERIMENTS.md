@@ -684,3 +684,15 @@ no longer stops — it keeps the REPL-accepted winner as the shipping
 fallback and continues the search in surface mode (S1/S2 prompts carry the
 import-surface constraint, candidates are linted, precheck cap 4). Tests:
 210 passed.
+
+Judge-check failure diagnosis (2026-09-01 ~20:50–21:12Z, machine load 4.6–6.9
+on 4 cores with 7–9 Lean containers): a judge-invocation replica on p01 kept
+its artifacts. The agent behaved exactly as designed — zero LLM calls, the
+$0 S0 sweep solved p01 (), and the comparator precheck
+PASSED (194 s) — but the runner's final scoring comparator returned
+passed=False timed_out=True after 180519 ms: under
+saturation, even p01's cold build exceeds the kit's 180 s scoring limit
+(the REPL import also timed out once and recovered). The earlier failed
+judge_check (cost_unknown) ran under the same load. Neither involves the
+code paths changed today (no LLM call occurred); judge_check is re-run on a
+quiet machine before submission and must pass there.

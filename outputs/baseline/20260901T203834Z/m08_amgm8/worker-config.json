@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "m08_amgm8",
+  "description": "# m08_amgm8\n\nLet $a, b, c$ be positive real numbers. Prove that\n$$(a+b)(b+c)(c+a) \\ge 8abc.$$\n\nProve the theorem `m08_amgm8`. This is AM–GM applied to each factor; a direct\nroute is the sum-of-squares identity\n$(a+b)(b+c)(c+a) - 8abc = a(b-c)^2 + b(c-a)^2 + c(a-b)^2 \\ge 0$.\n",
+  "challenge": "import Mathlib\n\n/-- AM–GM for three factors: positive reals `a, b, c` satisfy\n`8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. -/\ntheorem m08_amgm8 (a b c : ℝ) (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) :\n    8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m08_amgm8"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T203834Z/m08_amgm8",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "c6c7dffd244f45139fdb850ba5a0a21e"
+}

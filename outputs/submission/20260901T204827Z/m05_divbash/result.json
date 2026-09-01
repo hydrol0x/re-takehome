@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "problem_id": "m05_divbash",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": null,
+    "timed_out": true,
+    "duration_ms": 180898,
+    "output": {
+      "error": "Comparator timed out after 180s"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.025819625000000002,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 1261.141,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen:s4-skeleton:r1:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 10
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "bound_n_from_dvd_8",
+          "divisors_of_8",
+          "dvd_implies_4n_divides",
+          "final_case_analysis"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 11
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "divisors_of_8",
+          "m05_divbash"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 1076.1
+  }
+}
