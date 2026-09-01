@@ -595,3 +595,9 @@ passed=True, 14.0 s). The revised-statement scorable ceiling of 15/16 is
 therefore certified, and the constraint it imposes on solvers (matching
 import surfaces, or a final-composition stage that re-targets the
 challenge's imports) is documented as future agent work.
+
+Note: the rmo_2001_2 8-hour run (20260901T025836Z) was interrupted at
+4.96 h (2053 events, 13 cycles, populated lemma pool) by a dev-container
+restart at ~07:56Z and resumed at 07:58Z with its durable agent state
+(`--resume`; fresh worker window per the kit's resume semantics). Total
+accumulated wall time will be reported with the final result.
