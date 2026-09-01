@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "set": "custom-all",
+  "problems": [
+    {
+      "id": "c03_coprime_linear",
+      "theorem_names": [
+        "c03_coprime_linear"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "c05_pow_sum_div",
+      "theorem_names": [
+        "c05_pow_sum_div"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "c06_three_pow",
+      "theorem_names": [
+        "c06_three_pow"
+      ],
+      "definition_names": [
+        "c06_answer"
+      ],
+      "numeric_answer_names": [
+        "c06_answer"
+      ]
+    },
+    {
+      "id": "c10_tau_360",
+      "theorem_names": [
+        "c10_tau_360"
+      ],
+      "definition_names": [
+        "c10_answer"
+      ],
+      "numeric_answer_names": [
+        "c10_answer"
+      ]
+    },
+    {
+      "id": "m01_dvd13",
+      "theorem_names": [
+        "m01_dvd13"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "h01_legendre100",
+      "theorem_names": [
+        "h01_legendre100"
+      ],
+      "definition_names": [
+        "h01_answer"
+      ],
+      "numeric_answer_names": [
+        "h01_answer"
+      ]
+    }
+  ]
+}

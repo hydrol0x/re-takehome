@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "set": "custom-all",
+  "problems": [
+    {
+      "problem_id": "c01_quad_roots",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.0004975,
+      "wall_s": 209.71,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    },
+    {
+      "problem_id": "c02_amgm_frac",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.003127469,
+      "wall_s": 388.546,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    },
+    {
+      "problem_id": "c03_coprime_linear",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.00843879,
+      "wall_s": 618.597,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message body (incomplete chunked read)"
+    },
+    {
+      "problem_id": "c04_sum_odds",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00040572,
+      "wall_s": 62.383,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c05_pow_sum_div",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.005362238,
+      "wall_s": 618.362,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message body (incomplete chunked read)"
+    },
+    {
+      "problem_id": "c06_three_pow",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.0023291220000000003,
+      "wall_s": 408.198,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message body (incomplete chunked read)"
+    },
+    {
+      "problem_id": "c07_order_three",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.03403605600000001,
+      "wall_s": 1707.935,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "c08_count_congr",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0004618,
+      "wall_s": 116.822,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c09_factorial_mod",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.000156961,
+      "wall_s": 52.741,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c10_tau_360",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.000232129,
+      "wall_s": 111.954,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message body (incomplete chunked read)"
+    },
+    {
+      "problem_id": "h01_legendre100",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.01177065,
+      "wall_s": 1160.85,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "REPL failed to import Mathlib: TIMEOUT after 180s"
+    },
+    {
+      "problem_id": "h02_mod23_cycle",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.029772519,
+      "wall_s": 1700.534,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "h03_invsq_sum",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.029464567000000004,
+      "wall_s": 1709.104,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "h04_square_shift",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.03492394099999999,
+      "wall_s": 1703.691,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "h05_telescope_prod",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.04687913899999999,
+      "wall_s": 1710.247,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "h06_order_mod125",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.02880363,
+      "wall_s": 1701.494,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m01_dvd13",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.005929568,
+      "wall_s": 379.405,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message body (incomplete chunked read)"
+    },
+    {
+      "problem_id": "m02_ord25",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00918533,
+      "wall_s": 366.267,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m03_recip9",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.023202962,
+      "wall_s": 1702.07,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m04_sumfact",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.025009357000000003,
+      "wall_s": 1734.878,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m05_divbash",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.031891220000000005,
+      "wall_s": 1706.113,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m06_factcop",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.024311554999999995,
+      "wall_s": 1734.62,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m07_sumgeo",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.002346256,
+      "wall_s": 204.963,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m08_amgm8",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0016545,
+      "wall_s": 75.46,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 6,
+  "max_points": 24,
+  "actual_cost_usd": 0.360192979,
+  "wall_s_sum": 21884.944,
+  "run_id": "79da861e59d940d1a7e6e5461c962ff0",
+  "wall_s": 5971.877,
+  "finished_at": "2026-09-01T23:54:04.191402+00:00"
+}

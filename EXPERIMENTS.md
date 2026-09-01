@@ -749,3 +749,19 @@ window (duo + qwen held-8 arms, judge replica, judge_check, comparators on
 4 cores). Treated as load-confounded and rerun in full on a light machine
 (only the latency-bound solo-gptoss arm in the background). The first
 run's dir is kept for the record; its numbers are not used.
+
+### Raw GPT-OSS custom-24, second run (20260901T221432Z, light load)
+
+Nominal 6/24 ($0.36): passed c04, c08, c09, m02, m07, m08; statuses: 6 passed, 2 failed, **10 `cost_unknown`**, 6
+`harness_error`. Event inspection: all 10 `cost_unknown` are the runner's
+deadline cancellation of an in-flight call (`CancelledError` at
+"agent exceeded 1680.0s"; zero accepted checks) — genuine full-window
+failures, the same technicality documented for the kit-set runs. Of the six
+`harness_error`s, five are provider transport faults (`RemoteProtocolError:
+peer closed connection without sending a complete response` on c03, c05,
+c06, c10, m01 — the dev policy released the reservation but the rail-less
+baseline still dies) and one is a REPL import timeout (h01). Only those six
+are rerun (attempt 3, `custom-problems-gptoss6`); the other 18 results
+stand. Note that our controller's rails absorb exactly these faults (the
+same provider produced 2 transient errors inside the duo's 8-hour
+putnam_2018_a1 attempt without ending it).
