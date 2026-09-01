@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "m04_sumfact",
+  "description": "# m04_sumfact\n\nProve the telescoping factorial identity\n$$\\sum_{i=1}^{n} i \\cdot i! = (n+1)! - 1$$\nfor every natural number $n$. (In the Lean statement the sum runs over\n`i ∈ Finset.range n` with summand $(i+1)\\cdot(i+1)!$.)\n\nProve the theorem `m04_sumfact`. Induction on $n$ works; note the subtraction\nis natural-number subtraction, so it helps to move to `ℤ` (e.g. with `zify`)\nusing $(n+1)! \\ge 1$.\n",
+  "challenge": "import Mathlib\n\n/-- `∑_{i=1}^{n} i * i! = (n + 1)! - 1` for every natural number `n`. -/\ntheorem m04_sumfact (n : ℕ) :\n    ∑ i ∈ Finset.range n, (i + 1) * Nat.factorial (i + 1) =\n      Nat.factorial (n + 1) - 1 := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m04_sumfact"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T221432Z/m04_sumfact",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "274324de7aef4a2786ee0576734972ba"
+}

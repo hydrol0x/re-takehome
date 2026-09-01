@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "m01_dvd13",
+  "description": "# m01_dvd13\n\nProve that for every natural number $n$,\n$$13 \\mid 4^{2n+1} + 3^{n+2}.$$\n\nProve the theorem `m01_dvd13`. A natural route is induction on $n$: the base\ncase is $4 + 9 = 13$, and each step multiplies the two powers by $16$ and $3$\nrespectively, so the difference of consecutive terms is again a multiple of $13$.\n",
+  "challenge": "import Mathlib\n\n/-- For every natural number `n`, `13` divides `4 ^ (2 * n + 1) + 3 ^ (n + 2)`. -/\ntheorem m01_dvd13 (n : ℕ) : 13 ∣ 4 ^ (2 * n + 1) + 3 ^ (n + 2) := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m01_dvd13"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T221432Z/m01_dvd13",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "4c8e4eb950974a3eb37196f50ef23529"
+}

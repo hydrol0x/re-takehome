@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "problem_id": "m08_amgm8",
+  "calls": [
+    {
+      "call_id": "0fec69fd34d44c968f44d78a9b44121e",
+      "request": {
+        "model": "openai/gpt-oss-120b",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are writing a complete Lean 4 file using Mathlib.\nReturn only the complete Lean code, preferably in one ```lean code block.\nPreserve the theorem names and statements from the challenge.\nDo not use sorry, admit, axioms, or unsafe escapes.\nThe file must compile as-is."
+          },
+          {
+            "role": "user",
+            "content": "Problem id: m08_amgm8\nBaseline turn: 1/25\n\nProblem description:\n# m08_amgm8\n\nLet $a, b, c$ be positive real numbers. Prove that\n$$(a+b)(b+c)(c+a) \\ge 8abc.$$\n\nProve the theorem `m08_amgm8`. This is AM–GM applied to each factor; a direct\nroute is the sum-of-squares identity\n$(a+b)(b+c)(c+a) - 8abc = a(b-c)^2 + b(c-a)^2 + c(a-b)^2 \\ge 0$.\n\n\nChallenge Lean file:\n```lean\nimport Mathlib\n\n/-- AM–GM for three factors: positive reals `a, b, c` satisfy\n`8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. -/\ntheorem m08_amgm8 (a b c : ℝ) (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) :\n    8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n  sorry\n\n```"
+          }
+        ],
+        "max_tokens": 12000,
+        "stream": false,
+        "provider": {
+          "allow_fallbacks": true,
+          "require_parameters": true,
+          "max_price": {
+            "prompt": 0.1,
+            "completion": 0.5
+          }
+        },
+        "temperature": 0.2
+      },
+      "started_at": "2026-09-01T22:30:57.996901+00:00",
+      "reserved_cost_usd": 0.006736070000000001,
+      "response": {
+        "id": "gen-1788301858-I5ceWtW2iyX1N5ARfNQn",
+        "object": "chat.completion",
+        "created": 1788301858,
+        "model": "openai/gpt-oss-120b",
+        "provider": "BaseTen",
+        "system_fingerprint": null,
+        "service_tier": null,
+        "choices": [
+          {
+            "index": 0,
+            "logprobs": null,
+            "finish_reason": "stop",
+            "native_finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "```lean\nimport Mathlib\n\n/-- AM–GM for three factors: positive reals `a, b, c` satisfy\n`8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. -/\ntheorem m08_amgm8 (a b c : ℝ) (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) :\n    8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n  -- rewrite the difference as a sum of squares\n  have h_eq :\n      (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n        a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n  -- each term in the sum of squares is non‑negative\n  have h_nonneg :\n      0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have h1 : 0 ≤ a * (b - c) ^ 2 :=\n      mul_nonneg (le_of_lt ha) (pow_two_nonneg (b - c))\n    have h2 : 0 ≤ b * (c - a) ^ 2 :=\n      mul_nonneg (le_of_lt hb) (pow_two_nonneg (c - a))\n    have h3 : 0 ≤ c * (a - b) ^ 2 :=\n      mul_nonneg (le_of_lt hc) (pow_two_nonneg (a - b))\n    exact add_nonneg (add_nonneg h1 h2) h3\n  -- therefore the original difference is non‑negative\n  have h0 :\n      0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    simpa [h_eq] using h_nonneg\n  -- turn the non‑negativity of the difference into the desired inequality\n  exact (sub_nonneg.mp h0)\n```\n",
+              "refusal": null,
+              "reasoning": " need to fill Lean proof. Use known inequality: (a+b)(b+c)(c+a) - 8abc = a(b-c)^2 + b(c-a)^2 + c(a-b)^2 ≥ 0. Since a,b,c>0, each term nonnegative. So we can prove inequality by rewriting.\n\nIn Lean, we can use `ring` to expand and `linarith`? Use `have` with `calc`. Use `have h : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) = ...` then `simp`? Use `ring` to compute identity.\n\nLet's attempt:\n\n```\n  have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n    a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n```\n\nBut need to ensure exponent notation: `^ 2` works for `ℝ`. Use `pow_two`. Could also use `(b - c) ^ 2`. `ring` works with `pow`? Might need `ring_nf` after rewriting `pow_two`. Use `simp [pow_two]` maybe.\n\nLet's try:\n\n```\n    have : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n      a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n```\n\nWill `ring` handle `^2`? In `ring`, `pow` is not a ring operation; but `pow_two` expands to `x * x`. So we may need to rewrite with `pow_two` first.\n\nBetter: Use `simp [pow_two]` after `ring`. Could do:\n\n```\n    have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n      a * (b - c) * (b - c) + b * (c - a) * (c - a) + c * (a - b) * (a - b) := by\n      ring\n```\n\nThen later use `pow_two` to rewrite.\n\nBut we can also directly prove inequality using `nlinarith`? Might be easier: Since all positive, we can use `calc` with `mul_le_mul_of_nonneg_left` etc. But identity is straightforward.\n\nGoal: `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Equivalent to `0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. So we can rewrite and show RHS is sum of nonnegative terms.\n\nImplementation:\n\n```\n  have h_nonneg : 0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have ha' : 0 ≤ a := le_of_lt ha\n    have hb' : 0 ≤ b := le_of_lt hb\n    have hc' : 0 ≤ c := le_of_lt hc\n    have h1 : 0 ≤ (b - c) ^ 2 := by\n      have : (b - c) ^ 2 = (b - c) * (b - c) := by simpa [pow_two]\n      have : 0 ≤ (b - c) * (b - c) := mul_self_nonneg (b - c)\n      simpa [pow_two] using this\n    similarly for others.\n    nlinarith? Could use `calc` with `add_nonneg` etc.\n```\n\nSimplify: Use `pow_two_nonneg` lemma? There is `pow_two_nonneg`. Actually there is lemma `pow_two_nonneg (x : ℝ) : 0 ≤ x ^ 2`. Yes.\n\nSo we can do:\n\n```\n    have h1 : 0 ≤ (b - c) ^ 2 := by\n      have := pow_two_nonneg (b - c)\n      simpa using this\n```\n\nThen `have : 0 ≤ a * (b - c) ^ 2 := mul_nonneg (le_of_lt ha) h1`. Similarly.\n\nThen combine with `add_nonneg`.\n\nThus:\n\n```\n  have h_nonneg : 0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have h1 : 0 ≤ a * (b - c) ^ 2 := mul_nonneg (le_of_lt ha) (pow_two_nonneg _)\n    have h2 : 0 ≤ b * (c - a) ^ 2 := mul_nonneg (le_of_lt hb) (pow_two_nonneg _)\n    have h3 : 0 ≤ c * (a - b) ^ 2 := mul_nonneg (le_of_lt hc) (pow_two_nonneg _)\n    exact add_nonneg (add_nonneg h1 h2) h3\n```\n\nNow we have equality identity.\n\n```\n  have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n    a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n```\n\nNow we can rewrite goal using `h_eq`:\n\nGoal: `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Use `have` to transform:\n\n```\n  have : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    simpa [h_eq] using h_nonneg\n```\n\nBut `h_eq` is equality, we can rewrite `h_nonneg` with `h_eq`. Actually `h_nonneg` is `0 ≤ a * (b - c) ^ 2 + ...`. So we can `simpa [h_eq]`? Wait `h_eq` expresses RHS minus LHS equals sum. So we want `0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. Using `h_eq` we can rewrite that expression to the sum, then apply `h_nonneg`. So:\n\n```\n  have h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    have := h_nonneg\n    simpa [h_eq] using this\n```\n\nNow from `h0` we can get the desired inequality by `linarith` or `exact` after rewriting.\n\nGoal: `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. This is equivalent to `0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. So we can `have` and then `exact` after `linarith`. Use `exact` with `sub_nonneg.mp`? Actually we have `h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. Then `exact` `by`? We can use `exact` with `sub_nonneg.mp`? Wait `sub_nonneg` is lemma: `0 ≤ a - b ↔ b ≤ a`. So we can use `have := (sub_nonneg).mp h0`. But `sub_nonneg` is `0 ≤ a - b ↔ b ≤ a`. So we can do:\n\n```\n  have : 8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n    have := (sub_nonneg).mp h0\n    simpa [sub_eq, add_comm, add_left_comm, add_assoc] using this\n```\n\nBut easier: Use `exact` with `by`:\n\n```\n  have : 8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n    have := (sub_nonneg).mp h0\n    simpa [sub_eq, add_comm, add_left_comm, add_assoc, mul_comm, mul_left_comm, mul_assoc] using this\n```\n\nBut maybe simpler: Use `linarith` after `h0`:\n\n```\n  linarith [h0]\n```\n\nBecause `linarith` can handle linear inequality? But `h0` is non-linear due to product? Actually `h0` is inequality with subtraction; `linarith` may not handle multiplication. But we can rewrite goal to `0 ≤ ...` and use `exact h0`. So we can change goal to `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Use `have` as `h0`. Then we can `exact` after `simpa [sub_eq, add_comm]`? Wait we need to transform `h0` to the goal.\n\nWe have `h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. Using `sub_nonneg` equivalence:\n\n`sub_nonneg` lemma: `0 ≤ a - b ↔ b ≤ a`. So we can get `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)` by `exact (sub_nonneg.mp h0)`. Indeed `sub_nonneg.mp h0` returns `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Let's check: `sub_nonneg` expects `0 ≤ a - b`. So `a` is `(a + b) * (b + c) * (c + a)`, `b` is `8 * (a * b * c)`. So `sub_nonneg.mp h0` yields `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Yes.\n\nThus final proof:\n\n```\n  have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n    a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n  have h_nonneg : 0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have h1 : 0 ≤ a * (b - c) ^ 2 := mul_nonneg (le_of_lt ha) (pow_two_nonneg _)\n    have h2 : 0 ≤ b * (c - a) ^ 2 := mul_nonneg (le_of_lt hb) (pow_two_nonneg _)\n    have h3 : 0 ≤ c * (a - b) ^ 2 := mul_nonneg (le_of_lt hc) (pow_two_nonneg _)\n    exact add_nonneg (add_nonneg h1 h2) h3\n  have h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    simpa [h_eq] using h_nonneg\n  exact (sub_nonneg.mp h0)\n```\n\nBut we need to ensure `pow_two_nonneg` is imported. It's in `Mathlib`. Use `_` placeholder for variable.\n\n`pow_two_nonneg _` expects argument. So `pow_two_nonneg (b - c)`.\n\nThus:\n\n`(pow_two_nonneg (b - c))`.\n\nNow final code.\n\nLet's produce final Lean file.\n\n",
+              "reasoning_details": [
+                {
+                  "type": "reasoning.text",
+                  "text": " need to fill Lean proof. Use known inequality: (a+b)(b+c)(c+a) - 8abc = a(b-c)^2 + b(c-a)^2 + c(a-b)^2 ≥ 0. Since a,b,c>0, each term nonnegative. So we can prove inequality by rewriting.\n\nIn Lean, we can use `ring` to expand and `linarith`? Use `have` with `calc`. Use `have h : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) = ...` then `simp`? Use `ring` to compute identity.\n\nLet's attempt:\n\n```\n  have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n    a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n```\n\nBut need to ensure exponent notation: `^ 2` works for `ℝ`. Use `pow_two`. Could also use `(b - c) ^ 2`. `ring` works with `pow`? Might need `ring_nf` after rewriting `pow_two`. Use `simp [pow_two]` maybe.\n\nLet's try:\n\n```\n    have : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n      a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n```\n\nWill `ring` handle `^2`? In `ring`, `pow` is not a ring operation; but `pow_two` expands to `x * x`. So we may need to rewrite with `pow_two` first.\n\nBetter: Use `simp [pow_two]` after `ring`. Could do:\n\n```\n    have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n      a * (b - c) * (b - c) + b * (c - a) * (c - a) + c * (a - b) * (a - b) := by\n      ring\n```\n\nThen later use `pow_two` to rewrite.\n\nBut we can also directly prove inequality using `nlinarith`? Might be easier: Since all positive, we can use `calc` with `mul_le_mul_of_nonneg_left` etc. But identity is straightforward.\n\nGoal: `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Equivalent to `0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. So we can rewrite and show RHS is sum of nonnegative terms.\n\nImplementation:\n\n```\n  have h_nonneg : 0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have ha' : 0 ≤ a := le_of_lt ha\n    have hb' : 0 ≤ b := le_of_lt hb\n    have hc' : 0 ≤ c := le_of_lt hc\n    have h1 : 0 ≤ (b - c) ^ 2 := by\n      have : (b - c) ^ 2 = (b - c) * (b - c) := by simpa [pow_two]\n      have : 0 ≤ (b - c) * (b - c) := mul_self_nonneg (b - c)\n      simpa [pow_two] using this\n    similarly for others.\n    nlinarith? Could use `calc` with `add_nonneg` etc.\n```\n\nSimplify: Use `pow_two_nonneg` lemma? There is `pow_two_nonneg`. Actually there is lemma `pow_two_nonneg (x : ℝ) : 0 ≤ x ^ 2`. Yes.\n\nSo we can do:\n\n```\n    have h1 : 0 ≤ (b - c) ^ 2 := by\n      have := pow_two_nonneg (b - c)\n      simpa using this\n```\n\nThen `have : 0 ≤ a * (b - c) ^ 2 := mul_nonneg (le_of_lt ha) h1`. Similarly.\n\nThen combine with `add_nonneg`.\n\nThus:\n\n```\n  have h_nonneg : 0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have h1 : 0 ≤ a * (b - c) ^ 2 := mul_nonneg (le_of_lt ha) (pow_two_nonneg _)\n    have h2 : 0 ≤ b * (c - a) ^ 2 := mul_nonneg (le_of_lt hb) (pow_two_nonneg _)\n    have h3 : 0 ≤ c * (a - b) ^ 2 := mul_nonneg (le_of_lt hc) (pow_two_nonneg _)\n    exact add_nonneg (add_nonneg h1 h2) h3\n```\n\nNow we have equality identity.\n\n```\n  have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n    a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n```\n\nNow we can rewrite goal using `h_eq`:\n\nGoal: `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Use `have` to transform:\n\n```\n  have : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    simpa [h_eq] using h_nonneg\n```\n\nBut `h_eq` is equality, we can rewrite `h_nonneg` with `h_eq`. Actually `h_nonneg` is `0 ≤ a * (b - c) ^ 2 + ...`. So we can `simpa [h_eq]`? Wait `h_eq` expresses RHS minus LHS equals sum. So we want `0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. Using `h_eq` we can rewrite that expression to the sum, then apply `h_nonneg`. So:\n\n```\n  have h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    have := h_nonneg\n    simpa [h_eq] using this\n```\n\nNow from `h0` we can get the desired inequality by `linarith` or `exact` after rewriting.\n\nGoal: `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. This is equivalent to `0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. So we can `have` and then `exact` after `linarith`. Use `exact` with `sub_nonneg.mp`? Actually we have `h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. Then `exact` `by`? We can use `exact` with `sub_nonneg.mp`? Wait `sub_nonneg` is lemma: `0 ≤ a - b ↔ b ≤ a`. So we can use `have := (sub_nonneg).mp h0`. But `sub_nonneg` is `0 ≤ a - b ↔ b ≤ a`. So we can do:\n\n```\n  have : 8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n    have := (sub_nonneg).mp h0\n    simpa [sub_eq, add_comm, add_left_comm, add_assoc] using this\n```\n\nBut easier: Use `exact` with `by`:\n\n```\n  have : 8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a) := by\n    have := (sub_nonneg).mp h0\n    simpa [sub_eq, add_comm, add_left_comm, add_assoc, mul_comm, mul_left_comm, mul_assoc] using this\n```\n\nBut maybe simpler: Use `linarith` after `h0`:\n\n```\n  linarith [h0]\n```\n\nBecause `linarith` can handle linear inequality? But `h0` is non-linear due to product? Actually `h0` is inequality with subtraction; `linarith` may not handle multiplication. But we can rewrite goal to `0 ≤ ...` and use `exact h0`. So we can change goal to `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Use `have` as `h0`. Then we can `exact` after `simpa [sub_eq, add_comm]`? Wait we need to transform `h0` to the goal.\n\nWe have `h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c)`. Using `sub_nonneg` equivalence:\n\n`sub_nonneg` lemma: `0 ≤ a - b ↔ b ≤ a`. So we can get `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)` by `exact (sub_nonneg.mp h0)`. Indeed `sub_nonneg.mp h0` returns `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Let's check: `sub_nonneg` expects `0 ≤ a - b`. So `a` is `(a + b) * (b + c) * (c + a)`, `b` is `8 * (a * b * c)`. So `sub_nonneg.mp h0` yields `8 * (a * b * c) ≤ (a + b) * (b + c) * (c + a)`. Yes.\n\nThus final proof:\n\n```\n  have h_eq : (a + b) * (b + c) * (c + a) - 8 * (a * b * c) =\n    a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    ring\n  have h_nonneg : 0 ≤ a * (b - c) ^ 2 + b * (c - a) ^ 2 + c * (a - b) ^ 2 := by\n    have h1 : 0 ≤ a * (b - c) ^ 2 := mul_nonneg (le_of_lt ha) (pow_two_nonneg _)\n    have h2 : 0 ≤ b * (c - a) ^ 2 := mul_nonneg (le_of_lt hb) (pow_two_nonneg _)\n    have h3 : 0 ≤ c * (a - b) ^ 2 := mul_nonneg (le_of_lt hc) (pow_two_nonneg _)\n    exact add_nonneg (add_nonneg h1 h2) h3\n  have h0 : 0 ≤ (a + b) * (b + c) * (c + a) - 8 * (a * b * c) := by\n    simpa [h_eq] using h_nonneg\n  exact (sub_nonneg.mp h0)\n```\n\nBut we need to ensure `pow_two_nonneg` is imported. It's in `Mathlib`. Use `_` placeholder for variable.\n\n`pow_two_nonneg _` expects argument. So `pow_two_nonneg (b - c)`.\n\nThus:\n\n`(pow_two_nonneg (b - c))`.\n\nNow final code.\n\nLet's produce final Lean file.\n\n",
+                  "format": "unknown",
+                  "index": 0
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 410,
+          "completion_tokens": 3227,
+          "total_tokens": 3637,
+          "cost": 0.0016545,
+          "is_byok": false,
+          "prompt_tokens_details": {
+            "cached_tokens": 64,
+            "cache_write_tokens": 0,
+            "audio_tokens": 0,
+            "video_tokens": 0
+          },
+          "cost_details": {
+            "upstream_inference_cost": 0.0016545,
+            "upstream_inference_prompt_cost": 4.1e-05,
+            "upstream_inference_completions_cost": 0.0016135
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "image_tokens": 0,
+            "audio_tokens": 0
+          }
+        }
+      },
+      "actual_cost_usd": 0.0016545,
+      "latency_ms": 19718,
+      "status": "ok"
+    }
+  ],
+  "actual_cost_usd": 0.0016545
+}
