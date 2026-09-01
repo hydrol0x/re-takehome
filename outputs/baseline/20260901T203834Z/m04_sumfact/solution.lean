@@ -8,6 +8,7 @@ theorem m04_sumfact (n : ℕ) :
   | zero =>
       simp
   | succ n ih =>
-      simp [Finset.sum_range_succ, ih, Nat.factorial_succ, Nat.succ_mul,
-            Nat.add_comm, Nat.add_left_comm, Nat.add_assoc,
-            Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]
+      -- expand the sum at `n+1`
+      simp [Finset.sum_range_succ, ih, Nat.succ_mul, Nat.factorial_succ,
+        Nat.add_comm, Nat.add_left_comm, Nat.add_assoc,
+        Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]
