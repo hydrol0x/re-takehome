@@ -688,7 +688,7 @@ import-surface constraint, candidates are linted, precheck cap 4). Tests:
 Judge-check failure diagnosis (2026-09-01 ~20:50–21:12Z, machine load 4.6–6.9
 on 4 cores with 7–9 Lean containers): a judge-invocation replica on p01 kept
 its artifacts. The agent behaved exactly as designed — zero LLM calls, the
-$0 S0 sweep solved p01 (), and the comparator precheck
+$0 S0 sweep solved p01 (`sweep:nlinarith`), and the comparator precheck
 PASSED (194 s) — but the runner's final scoring comparator returned
 passed=False timed_out=True after 180519 ms: under
 saturation, even p01's cold build exceeds the kit's 180 s scoring limit
