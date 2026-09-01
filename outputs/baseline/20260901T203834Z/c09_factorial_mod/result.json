@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "problem_id": "c09_factorial_mod",
+  "status": "harness_error",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": null,
+    "timed_out": true,
+    "duration_ms": 180853,
+    "output": {
+      "error": "Comparator timed out after 180s"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.00026678,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 383.181,
+  "models_used": [
+    "openai/gpt-oss-120b"
+  ],
+  "both_required_models_used": false,
+  "agent_error": {
+    "type": "LeanRuntimeError",
+    "message": "REPL failed to import Mathlib: TIMEOUT after 180s",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/user/re-takehome/src/re_harness/worker.py\", line 133, in _run\n    result = await asyncio.wait_for(agent.solve(problem, services), timeout=agent_time)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.11/asyncio/tasks.py\", line 489, in wait_for\n    return fut.result()\n           ^^^^^^^^^^^^\n  File \"/home/user/re-takehome/baselines/simple_agent.py\", line 127, in solve\n    check = await services.lean.check_file(candidate)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/user/re-takehome/src/re_harness/lean.py\", line 117, in check_file\n    return await asyncio.to_thread(self._check_file_sync, source, timeout_s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.11/asyncio/threads.py\", line 25, in to_thread\n    return await loop.run_in_executor(None, func_call)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.11/concurrent/futures/thread.py\", line 58, in run\n    result = self.fn(*self.args, **self.kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/user/re-takehome/src/re_harness/lean.py\", line 134, in _check_file_sync\n    restarted = self._ensure_alive()\n                ^^^^^^^^^^^^^^^^^^^^\n  File \"/home/user/re-takehome/src/re_harness/lean.py\", line 160, in _ensure_alive\n    self.start()\n  File \"/home/user/re-takehome/src/re_harness/lean.py\", line 183, in start\n    raise LeanRuntimeError(f\"REPL failed to import Mathlib: {detail or 'no response'}\")\nre_harness.lean.LeanRuntimeError: REPL failed to import Mathlib: TIMEOUT after 180s\n"
+  },
+  "agent_metadata": {
+    "baseline_turn": 1,
+    "model": "openai/gpt-oss-120b"
+  }
+}

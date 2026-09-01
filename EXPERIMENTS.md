@@ -723,6 +723,7 @@ was the load-induced final-scoring timeout diagnosed above.
 | 20260825T183009Z | duo (20-min, earlier check) | 6/8 | same six | light |
 | 20260901T204827Z | duo (30-min) | **4/8** ($0.096) | c04 c09 h06 m07 | **saturated** (load 4.6–6.9: 3 duo + 4 baseline workers + judge replica + comparators); c07 and m03 — solved in both earlier checks — timed out at 18 min |
 | 20260901T200131Z | raw Qwen (30-min) | 4/8 ($0.06) | c04 c07 c09 m07 | moderate |
+| 20260901T212748Z | solo-qwen (30-min) | **6/8** ($0.165) | c04 c07 c09 h06 m03 m07 (identical to the duo's two 6/8 checks) | light (baseline only, load ≈0.5–1.5) |
 
 Cross-run duo tally on held-8: c04 3/3, c09 3/3, m07 3/3, h06 3/3, c07 2/3,
 m03 2/3, h03 0/3, m05 0/3. The duo covers two problems the raw loop did
