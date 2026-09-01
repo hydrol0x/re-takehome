@@ -1,80 +1,113 @@
-import Mathlib.Data.Nat.ModEq
-import Mathlib.Tactic
 import Mathlib.Data.ZMod.Basic
 import Mathlib.GroupTheory.OrderOfElement
+import Mathlib.Tactic
 
 open Nat
 
+/-- Helper: the multiplicative order of `2` in `ZMod 23` is `11`. -/
+lemma orderOf_two_mod23 : (orderOf (2 : ZMod 23)) = 11 := by
+  have hpow : (2 : ZMod 23) ^ 11 = 1 := by norm_num
+  have hdiv : (orderOf (2 : ZMod 23)) ∣ 11 :=
+    (orderOf_dvd_iff_pow_eq_one).mpr hpow
+  have hpos : (orderOf (2 : ZMod 23)) ≠ 0 := by
+    have hne : (2 : ZMod 23) ≠ 0 := by norm_num
+    exact (orderOf_ne_zero_iff).mpr hne
+  rcases Nat.dvd_prime (by decide : Nat.Prime 11) hdiv with h | h
+  · exact (hpos (by simpa [h] ))
+  · exact h
+
 /-- (a): `23 ∣ 2 ^ n - 1` iff `11 ∣ n`, for positive `n`. -/
 theorem h02_a (n : ℕ) (hn : 0 < n) : 23 ∣ 2 ^ n - 1 ↔ 11 ∣ n := by
-  -- work in the multiplicative group of units of `ZMod 23`
-  have h23 : (23 : ℕ) ≠ 0 := by decide
-  let g : (ZMod 23)ˣ := (2 : ZMod 23)⁻¹
-  have hg : (2 : ZMod 23) ∈ (Units (ZMod 23)) := by
-    have : (2 : ZMod 23) ≠ 0 := by
-      decide
-    exact Units.mk0 _ this
-  have horder : orderOf (2 : (ZMod 23)ˣ) = 11 := by
-    -- `norm_num` can compute the order of a unit in a small field
-    norm_num
-  -- rewrite the statement in terms of `ZMod`
-  have hdiv_iff : (23 ∣ 2 ^ n - 1) ↔ ((2 ^ n : ℕ) : ZMod 23) = 1 := by
+  -- rewrite the divisibility condition in `ZMod 23`
+  have h₁ : (23 ∣ 2 ^ n - 1) ↔ ((2 : ZMod 23) ^ n = (1 : ZMod 23)) := by
+    have hpos : 1 ≤ 2 ^ n := by
+      have : 0 < n := hn
+      have : 2 ^ n ≥ 2 := by
+        have : 1 ≤ n := Nat.succ_le_of_lt hn
+        exact Nat.pow_le_pow_of_le_left (by decide : 1 ≤ 2) this
+      exact le_trans (Nat.succ_le_of_lt (Nat.zero_lt_one)) this
     constructor
     · intro h
       have : ((2 ^ n - 1) : ZMod 23) = 0 := by
-        exact (ZMod.natCast_self (n := 23) (a := 2 ^ n - 1)).symm ▸
-          (ZMod.natCast_self (n := 23)).trans (by
-            exact (ZMod.natCast_self (n := 23)).symm)
-      simpa [sub_eq, sub_eq_add_neg, map_sub, map_one, map_pow] using this
+        exact (ZMod.natCast_self).mpr h
+      have : (2 : ZMod 23) ^ n - 1 = 0 := by
+        simpa [Nat.cast_pow, Nat.cast_one, Nat.cast_sub hpos] using this
+      simpa [sub_eq, sub_eq_add_neg] using sub_eq_zero.mp this
     · intro h
+      have : (2 : ZMod 23) ^ n - 1 = (0 : ZMod 23) := by
+        simpa [h] using sub_self (1 : ZMod 23)
       have : ((2 ^ n - 1) : ZMod 23) = 0 := by
-        simpa [sub_eq, sub_eq_add_neg, map_sub, map_one, map_pow, h]
-      exact (ZMod.natCast_self (n := 23) (a := 2 ^ n - 1)).mp this
-  -- use the order of `2` in the group of units
-  have hpow : ((2 : ZMod 23) ^ n = (1 : ZMod 23)) ↔ 11 ∣ n := by
-    have : ((2 : ZMod 23) ^ n = (1 : ZMod 23)) ↔ (orderOf (2 : (ZMod 23)ˣ)) ∣ n := by
-      simpa [pow_eq, horder] using
-        (orderOf_pow_eq_one_iff (a := (2 : (ZMod 23)ˣ)) (n := n)).symm
-    simpa [horder] using this
-  simpa [hdiv_iff, map_pow] using hpow
+        simpa [Nat.cast_pow, Nat.cast_one, Nat.cast_sub hpos] using this
+      exact (ZMod.natCast_self).mp this
+  -- use the order of `2` modulo `23`
+  have h₂ : ((2 : ZMod 23) ^ n = (1 : ZMod 23)) ↔ 11 ∣ n := by
+    have horder := orderOf_two_mod23
+    have hpow : (2 : ZMod 23) ^ 11 = (1 : ZMod 23) := by
+      simpa [horder] using (orderOf_pow_eq_one (2 : ZMod 23)).mpr rfl
+    constructor
+    · intro h
+      have : (orderOf (2 : ZMod 23)) ∣ n :=
+        (orderOf_dvd_iff_pow_eq_one).mp (by simpa [horder] using h)
+      simpa [horder] using this
+    · intro h
+      rcases Nat.dvd_of_modEq_zero (by decide : (11 : ℕ) ≠ 0) h with ⟨k, rfl⟩
+      simpa [pow_mul, hpow] using rfl
+  exact h₁.trans h₂
 
 /-- (b): no positive `n` has `23 ∣ 2 ^ n + 1`. -/
 theorem h02_b (n : ℕ) (hn : 0 < n) : ¬23 ∣ 2 ^ n + 1 := by
   intro h
-  have hmod : ((2 : ZMod 23) ^ n = (-1 : ZMod 23)) := by
-    have : ((2 ^ n + 1 : ℕ) : ZMod 23) = 0 := by
-      have : ((2 ^ n + 1) : ZMod 23) = ((2 ^ n : ℕ) : ZMod 23) + 1 := by rfl
-      simpa [this] using
-        (ZMod.natCast_self (n := 23) (a := 2 ^ n + 1)).mp h
-    have : ((2 : ZMod 23) ^ n) = -1 := by
-      have : ((2 : ZMod 23) ^ n) + (1 : ZMod 23) = 0 := by
-        simpa [map_pow, map_one] using this
-      exact eq_neg_of_add_eq_zero_left this
+  have hmod : ((2 : ZMod 23) ^ n : ZMod 23) = -1 := by
+    have hpos : 1 ≤ 2 ^ n := by
+      have : 0 < n := hn
+      have : 2 ^ n ≥ 2 := by
+        have : 1 ≤ n := Nat.succ_le_of_lt hn
+        exact Nat.pow_le_pow_of_le_left (by decide : 1 ≤ 2) this
+      exact le_trans (Nat.succ_le_of_lt (Nat.zero_lt_one)) this
+    have : ((2 ^ n + 1) : ZMod 23) = 0 := (ZMod.natCast_self).mpr h
+    have : (2 : ZMod 23) ^ n + 1 = (0 : ZMod 23) := by
+      simpa [Nat.cast_pow, Nat.cast_one, Nat.cast_add, Nat.cast_one] using this
+    have : (2 : ZMod 23) ^ n = -1 := by
+      simpa using eq_neg_of_add_eq_zero_left this
     exact this
-  have horder : orderOf (2 : (ZMod 23)ˣ) = 11 := by
-    norm_num
-  have hpow : ((2 : ZMod 23) ^ (2 * 11) = 1) := by
-    have : ((2 : (ZMod 23)ˣ) ^ (2 * 11) : (ZMod 23)ˣ) = 1 := by
-      simpa [pow_mul, horder] using (orderOf_pow_eq_one (a := (2 : (ZMod 23)ˣ)) (k := 2))
-    exact congrArg Units.val this
-  have : ((2 : ZMod 23) ^ (2 * 11) = (-1 : ZMod 23) ^ (2 * 11)) := by
+  have horder := orderOf_two_mod23
+  have hpow : (2 : ZMod 23) ^ 11 = (1 : ZMod 23) := by
+    simpa [horder] using (orderOf_pow_eq_one (2 : ZMod 23)).mpr rfl
+  have hodd : (2 : ZMod 23) ^ (2 * 11) = (1 : ZMod 23) := by
+    simpa [pow_mul, hpow] using rfl
+  have hneg : (2 : ZMod 23) ^ (2 * 11) = ((-1 : ZMod 23) ^ 2) := by
     simpa [hmod] using congrArg (fun x : ZMod 23 => x ^ (2 * 11)) hmod
-  have : ((-1 : ZMod 23) ^ (2 * 11) = (1 : ZMod 23)) := by
-    simpa using (one_pow (2 * 11))
-  have : ((2 : ZMod 23) ^ (2 * 11) = (1 : ZMod 23)) := by
-    simpa [this] using this
-  have hcontr : (1 : ZMod 23) = (-1 : ZMod 23) := by
-    calc
-      (1 : ZMod 23) = ((2 : ZMod 23) ^ (2 * 11)) := (hpow.symm)
-      _ = ((2 : ZMod 23) ^ n) ^ (2 * 11 / n) := by
-        sorry
-      _ = (-1 : ZMod 23) ^ (2 * 11 / n) := by
-        sorry
-      _ = (-1 : ZMod 23) := by
-        have : (2 * 11 / n) % 2 = 1 := by sorry
-        simpa [pow_mul] using this
-  have : (2 : ZMod 23) = 0 := by
-    have : (1 : ZMod 23) - (-1 : ZMod 23) = 0 := by simpa [hcontr] using sub_self (1 : ZMod 23)
+  have : ((-1 : ZMod 23) ^ 2) = (1 : ZMod 23) := by norm_num
+  have : (2 : ZMod 23) ^ (2 * 11) = (1 : ZMod 23) := by
+    simpa [this] using hneg
+  have hdiv : (orderOf (2 : ZMod 23)) ∣ 2 * 11 :=
+    (orderOf_dvd_iff_pow_eq_one).mpr this
+  have : (orderOf (2 : ZMod 23)) = 11 := by
+    simpa [horder] using hdiv
+  have : (2 : ZMod 23) ^ (2 * 11) = (1 : ZMod 23) := by
+    simpa [pow_mul, hpow] using rfl
+  have : ((-1 : ZMod 23) ^ (2 * 11)) = (1 : ZMod 23) := by
+    simpa [hmod] using congrArg (fun x : ZMod 23 => x ^ (2 * 11)) hmod
+  have : ((-1 : ZMod 23) ^ 22) = (1 : ZMod 23) := by simpa using this
+  have : ((-1 : ZMod 23) ^ 22) = (1 : ZMod 23) := by norm_num
+  have : ((-1 : ZMod 23) ^ 22) = (1 : ZMod 23) := this
+  have hodd' : ((-1 : ZMod 23) ^ 11) = (-1 : ZMod 23) := by
+    have : ((-1 : ZMod 23) ^ 11) * ((-1 : ZMod 23) ^ 11) = (1 : ZMod 23) := by
+      simpa [pow_mul] using this
+    have hne : ((-1 : ZMod 23) ^ 11) ≠ 0 := by norm_num
+    have := mul_left_cancel₀ hne this
     simpa using this
-  have : (2 : ℕ) % 23 ≠ 0 := by decide
-  exact this (by simpa using congrArg ZMod.val this)
+  have : ((2 : ZMod 23) ^ 11) = (1 : ZMod 23) := by
+    simpa [horder] using (orderOf_pow_eq_one (2 : ZMod 23)).mpr rfl
+  have : ((2 : ZMod 23) ^ 11) = (-1 : ZMod 23) := by
+    simpa [hmod] using congrArg (fun x : ZMod 23 => x ^ 11) hmod
+  have : (1 : ZMod 23) = (-1 : ZMod 23) := by
+    simpa [hpow] using this
+  have : (2 : ZMod 23) = (0 : ZMod 23) := by
+    have : (2 : ZMod 23) = (1 : ZMod 23) + (1 : ZMod 23) := by norm_num
+    simpa [this] using congrArg (fun x : ZMod 23 => x + 1) this
+  have : (2 : ZMod 23) = (0 : ZMod 23) := by norm_num
+  have : False := by
+    have hneq : (2 : ZMod 23) ≠ 0 := by norm_num
+    exact hneq this
+  exact this.elim
