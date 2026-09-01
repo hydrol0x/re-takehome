@@ -656,3 +656,14 @@ flippers on good seeds). Unlike the kit set, where the raw loops reach
 parity, the custom benchmark shows a scaffold gain of +2/8 held and roughly
 +3–5/16 dev at a 10-minute cap disadvantage. (gpt-oss raw on the custom 24
 running next.)
+
+Surface-repair validation, seed 2 (20260901T203559Z, duo, 2-hour cap,
+revised rmo_2000_6): ✗ ($0.025) — but the precondition arose at 12 min this
+time and the new path executed end-to-end: precheck rejected the
+REPL-accepted winner (not a timeout, 6 s); S5-surface's lint rejected the
+first confined candidate for `interval_cases`; the bounded confined round
+produced no accepted core-only proof; the agent shipped the original winner
+and exited with 108 min of window unused. Diagnosis: plumbing works; the
+gap is (i) model capability under the restricted surface in one round, and
+(ii) the early exit — after a failed confined round the search should
+continue in a surface-aware mode for the remaining window.

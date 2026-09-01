@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "problem_id": "m02_ord25",
+  "description": "# m02_ord25\n\nFind the least positive integer $n$ such that $2^n \\equiv 1 \\pmod{25}$, i.e.\nthe multiplicative order of $2$ modulo $25$.\n\nFill in `m02_answer` with a numeric literal and prove the theorem `m02_ord25`.\n`IsLeast S a` means `a ∈ S` and `a` is a lower bound of `S`, so the proof has\ntwo parts: your $n$ satisfies $2^n \\bmod 25 = 1$, and no smaller positive\nexponent does.\n",
+  "challenge": "import Mathlib\n\n/-- The least positive integer `n` such that `2 ^ n` leaves remainder `1` when\ndivided by `25`. Must be a numeric literal. -/\nabbrev m02_answer : ℕ := sorry\n\n/-- `m02_answer` is the least element of the set of positive `n` with\n`2 ^ n % 25 = 1`; that is, the multiplicative order of `2` modulo `25`. -/\ntheorem m02_ord25 : IsLeast {n : ℕ | 0 < n ∧ 2 ^ n % 25 = 1} m02_answer := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m02_ord25"
+  ],
+  "definition_names": [
+    "m02_answer"
+  ],
+  "numeric_answer_names": [
+    "m02_answer"
+  ],
+  "out_dir": "outputs/baseline/20260901T203834Z/m02_ord25",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "b7159a605409472fa96e3ad2f7f0b77a"
+}

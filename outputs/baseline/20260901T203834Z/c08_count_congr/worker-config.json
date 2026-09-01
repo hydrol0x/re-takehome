@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "problem_id": "c08_count_congr",
+  "description": "# c08_count_congr\n\nHow many natural numbers $n$ with $0 \\le n < 250$ satisfy both $n \\equiv 0 \\pmod 3$\nand $n \\equiv 2 \\pmod 5$?\n\nFill in `c08_answer` with a numeric literal and prove the theorem.\n",
+  "challenge": "import Mathlib\n\n/-- The number of natural numbers `n < 250` with `n % 3 = 0` and `n % 5 = 2`.\nMust be a numeric literal. -/\nabbrev c08_answer : ℕ := sorry\n\n/-- Count the `n < 250` that are divisible by `3` and leave remainder `2` mod `5`. -/\ntheorem c08_count_congr :\n    (Finset.filter (fun n => n % 3 = 0 ∧ n % 5 = 2) (Finset.range 250)).card\n      = c08_answer := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c08_count_congr"
+  ],
+  "definition_names": [
+    "c08_answer"
+  ],
+  "numeric_answer_names": [
+    "c08_answer"
+  ],
+  "out_dir": "outputs/baseline/20260901T203834Z/c08_count_congr",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "56c792e0f0c043f98c2ceccd05981f92"
+}

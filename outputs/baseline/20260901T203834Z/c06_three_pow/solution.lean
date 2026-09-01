@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option exponentiation.threshold 10000
+
 /-- The last two digits of `3 ^ 2026`, i.e. `3 ^ 2026 % 100`. Must be a numeric literal. -/
 abbrev c06_answer : ℕ := 29
 
