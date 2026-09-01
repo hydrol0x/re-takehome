@@ -714,3 +714,20 @@ surface. Reported as such in the paper.
 judge_check re-run on a quiet machine (load 0.4, 21:20Z Sept 1) with the
 full surface-mode code: **PASSED** (score 1/1, $0.00) — the earlier failure
 was the load-induced final-scoring timeout diagnosed above.
+
+### Held-8 arms at 30-min caps (RQ2 replication on unseen problems)
+
+| run | arm | held-8 | solved | machine load |
+| --- | --- | --- | --- | --- |
+| 20260825T174536Z | duo (20-min, earlier check) | 6/8 | c04 c07 c09 m03 m07 h06 | light |
+| 20260825T183009Z | duo (20-min, earlier check) | 6/8 | same six | light |
+| 20260901T204827Z | duo (30-min) | **4/8** ($0.096) | c04 c09 h06 m07 | **saturated** (load 4.6–6.9: 3 duo + 4 baseline workers + judge replica + comparators); c07 and m03 — solved in both earlier checks — timed out at 18 min |
+| 20260901T200131Z | raw Qwen (30-min) | 4/8 ($0.06) | c04 c07 c09 m07 | moderate |
+
+Cross-run duo tally on held-8: c04 3/3, c09 3/3, m07 3/3, h06 3/3, c07 2/3,
+m03 2/3, h03 0/3, m05 0/3. The duo covers two problems the raw loop did
+not (m03, h06; 2–3 of 3 runs each); both miss h03/m05. The 30-min duo run
+is load-confounded and is rerun on a quiet machine after the baseline
+finishes, so that all three 30-min arms are compared under comparable
+conditions; solo-qwen and solo-gptoss arms follow with only the light
+gpt-oss baseline in the background.
