@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "h04_square_shift",
+  "description": "# h04_square_shift\n\nFind all pairs of positive integers $(x, y)$ with\n\n$$x^2 = y^2 + 2y + 17.$$\n\nProve the characterization stated as an if-and-only-if: the only solution is\n$(x, y) = (5, 2)$.\n",
+  "challenge": "import Mathlib\n\ntheorem h04_square_shift (x y : ℕ) (hx : 0 < x) (hy : 0 < y) :\n    x ^ 2 = y ^ 2 + 2 * y + 17 ↔ x = 5 ∧ y = 2 := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "h04_square_shift"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T200131Z/h04_square_shift",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "52d047fce05f4a54a5f2b1ab1b79c293"
+}

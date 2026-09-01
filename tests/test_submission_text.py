@@ -272,3 +272,24 @@ def test_classify_on_parsed_signature():
     parsed = parse_challenge(source)
     assert classify_goal(parsed.signatures[0]) == "induction"
     assert classify_goal(parsed.signatures[1]) == "inequality"
+
+
+def test_guard_composes_on_the_challenge_import_block():
+    # The Comparator compares kernel-level statements; a model-added
+    # `import Mathlib.Tactic` on a minimal-import challenge makes the same
+    # statement elaborate differently and fails scoring (paper §5.4).
+    minimal = ("import Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Bounds.Basic\n\n"
+               "theorem t : 1 = 1 := by\n  sorry\n")
+    parsed = parse_challenge(minimal)
+    extra = ("import Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Bounds.Basic\n"
+             "import Mathlib.Tactic\n\ntheorem t : 1 = 1 := by\n  rfl\n")
+    guarded, _ = guard_candidate(extra, parsed)
+    assert guarded is not None
+    assert guarded.startswith("import Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Bounds.Basic\n\n")
+    assert "Mathlib.Tactic" not in guarded
+    # A candidate already on the challenge's block is untouched byte-for-byte.
+    same = minimal.replace("sorry", "rfl")
+    assert guard_candidate(same, parsed)[0] == same
+    # A candidate with no import lines still receives the challenge's block.
+    guarded, _ = guard_candidate("theorem t : 1 = 1 := by\n  rfl\n", parsed)
+    assert guarded is not None and guarded.startswith("import Mathlib.Data.Nat.Basic\n")

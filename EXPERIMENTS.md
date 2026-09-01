@@ -611,3 +611,26 @@ prechecks triggered; final best candidate is an S4 sketch with exactly
 **one unfilled hole** — the same distance as the 4-hour attempt. rmo_2001_2
 remains the one provable kit problem outside cumulative coverage (13/14
 scorable under original statements). Paper Table 3 updated.
+
+## 2026-09-01: import-surface fallback (post-audit mechanism), custom-set baselines
+
+Following the rmo_2000_6 near-solve, two generic changes (no per-problem
+content), both covered by offline tests and `judge_check` (PASSED 20:14Z):
+
+1. **Composition rule** (`lean_text.guard_candidate`): every candidate is
+   composed on the challenge's exact import block. The warm REPL strips
+   imports, so this is invisible during search; the Comparator compares
+   kernel-level statements, so a model-added `import Mathlib.Tactic` on a
+   minimal-import challenge can only hurt. Idempotent on `import Mathlib`
+   challenges (all 14 other kit problems, all 24 custom problems).
+2. **S5 surface repair** (`SUBMISSION_SURFACE_REPAIR`, default on): when the
+   comparator precheck rejects a REPL-accepted winner outright (not a
+   timeout) on a challenge narrower than `import Mathlib`, one bounded
+   repair round confined to the challenge's imports (core tactics only; a
+   lint rejects Mathlib-only tactics before REPL time is spent), then one
+   more precheck. Never fires on `import Mathlib` challenges; any failure
+   ships the original winner exactly as before. `worker.py`'s precheck now
+   returns the comparator's diagnostic tail (`reason`) for this purpose.
+
+Validation planned: duo, 30-min caps, revised rmo_2000_6 (2 seeds) once the
+custom-set baselines release the machine.

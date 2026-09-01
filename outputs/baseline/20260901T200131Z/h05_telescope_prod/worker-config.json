@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "h05_telescope_prod",
+  "description": "# h05_telescope_prod\n\nProve the telescoping product identity: for every integer $n \\ge 2$,\n\n$$\\prod_{k=2}^{n} \\left(1 - \\frac{1}{k^2}\\right) = \\frac{n+1}{2n}.$$\n\nThe product is over the real numbers.\n",
+  "challenge": "import Mathlib\n\n/-- Telescoping product: `∏_{k=2}^n (1 - 1/k²) = (n+1)/(2n)` for `n ≥ 2`. -/\ntheorem h05_telescope_prod (n : ℕ) (hn : 2 ≤ n) :\n    ∏ k ∈ Finset.Icc 2 n, ((1 : ℝ) - 1 / (k : ℝ) ^ 2) = ((n : ℝ) + 1) / (2 * (n : ℝ)) := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "h05_telescope_prod"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T200131Z/h05_telescope_prod",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "a1cf37b2e07d4cf7a256d303fcedc768"
+}

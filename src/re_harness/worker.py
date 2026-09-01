@@ -110,8 +110,13 @@ async def _run(config: dict[str, Any]) -> int:
             timed_out=verdict.timed_out,
             duration_ms=verdict.duration_ms,
         )
+        # The agent's import-surface fallback needs to distinguish a
+        # statement/build rejection from a timeout; pass the diagnostic tail.
+        output = verdict.output if isinstance(verdict.output, dict) else {}
+        reason = (str(output.get("stdout", "")) + "\n"
+                  + str(output.get("stderr", ""))).strip()[-4000:]
         return {"passed": verdict.passed, "timed_out": verdict.timed_out,
-                "duration_ms": verdict.duration_ms}
+                "duration_ms": verdict.duration_ms, "reason": reason}
 
     services = Services(llm=llm, lean=lean, checkpoint=checkpoint, state_dir=out_dir,
                         compare=precheck_compare)

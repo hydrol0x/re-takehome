@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "problem_id": "c06_three_pow",
+  "description": "# c06_three_pow\n\nFind the last two digits of $3^{2026}$; that is, compute $3^{2026} \\bmod 100$.\n\nFill in `c06_answer` with a numeric literal and prove the theorem.\n",
+  "challenge": "import Mathlib\n\n/-- The last two digits of `3 ^ 2026`, i.e. `3 ^ 2026 % 100`. Must be a numeric literal. -/\nabbrev c06_answer : ℕ := sorry\n\n/-- Compute `3 ^ 2026 % 100`. -/\ntheorem c06_three_pow : 3 ^ 2026 % 100 = c06_answer := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c06_three_pow"
+  ],
+  "definition_names": [
+    "c06_answer"
+  ],
+  "numeric_answer_names": [
+    "c06_answer"
+  ],
+  "out_dir": "outputs/baseline/20260901T200131Z/c06_three_pow",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "ce51c2cd2a5f4f85919bd497c50b0a15"
+}

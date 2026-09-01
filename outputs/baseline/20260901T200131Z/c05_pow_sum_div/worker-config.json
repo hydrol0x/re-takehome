@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "c05_pow_sum_div",
+  "description": "# c05_pow_sum_div\n\nShow that $5$ divides $2^{2025} + 3^{2025}$.\n\nReplace the `sorry` in the theorem with a proof. (The numbers involved are far too\nlarge to evaluate directly; work modulo $5$.)\n",
+  "challenge": "import Mathlib\n\n/-- `5` divides `2 ^ 2025 + 3 ^ 2025`. -/\ntheorem c05_pow_sum_div : 5 ∣ 2 ^ 2025 + 3 ^ 2025 := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c05_pow_sum_div"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T200131Z/c05_pow_sum_div",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "732c157af9b7463d95a4798b19168362"
+}

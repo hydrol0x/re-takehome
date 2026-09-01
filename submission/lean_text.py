@@ -346,8 +346,17 @@ def guard_candidate(
     banned = SKETCH_BANNED_RE if allow_sorry else BANNED_RE
     if banned.search(candidate):
         return None, "contains a banned token (sorry/admit/native_decide/axiom)"
-    if "import " not in candidate:
-        candidate = "\n".join(parsed.imports) + "\n\n" + candidate
+    # The scoring Comparator compares kernel-level statements, and a
+    # statement can elaborate to a different term under a different import
+    # set — so a model-added `import Mathlib.Tactic` on a minimal-import
+    # challenge fails scoring even with a correct proof. The warm REPL strips
+    # imports anyway; compose every candidate on the challenge's exact block.
+    if parsed.imports:
+        lines = candidate.splitlines()
+        if [line for line in lines if line.startswith("import ")] != parsed.imports:
+            body = [line for line in lines if not line.startswith("import ")]
+            candidate = ("\n".join(parsed.imports) + "\n\n"
+                         + "\n".join(body).lstrip("\n"))
     normalized = normalize_ws(candidate)
     for signature in parsed.signatures:
         if signature not in normalized:
@@ -358,6 +367,31 @@ def guard_candidate(
                          candidate, re.MULTILINE):
             return None, f"numeric answer {name} is not a decimal literal"
     return candidate, ""
+
+
+# Tactics that live in Mathlib.Tactic (not Lean core / Std) and therefore do
+# not exist under a challenge that imports only a few Mathlib modules. The
+# list is deliberately conservative: only tactics that are unambiguously
+# Mathlib-provided, so the lint never rejects a core-only proof.
+MATHLIB_ONLY_TACTICS = (
+    "norm_num", "linarith", "nlinarith", "positivity", "polyrith", "field_simp",
+    "ring_nf", "ring", "interval_cases", "fin_cases", "aesop", "gcongr", "tauto",
+    "push_cast", "zify", "qify", "rify", "linear_combination", "nlinarith!",
+    "bound", "norm_cast", "exact_mod_cast", "simp_arith", "use",
+)
+_MATHLIB_ONLY_RE = re.compile(
+    r"(?<![A-Za-z0-9_.'])(" + "|".join(
+        re.escape(name) for name in sorted(MATHLIB_ONLY_TACTICS, key=len, reverse=True))
+    + r")(?![A-Za-z0-9_'])"
+)
+
+
+def surface_lint(source: str) -> str:
+    """Name the first Mathlib-only tactic used outside comments, or ''."""
+
+    stripped = "\n".join(line.split("--", 1)[0] for line in source.splitlines())
+    match = _MATHLIB_ONLY_RE.search(stripped)
+    return match.group(1) if match else ""
 
 
 def format_messages(messages: list[dict[str, Any]], limit: int = 5000) -> str:

@@ -54,6 +54,7 @@ from submission.lean_text import (
     extract_lean,
     format_messages,
     guard_candidate,
+    surface_lint,
     insert_preamble,
     parse_challenge,
     splice_holes,
@@ -121,6 +122,13 @@ class Config:
     # error fingerprint, repairs one representative per cluster, and replays
     # an accepted fix textually on the siblings (no LLM calls); default off.
     cluster_repair: bool = False
+    # SUBMISSION_SURFACE_REPAIR (default on): when the comparator precheck
+    # rejects a REPL-accepted winner on a challenge whose import block is
+    # narrower than `import Mathlib`, run one bounded repair round confined
+    # to the challenge's import surface (core tactics only), then precheck
+    # once more. The warm REPL preloads all of Mathlib and so cannot see
+    # this gap (paper §5.4); the branch never fires on `import Mathlib`.
+    surface_repair: bool = True
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -176,6 +184,9 @@ class Config:
                 "SUBMISSION_PREMISE_HINTS", "").strip() == "1",
             # SUBMISSION_CLUSTER_REPAIR (research branch B3): default off.
             cluster_repair=os.environ.get("SUBMISSION_CLUSTER_REPAIR", "").strip() == "1",
+            # Import-surface fallback (paper §5.4): default on; "0" disables.
+            surface_repair=os.environ.get(
+                "SUBMISSION_SURFACE_REPAIR", "1").strip() != "0",
         )
 
     @property
@@ -377,6 +388,63 @@ def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
                  "Fix the reported problems. Return the full corrected file."]
     return [{"role": "system", "content": system},
             {"role": "user", "content": "\n".join(user)}]
+
+
+SURFACE_TECHNIQUES = """Working inside a narrow import surface (core Lean 4 only):
+- Available: intro/intros, exact, refine, apply, constructor, cases, rcases, obtain,
+  induction, subst, rw, simp only [...] with core lemmas, calc, show, exfalso,
+  contradiction, omega, decide, rfl, trivial, anonymous constructors ⟨_, _⟩.
+- Core Nat lemmas exist (Nat.le_mul_of_pos_left/right, Nat.lt_or_ge, Nat.mul_le_mul,
+  Nat.pos_of_ne_zero, Nat.le_of_lt_succ, Nat.succ_le_of_lt); Mathlib-only names may not.
+- Bounded case analysis: state the finite claim and decide it, e.g.
+  `have key : ∀ a < N, ∀ b < N, P a b := by decide`, then instantiate it.
+- Divisibility witnesses: `⟨c, rfl⟩` or `⟨c, by decide⟩`; turn `k ∣ m` into `m % k = 0`
+  by `obtain ⟨c, hc⟩ := h` then `omega` (products of variables are atoms for omega).
+- Bound a variable from a product: `a ≤ a * b` via `Nat.le_mul_of_pos_right a hb`,
+  then `omega` with the bound in context."""
+
+
+def surface_repair_messages(problem: Problem, challenge: str, imports: list[str],
+                            feedback: str = "") -> list[dict[str, str]]:
+    """Repair prompt confined to the challenge's own import block (paper §5.4).
+
+    The scoring build compiles the solution under the challenge's imports and
+    compares kernel-level statements, so a proof that needs Mathlib's tactic
+    suite cannot score on a minimal-import challenge even when it is correct.
+    Generic technique material only; no problem-specific content.
+    """
+
+    forbidden = ", ".join(
+        name for name in MATHLIB_ONLY_TACTICS_PROMPT)
+    system = (
+        "You are an expert Lean 4 prover. Produce a complete, compiling Lean file "
+        "that proves the challenge theorem(s), replacing every `sorry`.\n"
+        + RULES_BLOCK + "\n- Do not use sorry.\n"
+        "- The scoring build compiles your file with ONLY these imports; do not add, "
+        "remove, or change them:\n" + "\n".join(f"    {line}" for line in imports) + "\n"
+        f"- Mathlib's tactic suite is NOT available under these imports. Do not use: {forbidden}.\n\n"
+        + SURFACE_TECHNIQUES
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Challenge file (fill in the sorries, change nothing else, keep exactly these imports):",
+        "```lean", challenge.rstrip(), "```",
+    ]
+    if feedback:
+        user += ["", "The previous file was accepted by the development checker but rejected "
+                 "by the scoring build (which uses only the imports above):",
+                 "```", feedback, "```",
+                 "Rewrite the proof using only tactics and lemmas available under those "
+                 "imports. Return the full corrected file."]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+MATHLIB_ONLY_TACTICS_PROMPT = (
+    "norm_num", "linarith", "nlinarith", "positivity", "polyrith", "field_simp",
+    "ring", "ring_nf", "interval_cases", "fin_cases", "aesop", "gcongr", "tauto",
+    "push_cast", "zify", "qify", "use", "norm_cast", "exact_mod_cast", "simp_arith",
+)
 
 
 def plan_messages(problem: Problem, challenge: str) -> list[dict[str, str]]:
@@ -1159,6 +1227,7 @@ class SubmissionAgent:
             max_cycles = max(8, int(self.config.agent_time_s // 1500))
             cycle = toolbox.cycles_done
             prechecks = 0
+            surface_tried = False
             while True:
                 # The cycle cap is calibrated for ~25-min mixed-model cycles; when
                 # one channel is refusing, all-qwen cycles run far faster and the
@@ -1202,9 +1271,22 @@ class SubmissionAgent:
                             passed=bool(verdict.get("passed")),
                             timed_out=bool(verdict.get("timed_out")),
                             duration_ms=verdict.get("duration_ms"))
-                if verdict.get("passed") or not verdict.get("timed_out"):
-                    # Confirmed — or rejected for a reason further REPL-guided
-                    # search cannot fix better than S5's audit; ship it.
+                if verdict.get("passed"):
+                    break
+                if not verdict.get("timed_out"):
+                    # Rejected outright. On a challenge narrower than
+                    # `import Mathlib` the usual cause is the import-surface
+                    # gap the warm REPL cannot see (paper §5.4): one repair
+                    # round confined to the challenge's imports, then one more
+                    # precheck. Otherwise S5's audit is the last word; ship.
+                    if not surface_tried and self._surface_repair_applicable(toolbox):
+                        surface_tried = True
+                        repaired = await self.stage5_surface_repair(
+                            toolbox, solved, str(verdict.get("reason", "")))
+                        if repaired is not None:
+                            solved = repaired
+                            prechecks -= 1  # the confined retry earns its own precheck
+                            continue
                     break
                 if heavy_fallback is None or solved.check_s < heavy_fallback.check_s:
                     heavy_fallback = solved
@@ -1556,6 +1638,63 @@ class SubmissionAgent:
             return
         tb.history_notes.append("gpt-oss diagnosis: " + text.strip()[:800])
         tb.log(stage="S2", critic=True)
+
+    # ---- S5 import-surface fallback (paper §5.4) ---------------------------
+
+    def _surface_repair_applicable(self, tb: Toolbox) -> bool:
+        """Only on challenges narrower than `import Mathlib`, with room to work."""
+
+        imports = tb.parsed.imports
+        return bool(
+            self.config.surface_repair and imports and imports != ["import Mathlib"]
+            and tb.llm_alive and tb.lean_alive
+            and tb.deadline.allows(tb.config.scaled(600)))
+
+    async def stage5_surface_repair(self, tb: Toolbox, winner: Candidate,
+                                    reason: str) -> Candidate | None:
+        """One bounded repair round confined to the challenge's import block.
+
+        The winner was REPL-accepted (the warm REPL preloads all of Mathlib)
+        but rejected by the scoring comparator, which builds under the
+        challenge's own imports. Re-prove with core tactics only; the lint
+        rejects candidates that still use Mathlib-only tactics before any
+        REPL time is spent. Any failure returns None and the caller ships
+        the original winner exactly as it would have without this stage.
+        """
+
+        feedback = "\n".join(
+            line for line in reason.splitlines()
+            if "error" in line.lower() or "do not match" in line)[-2500:]
+        seed = Candidate(source=winner.source, origin=winner.origin)
+        seed.error_count = 1
+        seed.messages = [{"severity": "error",
+                          "data": "Scoring build rejected this file:\n" + feedback}]
+        imports = list(tb.parsed.imports)
+
+        def guard(source: str) -> str | None:
+            guarded, _reason = guard_candidate(source, tb.parsed)
+            if guarded is None:
+                return None
+            bad = surface_lint(guarded)
+            if bad:
+                tb.log(stage="S5-surface", lint=bad)
+                return None
+            return guarded
+
+        try:
+            result = await self.repair_with_handoff(
+                tb, seed,
+                origin_model=QWEN if winner.origin.startswith("qwen") else GPTOSS,
+                build_messages=lambda fb: surface_repair_messages(
+                    tb.problem, tb.challenge, imports, fb),
+                guard=guard, stage="S5-surface")
+        except LLMDead:
+            raise
+        except Exception as exc:  # the fallback must never break shipping
+            tb.log(stage="S5-surface", error=str(exc)[:120])
+            return None
+        tb.log(stage="S5-surface", solved=(result.origin if result is not None else False))
+        return result
 
     # ---- S2/S3 core: capped repair with plateau handoff --------------------
 

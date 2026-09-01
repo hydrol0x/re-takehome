@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "c03_coprime_linear",
+  "description": "# c03_coprime_linear\n\nShow that for every natural number $n$, the integers $2n + 1$ and $9n + 4$ are relatively prime, i.e. $\\gcd(2n+1,\\, 9n+4) = 1$.\n\nReplace the `sorry` in the theorem with a proof.\n",
+  "challenge": "import Mathlib\n\n/-- For every natural number `n`, the numbers `2 * n + 1` and `9 * n + 4` are coprime. -/\ntheorem c03_coprime_linear (n : ℕ) : Nat.gcd (2 * n + 1) (9 * n + 4) = 1 := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c03_coprime_linear"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T200131Z/c03_coprime_linear",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "b44352c0486f41b592a4a008334b1417"
+}
