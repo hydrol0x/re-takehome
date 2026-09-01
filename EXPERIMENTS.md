@@ -574,3 +574,24 @@ to a different kernel term than under the challenge's two minimal imports.
 The in-run precheck caught it exactly as designed. Probes A/B/C (matching
 imports + sorry; +Mathlib.Tactic + sorry; full Mathlib + sorry) staged to
 pin the mechanism; results below.
+
+### rmo_2000_6 statement-mismatch mechanism: probes + scorability certificate
+
+Probes (comparator, fresh containers; challenge = revised statement):
+- **A** solution with the challenge's exact two imports + `sorry` →
+  statements **match** (sole failure: `Illegal axiom detected: 'sorryAx'`).
+- **B** + `import Mathlib.Tactic` + `sorry` → **"Challenge and solution
+  theorem statement do not match"**.
+- **C** `import Mathlib` + `sorry` → same mismatch.
+
+So the mismatch is caused entirely by the solution's import surface
+changing how the identical statement text elaborates; the agent's
+mathematically-correct proof (and any full-Mathlib proof) can never score
+on this problem as composed. Constructive resolution: a reference proof
+written inside the challenge's import surface — core tactics only, with
+`decide`-driven 100-case bounded exhaustion replacing interval_cases —
+**passes the Comparator** (`reference/rmo_2000_6_revised.lean`,
+passed=True, 14.0 s). The revised-statement scorable ceiling of 15/16 is
+therefore certified, and the constraint it imposes on solvers (matching
+import surfaces, or a final-composition stage that re-targets the
+challenge's imports) is documented as future agent work.
