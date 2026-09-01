@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "problem_id": "c09_factorial_mod",
+  "description": "# c09_factorial_mod\n\nFind the remainder when $1! + 2! + 3! + \\cdots + 10!$ is divided by $100$.\n\nFill in `c09_answer` with a numeric literal and prove the theorem.\n",
+  "challenge": "import Mathlib\n\n/-- The remainder when `1! + 2! + ⋯ + 10!` is divided by `100`.\nMust be a numeric literal. -/\nabbrev c09_answer : ℕ := sorry\n\n/-- Compute `(∑ k ∈ Finset.range 10, (k + 1)!) % 100`. -/\ntheorem c09_factorial_mod :\n    (∑ k ∈ Finset.range 10, (k + 1).factorial) % 100 = c09_answer := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c09_factorial_mod"
+  ],
+  "definition_names": [
+    "c09_answer"
+  ],
+  "numeric_answer_names": [
+    "c09_answer"
+  ],
+  "out_dir": "outputs/baseline/20260901T200131Z/c09_factorial_mod",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "2c2544d8340346428447ea36e4fd79cb"
+}

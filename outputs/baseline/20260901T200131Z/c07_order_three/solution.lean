@@ -8,16 +8,19 @@ abbrev c07_answer : ℕ := 5
 theorem c07_order_three :
     IsLeast {n : ℕ | 0 < n ∧ 11 ∣ 3 ^ n - 1} c07_answer := by
   constructor
-  · -- Prove that 5 is in the set (0 < 5 ∧ 11 ∣ 3^5 - 1)
+  · -- Show that 5 is in the set
     constructor
-    · norm_num
-    · norm_num [Nat.dvd_iff_mod_eq_zero]
-      <;> decide
-  · -- Prove that 5 is a lower bound for the set
-    intro n hn
-    have h1 : 0 < n := hn.1
-    have h2 : 11 ∣ 3 ^ n - 1 := hn.2
+    · -- 0 < 5
+      norm_num
+    · -- 11 ∣ 3^5 - 1
+      norm_num [Nat.dvd_iff_mod_eq_zero]
+  · -- Show that 5 is the least element
+    intro b hb
+    have h1 : 0 < b := hb.1
+    have h2 : 11 ∣ 3 ^ b - 1 := hb.2
+    -- We need to show 5 ≤ b
     by_contra h
-    -- If n < 5, check each case
-    have h3 : n < 5 := lt_of_not_ge h
-    interval_cases n <;> norm_num at h2 ⊢ <;> contradiction
+    -- If 5 > b, then b < 5
+    have h3 : b < 5 := lt_of_not_ge h
+    -- Since b > 0 and b < 5, check each case
+    interval_cases b <;> simp_all (config := {decide := true})

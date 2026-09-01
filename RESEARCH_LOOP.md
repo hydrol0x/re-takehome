@@ -1,3 +1,5 @@
+> *Working document (historical). Final results and conclusions are in `writeup.pdf` (source `paper.html`), which supersede any numbers or claims here.*
+
 # Research loop — variant selection on the custom eval set
 
 Goal: use the remaining key budget (~$46) and days before the deadline to

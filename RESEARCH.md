@@ -1,3 +1,5 @@
+> *Working document (historical). Final results and conclusions are in `writeup.pdf` (source `paper.html`), which supersede any numbers or claims here.*
+
 # Coordination Layer — Research Notes & Design Brainstorm
 
 *Working document for Part One (build the coordination layer) and Part Two (does

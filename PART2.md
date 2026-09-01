@@ -1,8 +1,41 @@
 # Part Two — Does two-model collaboration beat either model alone?
 
-**Short answer: yes, by a small but repeatable margin at matched budgets —
-and the reason is portfolio coverage plus a verifier-gated division of
-labor, not conversational synergy.** The compiler is the only judge that
+> **Post-review update (2026-09-01) — supersedes the figures below.** The
+> final account is the paper (`writeup.pdf`, source `paper.html`); this
+> document is the mid-project analysis, kept for its mechanism discussion.
+> What changed after the kit's raw baselines were rerun at the arms' own
+> 30-minute caps (they had run at ≈20 minutes):
+>
+> - **Aggregate: parity, not a margin.** Raw Qwen 9/16 and raw GPT-OSS
+>   10/16 versus controller arms 8–10/16 (duo 9–10). The duo's +1 over the
+>   best solo arm sits inside the ±2 run-to-run band. The controller's
+>   earlier apparent gain over the kit baselines was substantially wall-clock.
+> - **Complementarity is real but only partly captured in one window.** The
+>   union of the two raw reruns covers 12/16 — more than any single
+>   controller run — so the model families do fail differently; one
+>   cap-matched duo window realizes part of that union (paper §5.1–5.2).
+> - **Where the controller's value actually sits:** zero-cost deterministic
+>   coverage, per-problem complementarity, robustness to a 14-hour provider
+>   outage, and verifier-alignment machinery (the comparator precheck decided
+>   several long-horizon runs, and caught a solution-side import-surface gap
+>   on the corrected rmo_2000_6 — paper §5.4). Hard instances fell
+>   systematically only at multi-hour horizons under decomposition, and a
+>   solo-Qwen arm reproduced one of those solves, so scaffold + horizon
+>   carry more of the gain than model-to-model interaction.
+> - **Benchmark audit.** Our falsity certificate for rmo_2000_6 anticipated
+>   the upstream fix (bound 20→10, exactly our witness value); every historical
+>   Putnam pass used a definitional shortcut the upstream revision removed;
+>   the revised-statement ceiling is 15/16 and is certified scorable by an
+>   in-repo matching-imports proof. Post-revision runs: 0-for-24 problem
+>   attempts at 30 min–8 h.
+>
+> **Short answer, revised: two models add coverage and robustness, not an
+> aggregate lift at matched caps; the largest measured effects are the
+> verifier-aligned scaffold and the search horizon.**
+
+*Mid-project short answer (superseded):* yes, by a small but repeatable
+margin at matched budgets — the reason being portfolio coverage plus a
+verifier-gated division of labor, not conversational synergy. The compiler is the only judge that
 matters; the second model earns its place where it adds *coverage* (different
 failure modes) or *independent confirmation of compact decisions* (numeric
 answers), and nowhere else we could measure.

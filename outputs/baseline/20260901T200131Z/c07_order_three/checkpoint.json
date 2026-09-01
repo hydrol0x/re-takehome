@@ -1,6 +1,46 @@
 {
   "metadata": {
-    "baseline_turn": 4,
-    "model": "qwen/qwen3.5-flash-02-23"
+    "baseline": "simple",
+    "model": "qwen/qwen3.5-flash-02-23",
+    "turns": 6,
+    "accepted_by_repl": true,
+    "attempts": [
+      {
+        "turn": 1,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 7
+      },
+      {
+        "turn": 2,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 7
+      },
+      {
+        "turn": 3,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 4
+      },
+      {
+        "turn": 4,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 4
+      },
+      {
+        "turn": 5,
+        "accepted": false,
+        "timed_out": false,
+        "message_count": 5
+      },
+      {
+        "turn": 6,
+        "accepted": true,
+        "timed_out": false,
+        "message_count": 0
+      }
+    ]
   }
 }

@@ -57,7 +57,9 @@ per-problem origin (in `result.json.agent_metadata.origin` — which stage and
 model produced the accepted proof), spend, wall time.
 
 Ablations when budget allows: `SUBMISSION_REPAIR_ROUNDS=0` (no repair/handoff),
-`SUBMISSION_SKETCH_ROUNDS=0` (no decomposition).
+`SUBMISSION_SKETCH_ROUNDS=0` (no decomposition), `SUBMISSION_COMPARE_PRECHECK=0`
+(no comparator precheck), `SUBMISSION_SURFACE_REPAIR=0` (no import-surface
+fallback on minimal-import challenges; paper §5.4).
 
 ## 4. Final validation (before submitting)
 
