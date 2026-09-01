@@ -1,0 +1,649 @@
+{
+  "schema_version": 1,
+  "problem_id": "putnam_2018_a1",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 56124,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (10s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[putnam_2018_a1, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (9.3s)\nwarning: Solution.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[putnam_2018_a1, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- putnam_2018_a1 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- putnam_2018_a1 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.7702730130000008,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 27732.823,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen:s4-skeleton:r3",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "char_solutions",
+          "rational_to_integer"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:gptoss-high:1",
+        "holes": 3
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message bo"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:gptoss-high:1",
+        "unfilled_decls": [
+          "factorization_solutions"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 9
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "div_2018_sq_factors",
+          "only_six_solutions",
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "factors_of_square",
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r3"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r3",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "qwen:s4-skeleton:r3",
+        "unfilled_decls": [
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "unique_solution_list"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "divisors_of_2018_sq",
+          "putnam_2018_a1",
+          "rat_eq_iff_int_eq",
+          "valid_divisor_pairs"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 6,
+        "rejected": 3
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 13
+      },
+      {
+        "stage": "S4",
+        "unfilled": 12,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "all_divisors_of_2018_sq",
+          "divisor_bound",
+          "factorization_backward",
+          "factorization_forward",
+          "pos_divisor_implies_pos_sol",
+          "putnam_2018_a1",
+          "rat_to_int_eq",
+          "sol_from_div_1009",
+          "sol_from_div_2",
+          "sol_from_div_2018",
+          "sol_from_div_4",
+          "sol_from_div_4036"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 13
+      },
+      {
+        "stage": "S4",
+        "unfilled": 6,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "divisor_bound_from_pos",
+          "int_eq_iff_factorization",
+          "num_divisors_2018_sq",
+          "positive_divisors_only",
+          "putnam_2018_a1",
+          "rat_to_int_equation"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "divisors_of_2018_sq",
+          "eq_to_factored_form",
+          "putnam_2018_a1",
+          "solution_from_pair",
+          "valid_divisor_pairs"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 8
+      },
+      {
+        "stage": "S4",
+        "unfilled": 5,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "cross_multiply_equation",
+          "finite_divisors_bound",
+          "list_all_solutions",
+          "putnam_2018_a1",
+          "solution_bounds"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 14
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "both_factors_divide",
+          "eq_to_factored_form",
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 8
+      },
+      {
+        "stage": "S4",
+        "unfilled": 7,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "check_six_solutions_complete",
+          "divisor_pair_cases",
+          "eq_to_cross_product",
+          "positive_factors_of_eq",
+          "putnam_2018_a1",
+          "solution_from_divisor",
+          "valid_divisor_pairs"
+        ]
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:2",
+        "holes": 3
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "sketch:qwen-think:2",
+        "unfilled_decls": [
+          "putnam_2018_a1"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter request failed (reservation released, dev policy): "
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 6,
+        "rejected": 3
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "div_2018_sq_factors",
+          "putnam_2018_a1",
+          "valid_divisor_mod_constraint"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 27675.3
+  }
+}

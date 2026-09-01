@@ -558,3 +558,19 @@ duo agent's S0 sweeps keep the REPLs elaboration-bound, unlike the
 baseline agents (model-latency-bound) that coexisted at 4 workers. Plan
 changed to strictly serial: rmo_2001_2 launches on the empty machine when
 revised3 completes (~03:15Z Sept 1).
+
+### 8-hour duo on the revised statements (20260831T191439Z) — near-solve of rmo_2000_6
+
+| problem | outcome | cost | wall | note |
+| --- | --- | --- | --- | --- |
+| putnam_2018_a1 | ✗ | $0.770 | 7.7 h | genuine deep miss; 3642 REPL checks, 0 accepted; 2 transient llm_errors absorbed by rails |
+| putnam_2020_a2 | ✗ | $0.972 | 6.7 h | **first budget-exhausted problem ever** (stopped by the $1 ledger, not the clock); 2628 checks, 0 accepted |
+| rmo_2000_6 | ✗ | $0.092 | 1.4 h | **REPL-accepted proof found** (correct witness (1,10): 1·10⁵=2000·50, 10⁴=2000·5), **twice** — comparator precheck rejected it (31 s, `passed=false`), final scoring confirms: both files build, kernel statement comparison fails: "Challenge and solution theorem statement do not match" |
+
+The rmo_2000_6 outcome is the paper's REPL≠Comparator gap on the *solution*
+side: the agent's file adds `import Mathlib.Tactic` (needed for
+interval_cases/nlinarith), and the same statement text apparently elaborates
+to a different kernel term than under the challenge's two minimal imports.
+The in-run precheck caught it exactly as designed. Probes A/B/C (matching
+imports + sorry; +Mathlib.Tactic + sorry; full Mathlib + sorry) staged to
+pin the mechanism; results below.
