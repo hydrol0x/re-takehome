@@ -642,3 +642,17 @@ earlier 0/6 at 30-min caps — the precondition first appeared at 75 min in
 the 8-hour run). Follow-ups: a 2-hour seed, and a direct offline test of the
 confined-repair prompt against both models with the 8-hour run's rejected
 proof as feedback, scored by the Comparator.
+
+### Raw Qwen 30-min baseline on the custom 24 (20260901T200131Z)
+
+**12/24** ($0.315 total): dev-16 **8/16** (c01, c02, c06, c08, c10, h05,
+m01, m04), held-8 **4/8** (c04, c07, c09, m07). Comparison with the
+controller (duo) at *20-minute* caps from RESEARCH_LOOP.md: dev-16 11–13
+(band; tuned default), held-8 6/8 on both checks (c04, c07, c09, m03, m07,
+h06; missed h03, m05). On the held-out 8 the duo's set is a strict superset
+of the raw loop's (+m03_recip9, +h06_order_mod125), with a shorter window;
+on dev-16 the duo additionally covers c05, h01, m02, m08 (and the c03/m01
+flippers on good seeds). Unlike the kit set, where the raw loops reach
+parity, the custom benchmark shows a scaffold gain of +2/8 held and roughly
++3–5/16 dev at a 10-minute cap disadvantage. (gpt-oss raw on the custom 24
+running next.)
