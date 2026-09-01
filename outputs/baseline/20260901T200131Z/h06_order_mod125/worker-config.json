@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "problem_id": "h06_order_mod125",
+  "description": "# h06_order_mod125\n\nFind the multiplicative order of $2$ modulo $125$, i.e. the least positive\ninteger $n$ with $2^n \\equiv 1 \\pmod{125}$.\n\nFill in `h06_answer` with a numeric literal and prove the theorem. `IsLeast S a`\nmeans `a ∈ S` and `a` is a lower bound of `S`; the lower-bound half needs an\nargument ruling out every smaller exponent, not just a finite check of a few.\n",
+  "challenge": "import Mathlib\n\n/-- The multiplicative order of `2` modulo `125`. Must be a numeric literal. -/\nabbrev h06_answer : ℕ := sorry\n\n/-- `h06_answer` is the least positive `n` with `2 ^ n ≡ 1 (mod 125)`. -/\ntheorem h06_order_mod125 :\n    IsLeast {n : ℕ | 0 < n ∧ 2 ^ n % 125 = 1} h06_answer := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "h06_order_mod125"
+  ],
+  "definition_names": [
+    "h06_answer"
+  ],
+  "numeric_answer_names": [
+    "h06_answer"
+  ],
+  "out_dir": "outputs/baseline/20260901T200131Z/h06_order_mod125",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "f54129c0c7994365a0f29ff9a032ca57"
+}

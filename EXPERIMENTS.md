@@ -634,3 +634,11 @@ content), both covered by offline tests and `judge_check` (PASSED 20:14Z):
 
 Validation planned: duo, 30-min caps, revised rmo_2000_6 (2 seeds) once the
 custom-set baselines release the machine.
+
+Surface-repair validation, seed 1 (20260901T201718Z, duo, 30 min, revised
+rmo_2000_6): ✗ ($0.034, 18 min) — no REPL-accepted candidate arose, so the
+fallback never fired (uninformative for the mechanism; consistent with the
+earlier 0/6 at 30-min caps — the precondition first appeared at 75 min in
+the 8-hour run). Follow-ups: a 2-hour seed, and a direct offline test of the
+confined-repair prompt against both models with the 8-hour run's rejected
+proof as feedback, scored by the Comparator.
