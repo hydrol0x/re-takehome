@@ -230,7 +230,9 @@ Disclosures and attribution:
   upstream ledger fix (kit issue → merged commit #6) adopted verbatim, plus
   applicant additions kept deliberately small and inert at judging:
   `Services.state_dir` (durable agent state), `Services.compare`
-  (real-comparator precheck), events-archive-on-resume in the runner, and
+  (real-comparator precheck, returning the comparator's diagnostic tail so
+  the agent can distinguish a statement/build rejection from a timeout),
+  events-archive-on-resume in the runner, and
   a dev-container-only `VM_TRANSPORT_FAILURE_POLICY` knob (never set during
   judging; default behavior is fail-closed and covered by the kit's tests).
 - No per-problem special-casing: runtime prompts contain only generic
