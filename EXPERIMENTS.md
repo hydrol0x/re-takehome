@@ -667,3 +667,20 @@ and exited with 108 min of window unused. Diagnosis: plumbing works; the
 gap is (i) model capability under the restricted surface in one round, and
 (ii) the early exit — after a failed confined round the search should
 continue in a surface-aware mode for the remaining window.
+
+Offline confined-repair prompt test (before the technique-block revision):
+both models × 3 samples, given the 8-hour run's rejected proof and the
+comparator diagnostic, asked for a core-only proof under the challenge's
+imports; each sample composed, linted, and scored by the Comparator.
+**0/6 passed**; 5/6 were lint-clean core-only attempts that failed to build.
+Failure modes: `decide` applied to `∣` goals (no Decidable instance under
+these imports) and Mathlib lemma names (`one_pow`) that do not exist in the
+closure. The SURFACE_TECHNIQUES block now states both explicitly (quotient
+witnesses for `∣`, `obtain`+`omega` for `∣` hypotheses, no Mathlib lemma
+names); rerun follows.
+
+Surface mode continuation (code): after a failed confined round the agent
+no longer stops — it keeps the REPL-accepted winner as the shipping
+fallback and continues the search in surface mode (S1/S2 prompts carry the
+import-surface constraint, candidates are linted, precheck cap 4). Tests:
+210 passed.

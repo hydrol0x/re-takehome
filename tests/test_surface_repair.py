@@ -165,3 +165,30 @@ def test_guard_composition_makes_added_tactic_imports_moot():
         "import Mathlib.Order.Bounds.Basic", "import Mathlib.Order.Bounds.Basic\nimport Mathlib.Tactic")
     guarded, _ = guard_candidate(with_extra, parsed)
     assert guarded is not None and "Mathlib.Tactic" not in guarded
+
+
+# ---- surface mode: continuation after a failed confined round ---------------
+
+
+def test_toolbox_guard_lints_only_in_surface_mode():
+    _agent, tb = make_agent_and_toolbox(MINIMAL)
+    proof = MINIMAL.replace("sorry", "norm_num")
+    assert tb.guard(proof) is not None          # normal mode: composition only
+    assert tb.surface_imports is None
+    tb.surface_mode = True
+    assert tb.surface_imports == ["import Mathlib.Data.Nat.Basic",
+                                  "import Mathlib.Order.Bounds.Basic"]
+    assert tb.guard(proof) is None              # surface mode: Mathlib-only tactic rejected
+    assert tb.guard(MINIMAL.replace("sorry", "decide")) is not None
+
+
+def test_whole_proof_prompt_carries_surface_block_only_when_asked():
+    from submission.agent import whole_proof_messages
+    problem = Problem(id="t", description="d", challenge=MINIMAL)
+    plain = whole_proof_messages(problem, MINIMAL)[0]["content"]
+    assert "restricted import surface" not in plain
+    surfaced = whole_proof_messages(
+        problem, MINIMAL, surface=["import Mathlib.Data.Nat.Basic"])[0]["content"]
+    assert "restricted import surface" in surfaced
+    assert "import Mathlib.Data.Nat.Basic" in surfaced
+    assert "interval_cases" in surfaced and "decide" in surfaced

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "m06_factcop",
+  "description": "# m06_factcop\n\nProve that for every integer $n \\ge 1$, the numbers $n! + 1$ and $(n+1)! + 1$\nare coprime:\n$$\\gcd\\bigl(n! + 1,\\; (n+1)! + 1\\bigr) = 1.$$\n\nProve the theorem `m06_factcop`. Key idea: any common divisor $d$ also divides\n$(n+1)(n!+1) - \\bigl((n+1)!+1\\bigr) = n$, hence divides $n!$, hence divides\n$(n!+1) - n! = 1$.\n",
+  "challenge": "import Mathlib\n\n/-- For every `n ≥ 1`, the numbers `n! + 1` and `(n + 1)! + 1` are coprime. -/\ntheorem m06_factcop (n : ℕ) (hn : 1 ≤ n) :\n    Nat.Coprime (Nat.factorial n + 1) (Nat.factorial (n + 1) + 1) := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m06_factcop"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T203834Z/m06_factcop",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "049462bb9c0440b89123a03f2a5e0557"
+}

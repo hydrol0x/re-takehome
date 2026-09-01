@@ -366,12 +366,19 @@ FILL_TECHNIQUES: dict[str, str] = {
 
 
 def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
-                         history: str = "", plan: str = "") -> list[dict[str, str]]:
+                         history: str = "", plan: str = "",
+                         surface: list[str] | None = None) -> list[dict[str, str]]:
     system = (
         "You are an expert Lean 4 / Mathlib prover. Produce a complete, compiling "
         "Lean file that proves the challenge theorem(s), replacing every `sorry`.\n"
         + RULES_BLOCK + "\n- Do not use sorry.\n\n" + COOKBOOK
     )
+    if surface:  # surface mode (paper §5.4): the scoring build has only these imports
+        system += ("\n\nIMPORTANT — restricted import surface. The scoring build compiles "
+                   "your file with ONLY these imports (do not add, remove, or change them):\n"
+                   + "\n".join(f"    {line}" for line in surface)
+                   + "\nMathlib's tactic suite is NOT available under them. Do not use: "
+                   + ", ".join(MATHLIB_ONLY_TACTICS_PROMPT) + ".\n\n" + SURFACE_TECHNIQUES)
     user = [
         f"Problem {problem.id}:", problem.description, "",
         "Challenge file (fill in the sorries, change nothing else):",
@@ -396,10 +403,18 @@ SURFACE_TECHNIQUES = """Working inside a narrow import surface (core Lean 4 only
   contradiction, omega, decide, rfl, trivial, anonymous constructors ⟨_, _⟩.
 - Core Nat lemmas exist (Nat.le_mul_of_pos_left/right, Nat.lt_or_ge, Nat.mul_le_mul,
   Nat.pos_of_ne_zero, Nat.le_of_lt_succ, Nat.succ_le_of_lt); Mathlib-only names may not.
-- Bounded case analysis: state the finite claim and decide it, e.g.
-  `have key : ∀ a < N, ∀ b < N, P a b := by decide`, then instantiate it.
-- Divisibility witnesses: `⟨c, rfl⟩` or `⟨c, by decide⟩`; turn `k ∣ m` into `m % k = 0`
-  by `obtain ⟨c, hc⟩ := h` then `omega` (products of variables are atoms for omega).
+- `decide` settles closed facts about literals stated with `=`, `≠`, `<`, `≤`, `%`, `+`, `*`, `^`;
+  it does NOT work on `∣` goals here (no Decidable instance under these imports).
+  Prove `k ∣ m` by exhibiting the quotient: `⟨c, by decide⟩` proves `k ∣ m` when `m = k * c`.
+  Use a `k ∣ m` hypothesis via `obtain ⟨c, hc⟩ := h` (hc : m = k * c) and then `omega`
+  or `decide` on the resulting `%`/`=` facts (products of variables are atoms for omega).
+- Bounded case analysis: state the finite claim with decidable connectives and decide it, e.g.
+  `have key : ∀ a < N, ∀ b < N, 0 < a → 0 < b → a * b < N → (a ^ 2 * b ^ 5) % 2000 ≠ 0 := by decide`,
+  then instantiate it on the concrete variables.
+- Do not rely on Mathlib lemma names (`one_pow`, `mul_comm`-style algebra lemmas, `Nat.Prime.*`);
+  under these imports they may not exist. Prefer `omega`, `decide`, `rfl`, and core `Nat.*` lemmas.
+- `IsLeast S x` / `lowerBounds`: `constructor`; membership by an anonymous constructor;
+  the bound by `intro n hn` then destructuring `hn`.
 - Bound a variable from a product: `a ≤ a * b` via `Nat.le_mul_of_pos_right a hb`,
   then `omega` with the bound in context."""
 
@@ -905,6 +920,10 @@ class Toolbox:
         # the search, not crash the problem: after two consecutive failures we
         # stop checking and submit the best unverified candidate instead.
         self.lean_alive = True
+        # Set after the comparator rejects a REPL-accepted winner on a
+        # challenge narrower than `import Mathlib` (paper §5.4): prompts then
+        # carry the import-surface constraint and candidates are linted.
+        self.surface_mode = False
         self.repl_failures = 0
         self.models_arm: list[str] = {
             "qwen": [QWEN], "gptoss": [GPTOSS]}.get(config.models, [QWEN, GPTOSS])
@@ -918,6 +937,25 @@ class Toolbox:
         state_dir = getattr(services, "state_dir", None)
         self.state_path = Path(state_dir) / "agent_state.json" if state_dir else None
         self._load_state()
+
+    @property
+    def surface_imports(self) -> list[str] | None:
+        """The challenge's import block while in surface mode, else None."""
+
+        return list(self.parsed.imports) if self.surface_mode else None
+
+    def guard(self, source: str, *, allow_sorry: bool = False) -> str | None:
+        """guard_candidate, plus the Mathlib-only-tactic lint in surface mode."""
+
+        guarded, _reason = guard_candidate(source, self.parsed, allow_sorry=allow_sorry)
+        if guarded is None:
+            return None
+        if self.surface_mode:
+            bad = surface_lint(guarded)
+            if bad:
+                self.log(stage="surface-lint", rejected=bad)
+                return None
+        return guarded
 
     def log(self, **kv: Any) -> None:
         self.stage_log.append(kv)
@@ -1257,8 +1295,9 @@ class SubmissionAgent:
                 # and time permits, verify the winner against it; a timeout
                 # demotes the proof to fallback and resumes the hunt.
                 compare = getattr(toolbox.services, "compare", None)
+                precheck_cap = 4 if toolbox.surface_mode else 2
                 if solved is None or not solved.accepted or compare is None \
-                        or not self.config.compare_precheck or prechecks >= 2 \
+                        or not self.config.compare_precheck or prechecks >= precheck_cap \
                         or not toolbox.deadline.allows(360):
                     break
                 prechecks += 1
@@ -1287,6 +1326,22 @@ class SubmissionAgent:
                             solved = repaired
                             prechecks -= 1  # the confined retry earns its own precheck
                             continue
+                        # The confined round failed: keep the winner as the
+                        # shipping fallback and let the remaining window search
+                        # in surface mode (constrained prompts, linted
+                        # candidates) instead of stopping here.
+                        toolbox.surface_mode = True
+                        if heavy_fallback is None:
+                            heavy_fallback = solved
+                        solved = None
+                        continue
+                    if toolbox.surface_mode:
+                        # Later surface-mode winners that still fail: keep the
+                        # most recent as fallback, keep searching (bounded by
+                        # the precheck cap and the deadline).
+                        heavy_fallback = solved
+                        solved = None
+                        continue
                     break
                 if heavy_fallback is None or solved.check_s < heavy_fallback.check_s:
                     heavy_fallback = solved
@@ -1498,7 +1553,8 @@ class SubmissionAgent:
             texts = await asyncio.gather(
                 *(tb.sample(model, whole_proof_messages(
                     tb.problem, tb.challenge, history=history,
-                    plan=plan if kind == "qwen-fast" else ""), kind=kind,
+                    plan=plan if kind == "qwen-fast" else "",
+                    surface=tb.surface_imports), kind=kind,
                             temperature=temp)
                   for (model, kind), temp in zip(wave, temps)),
                 return_exceptions=True)
@@ -1511,7 +1567,7 @@ class SubmissionAgent:
                 source = extract_lean(text) if isinstance(text, str) else None
                 if not source:
                     continue
-                guarded, _reason = guard_candidate(source, tb.parsed)
+                guarded = tb.guard(source)
                 if not guarded:
                     rejected += 1
                     continue
@@ -1568,8 +1624,9 @@ class SubmissionAgent:
             result = await self.repair_with_handoff(
                 tb, candidate,
                 origin_model=QWEN if candidate.origin.startswith("qwen") else GPTOSS,
-                build_messages=lambda fb: whole_proof_messages(tb.problem, tb.challenge, feedback=fb),
-                guard=lambda src: guard_candidate(src, tb.parsed)[0],
+                build_messages=lambda fb: whole_proof_messages(
+                    tb.problem, tb.challenge, feedback=fb, surface=tb.surface_imports),
+                guard=tb.guard,
                 stage="S2")
             if result is not None:
                 if clusters and result.accepted:
