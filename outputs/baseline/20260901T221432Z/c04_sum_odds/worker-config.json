@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "c04_sum_odds",
+  "description": "# c04_sum_odds\n\nShow that for every natural number $n$, the sum of the first $n$ odd numbers is a perfect square:\n$$\\sum_{k=0}^{n-1} (2k + 1) = n^2.$$\n\nReplace the `sorry` in the theorem with a proof.\n",
+  "challenge": "import Mathlib\n\n/-- The sum of the first `n` odd numbers is `n ^ 2`. -/\ntheorem c04_sum_odds (n : ℕ) : ∑ k ∈ Finset.range n, (2 * k + 1) = n ^ 2 := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c04_sum_odds"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260901T221432Z/c04_sum_odds",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "08f65987388143728e4615359e5fcfb7"
+}
