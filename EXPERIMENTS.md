@@ -696,3 +696,17 @@ saturation, even p01's cold build exceeds the kit's 180 s scoring limit
 judge_check (cost_unknown) ran under the same load. Neither involves the
 code paths changed today (no LLM call occurred); judge_check is re-run on a
 quiet machine before submission and must pass there.
+
+Offline confined-repair prompt test, after the technique-block revision:
+**0/6 again** (qwen 0/3: one lint-clean build failure with omega gaps, two
+lint rejections; gpt-oss 0/3: two lint-clean build failures — `subst`
+misuse, unknown `Nat.prime_two`/`Nat.prime_five` — and one lint rejection).
+The revision removed the specific earlier failure modes but the models do
+not reliably find the bounded-`decide` proof structure that the in-repo
+reference uses. Conclusion: the mechanism's plumbing is verified end-to-end
+(seed 2 live run), but in one confined round neither model produces a
+scoring core-only proof for rmo_2000_6; the composition rule is the robust
+gain (it rescues any proof that only added imports gratuitously), and the
+confined repair + surface-mode continuation remain a demonstrated fallback
+whose effectiveness is bounded by model capability under a restricted
+surface. Reported as such in the paper.
