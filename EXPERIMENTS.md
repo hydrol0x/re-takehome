@@ -732,3 +732,14 @@ is load-confounded and is rerun on a quiet machine after the baseline
 finishes, so that all three 30-min arms are compared under comparable
 conditions; solo-qwen and solo-gptoss arms follow with only the light
 gpt-oss baseline in the background.
+
+### Raw GPT-OSS 30-min baseline on the custom 24 — first run invalid (20260901T203834Z)
+
+6/24 nominal, but 10 problems ended `harness_error` (the kit's simple
+baseline has no rails: "REPL failed to import Mathlib: TIMEOUT after 180s"
+at 21:02–21:43Z, plus one transport `ReadError`), one `cost_unknown`, and
+the timed-out problems got fewer turns — all inside the day's saturation
+window (duo + qwen held-8 arms, judge replica, judge_check, comparators on
+4 cores). Treated as load-confounded and rerun in full on a light machine
+(only the latency-bound solo-gptoss arm in the background). The first
+run's dir is kept for the record; its numbers are not used.

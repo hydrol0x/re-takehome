@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "set": "custom-all",
+  "problems": [
+    {
+      "problem_id": "c01_quad_roots",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0005361,
+      "wall_s": 64.337,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c02_amgm_frac",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00066636,
+      "wall_s": 146.71,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c03_coprime_linear",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.019354485,
+      "wall_s": 1598.952,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): "
+    },
+    {
+      "problem_id": "c04_sum_odds",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.001187466,
+      "wall_s": 171.19,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c05_pow_sum_div",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.01188701,
+      "wall_s": 986.341,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    },
+    {
+      "problem_id": "c06_three_pow",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.001053904,
+      "wall_s": 189.776,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c07_order_three",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.011576323999999999,
+      "wall_s": 1577.467,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): "
+    },
+    {
+      "problem_id": "c08_count_congr",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.0008375,
+      "wall_s": 129.506,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- c08_count_congr propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList c08_answer\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- c08_count_congr propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList c08_answer\nuncaught exception: Illegal axiom detected: 'c08_count_congr._native.native_decide.ax_1_1'\n"
+    },
+    {
+      "problem_id": "c09_factorial_mod",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.00026678,
+      "wall_s": 383.181,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "REPL failed to import Mathlib: TIMEOUT after 180s"
+    },
+    {
+      "problem_id": "c10_tau_360",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0005974,
+      "wall_s": 55.575,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "h01_legendre100",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.00671628,
+      "wall_s": 544.655,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): "
+    },
+    {
+      "problem_id": "h02_mod23_cycle",
+      "status": "timed_out",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.017412773,
+      "wall_s": 1800.722,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "problem exceeded 1800.0s wall-clock limit"
+    },
+    {
+      "problem_id": "h03_invsq_sum",
+      "status": "timed_out",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.01403402,
+      "wall_s": 1800.738,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "problem exceeded 1800.0s wall-clock limit"
+    },
+    {
+      "problem_id": "h04_square_shift",
+      "status": "timed_out",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.015642236,
+      "wall_s": 1800.559,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "problem exceeded 1800.0s wall-clock limit"
+    },
+    {
+      "problem_id": "h05_telescope_prod",
+      "status": "timed_out",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.016725862,
+      "wall_s": 1800.183,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "problem exceeded 1800.0s wall-clock limit"
+    },
+    {
+      "problem_id": "h06_order_mod125",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.011013902,
+      "wall_s": 723.963,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): "
+    },
+    {
+      "problem_id": "m01_dvd13",
+      "status": "agent_timeout",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.021401723,
+      "wall_s": 1771.671,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m02_ord25",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.009998614000000001,
+      "wall_s": 477.98,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): "
+    },
+    {
+      "problem_id": "m03_recip9",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.0011011,
+      "wall_s": 282.167,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "REPL failed to import Mathlib: TIMEOUT after 180s"
+    },
+    {
+      "problem_id": "m04_sumfact",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.008144683,
+      "wall_s": 742.658,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "OpenRouter request failed (reservation released, dev policy): "
+    },
+    {
+      "problem_id": "m05_divbash",
+      "status": "cost_unknown",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.018759552000000002,
+      "wall_s": 1786.191,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "agent exceeded 1680.0s"
+    },
+    {
+      "problem_id": "m06_factcop",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.002054393,
+      "wall_s": 644.424,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "REPL failed to import Mathlib: TIMEOUT after 180s"
+    },
+    {
+      "problem_id": "m07_sumgeo",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0018519550000000002,
+      "wall_s": 309.952,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m08_amgm8",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.00115722,
+      "wall_s": 291.517,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    }
+  ],
+  "total_points": 6,
+  "max_points": 24,
+  "actual_cost_usd": 0.193977642,
+  "wall_s_sum": 20080.415,
+  "run_id": "9f1ec4c9a156438da5c8557743b4a14f",
+  "wall_s": 5694.854,
+  "finished_at": "2026-09-01T22:13:29.455906+00:00"
+}
