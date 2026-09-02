@@ -138,6 +138,15 @@ class Config:
     # fresh S4 sketch, the sketcher proposes an informal plan, the other model
     # critiques it, and the sketcher writes the skeleton given plan + critique.
     dialogue_sketch: bool = False
+    # SUBMISSION_RAW_LOOP (research branch R1, default off): at cycle 1, after
+    # the S1 wave, run the kit baseline's own loop verbatim for Qwen — one
+    # chronological chain of whole-file rewrites at temperature 0.2 with the
+    # previous attempt's compiler errors, byte-identical prompt — for up to
+    # SUBMISSION_RAW_LOOP_TURNS turns. Motivation: the raw Qwen loop solved
+    # p09 in both 30-minute runs that tried it while seven controller runs
+    # produced no accepted p09 candidate (EXPERIMENTS.md, pair arm).
+    raw_loop: bool = False
+    raw_loop_turns: int = 8
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -199,6 +208,9 @@ class Config:
             # Dialogue mechanisms (research branches D1/D2): default off.
             dialogue_repair=os.environ.get("SUBMISSION_DIALOGUE_REPAIR", "").strip() == "1",
             dialogue_sketch=os.environ.get("SUBMISSION_DIALOGUE_SKETCH", "").strip() == "1",
+            # SUBMISSION_RAW_LOOP (research branch R1): default off.
+            raw_loop=os.environ.get("SUBMISSION_RAW_LOOP", "").strip() == "1",
+            raw_loop_turns=_env_int("SUBMISSION_RAW_LOOP_TURNS", 8, 1, 25),
         )
 
     @property
@@ -407,6 +419,65 @@ def whole_proof_messages(problem: Problem, challenge: str, feedback: str = "",
                  "Fix the reported problems. Return the full corrected file."]
     return [{"role": "system", "content": system},
             {"role": "user", "content": "\n".join(user)}]
+
+
+def raw_loop_messages(problem: Problem, challenge: str, *, feedback: str,
+                      turn: int, max_turns: int) -> list[dict[str, str]]:
+    """The kit baseline's prompt, byte for byte (baselines/simple_agent.py).
+
+    SUBMISSION_RAW_LOOP runs the baseline's chronological whole-file repair
+    chain inside the controller; keeping the prompt identical is the point,
+    so any gain is attributable to the loop shape and request profile rather
+    than to wording.
+    """
+
+    instructions = [
+        "You are writing a complete Lean 4 file using Mathlib.",
+        "Return only the complete Lean code, preferably in one ```lean code block.",
+        "Preserve the theorem names and statements from the challenge.",
+        "Do not use sorry, admit, axioms, or unsafe escapes.",
+        "The file must compile as-is.",
+    ]
+    if turn == max_turns:
+        instructions.append(
+            "This is your final attempt. Return the best complete Lean file only."
+        )
+    user = [
+        f"Problem id: {problem.id}",
+        f"Baseline turn: {turn}/{max_turns}",
+        "",
+        "Problem description:",
+        problem.description,
+        "",
+        "Challenge Lean file:",
+        "```lean",
+        challenge,
+        "```",
+    ]
+    if feedback:
+        user.extend([
+            "",
+            "Lean compiler feedback from the previous candidate:",
+            "```text",
+            feedback,
+            "```",
+        ])
+    return [
+        {"role": "system", "content": "\n".join(instructions)},
+        {"role": "user", "content": "\n".join(user)},
+    ]
+
+
+def raw_loop_feedback(messages: list[dict[str, Any]], *, limit: int = 6000) -> str:
+    """The kit baseline's feedback format (every message, last `limit` chars)."""
+
+    chunks: list[str] = []
+    for message in messages:
+        severity = message.get("severity", "message")
+        pos = message.get("pos")
+        data = str(message.get("data", "")).strip()
+        chunks.append(f"{severity} at {pos}: {data}")
+    return "\n\n".join(chunks)[-limit:]
 
 
 SURFACE_TECHNIQUES = """Working inside a narrow import surface (core Lean 4 only):
@@ -1162,7 +1233,7 @@ class Toolbox:
     async def sample(self, model: str, messages: list[dict[str, str]], *,
                      kind: str, temperature: float | None = None,
                      max_tokens: int | None = None) -> str | None:
-        """One guarded LLM call. kind: qwen-fast | qwen-think | gptoss-med | gptoss-high.
+        """One guarded LLM call. kind: qwen-fast | qwen-think | qwen-deep | qwen-raw | gptoss-med | gptoss-high.
 
         `temperature`, when set, overrides the kind profile's value
         (SUBMISSION_WAVE_SPREAD); None keeps the profile unchanged.
@@ -1180,6 +1251,10 @@ class Toolbox:
             "qwen-deep": dict(max_tokens=28000, temperature=0.7,
                               reasoning={"enabled": True, "max_tokens": 16000},
                               timeout_s=int(scaled(self.config.qwen_call_s + 420))),
+            # The kit baseline's exact request profile (SUBMISSION_RAW_LOOP);
+            # raw calls have been observed to run ~8 min on hard prompts.
+            "qwen-raw": dict(max_tokens=12000, temperature=0.2, reasoning=None,
+                             timeout_s=int(scaled(self.config.qwen_call_s + 300))),
             "gptoss-med": dict(max_tokens=24000, temperature=1.0,
                                reasoning={"effort": "medium"},
                                timeout_s=int(scaled(self.config.gptoss_call_s))),
@@ -1340,6 +1415,9 @@ class SubmissionAgent:
                     # of the window (it is the hard-tier weapon and needs room);
                     # whole-file repair mops up with whatever time remains.
                     solved, near_misses = await self.stage1_sample(toolbox)
+                    if solved is None and toolbox.lean_alive and cycle == 1 \
+                            and self.config.raw_loop:
+                        solved = await self.stage1r_rawloop(toolbox)
                     if solved is None and toolbox.lean_alive \
                             and toolbox.deadline.allows(toolbox.config.scaled(900)):
                         solved = await self.stage4_decompose(toolbox)
@@ -1665,6 +1743,51 @@ class SubmissionAgent:
                     f"{closest.error_count} errors; first: {head}")
             candidates.extend(usable)
         return None, candidates
+
+    async def stage1r_rawloop(self, tb: Toolbox) -> Candidate | None:
+        """SUBMISSION_RAW_LOOP: the kit baseline's Qwen loop, run once per problem.
+
+        One chronological chain: whole-file rewrite at temperature 0.2, no
+        reasoning budget, previous attempt's compiler errors fed back verbatim
+        (the baseline's own feedback format), up to `raw_loop_turns` turns.
+        Candidates pass through the statement guard like every other stage's;
+        an accepted one returns as the winner and takes the precheck path.
+        """
+
+        if QWEN not in tb.models_arm:
+            return None
+        max_turns = self.config.raw_loop_turns
+        feedback = ""
+        for turn in range(1, max_turns + 1):
+            if not tb.deadline.allows(tb.config.scaled(tb.config.qwen_call_s) + 120):
+                tb.log(stage="S1r", turn=turn, stopped="deadline")
+                return None
+            text = await tb.sample(
+                QWEN, raw_loop_messages(tb.problem, tb.challenge, feedback=feedback,
+                                        turn=turn, max_turns=max_turns),
+                kind="qwen-raw")
+            source = extract_lean(text) if isinstance(text, str) else None
+            if not source:
+                feedback = "The previous reply contained no complete Lean file."
+                tb.log(stage="S1r", turn=turn, usable=False)
+                continue
+            guarded = tb.guard(source)
+            if guarded is None:
+                feedback = ("The previous candidate changed a theorem statement, name, "
+                            "or the imports; keep them exactly as in the challenge and "
+                            "only replace `sorry`.")
+                tb.log(stage="S1r", turn=turn, rejected="statement")
+                continue
+            candidate = await tb.check(Candidate(source=guarded, origin=f"qwen-raw:s1r:t{turn}"))
+            tb.record(candidate, "S1r")
+            tb.log(stage="S1r", turn=turn, errors=candidate.error_count,
+                   accepted=candidate.accepted)
+            if candidate.accepted:
+                return candidate
+            feedback = raw_loop_feedback(candidate.messages)
+            if not feedback:
+                feedback = "Lean timed out while checking the previous candidate."
+        return None
 
     async def stage2_repair(self, tb: Toolbox,
                             candidates: list[Candidate]) -> Candidate | None:

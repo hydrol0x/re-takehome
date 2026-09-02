@@ -909,3 +909,21 @@ statements) and above them on p09, which no controller arm solved at 30
 minutes in seven runs (zero REPL-accepted p09 candidates in all seven),
 while the raw Qwen loop is now 2-for-2 on p09 at short caps (11 turns in the
 solo raw run, 2 turns here; both proofs pass the Comparator in 26–49 s).
+
+### R1: the kit baseline's loop as a controller stage (`SUBMISSION_RAW_LOOP`)
+
+Why: on p09 the raw Qwen loop is 2-for-2 at 30-minute caps (turn 11 in the
+solo raw run, turn 2 in the pair run; both proofs pass the Comparator in
+26–49 s), while all seven 30-minute controller runs produced zero
+REPL-accepted p09 candidates across 8–20 qwen-fast and 1–21 qwen-think
+samples each. The raw calls use no reasoning budget (0 reasoning tokens,
+~2–3k completion tokens, 12–16 s), so the difference is not thinking: it is
+the request profile (temperature 0.2 vs 0.8), the prompt (the kit's plain
+"complete Lean file" system prompt vs the controller's rules + cookbook), and
+the loop shape (one chronological whole-file chain fed the previous errors,
+vs independent samples then repair rounds). What: `stage1r_rawloop` runs the
+baseline's Qwen loop verbatim (prompt and feedback format byte-identical,
+unit-tested against `baselines/simple_agent.py`) for up to 8 turns at cycle
+1 after the S1 wave, behind the statement guard; an accepted candidate takes
+the normal precheck path. Pilot: p09 at 30 min, 2 seeds, alongside two more
+raw-Qwen p09 seeds to pin the raw rate; kit-16 at 30 min if positive.
