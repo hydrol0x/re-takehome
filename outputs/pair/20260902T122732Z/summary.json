@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "set": "sample",
+  "problems": [
+    {
+      "problem_id": "p01_linear",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.00037829499999999996,
+      "wall_s": 547.315,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    }
+  ],
+  "total_points": 0,
+  "max_points": 1,
+  "actual_cost_usd": 0.000378295,
+  "wall_s_sum": 547.315,
+  "run_id": "12b483a0c0754eadabb45dded23879a9",
+  "wall_s": 547.659,
+  "finished_at": "2026-09-02T12:36:40.541629+00:00"
+}

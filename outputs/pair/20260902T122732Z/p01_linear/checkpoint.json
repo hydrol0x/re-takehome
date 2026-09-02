@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "baseline": "pair",
+    "arm": "pair",
+    "origin": "pair:qwen/qwen3.5-flash-02-23",
+    "winner": null,
+    "accepted_by_repl": false,
+    "elapsed_s": 366.6,
+    "loops": {
+      "qwen/qwen3.5-flash-02-23": {
+        "model": "qwen/qwen3.5-flash-02-23",
+        "turns": 1,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "crash:LeanRuntimeError",
+        "attempts": []
+      },
+      "openai/gpt-oss-120b": {
+        "model": "openai/gpt-oss-120b",
+        "turns": 1,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "crash:LeanRuntimeError",
+        "attempts": []
+      }
+    }
+  }
+}
