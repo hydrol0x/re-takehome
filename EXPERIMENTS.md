@@ -773,3 +773,11 @@ provider faults this time. **Final raw GPT-OSS 30-min custom-24: 9/24**
 assembled from run 2's 18 valid results + attempt 3. Union of the two raw
 loops: 15/24. Controller for comparison: dev-16 11–13 (20-min), held-8 6/8
 ×2 (20-min) and 7/8 (30-min, matched light load).
+
+Data-count note (2026-09-02): the cap-matched kit-set record at 30-min caps
+is nine full 16-problem runs — duo 20260823T003216Z (9), 20260823T162449Z
+(10), 20260825T192220Z (9, $0.34; post-promotion check, previously
+unlabeled here); solo-qwen 20260823T011539Z (8), 20260823T171620Z (9);
+solo-gptoss 20260823T022516Z (8), 20260823T194338Z (9); raw Qwen
+20260830T201716Z (9); raw GPT-OSS (10, assembled from runs A/B/C). Figure 2
+now shows all seven controller runs and both raw loops.

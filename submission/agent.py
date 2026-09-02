@@ -129,6 +129,15 @@ class Config:
     # once more. The warm REPL preloads all of Mathlib and so cannot see
     # this gap (paper §5.4); the branch never fires on `import Mathlib`.
     surface_repair: bool = True
+    # SUBMISSION_DIALOGUE_REPAIR (research branch D1, default off): every
+    # error-informed repair round becomes a two-model exchange — the OTHER
+    # model first reviews the failing candidate and its compiler errors and
+    # writes a bounded critique, which the author receives with the errors.
+    dialogue_repair: bool = False
+    # SUBMISSION_DIALOGUE_SKETCH (research branch D2, default off): before a
+    # fresh S4 sketch, the sketcher proposes an informal plan, the other model
+    # critiques it, and the sketcher writes the skeleton given plan + critique.
+    dialogue_sketch: bool = False
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -187,6 +196,9 @@ class Config:
             # Import-surface fallback (paper §5.4): default on; "0" disables.
             surface_repair=os.environ.get(
                 "SUBMISSION_SURFACE_REPAIR", "1").strip() != "0",
+            # Dialogue mechanisms (research branches D1/D2): default off.
+            dialogue_repair=os.environ.get("SUBMISSION_DIALOGUE_REPAIR", "").strip() == "1",
+            dialogue_sketch=os.environ.get("SUBMISSION_DIALOGUE_SKETCH", "").strip() == "1",
         )
 
     @property
@@ -504,6 +516,53 @@ def pick_plan(plans: list[str] | None) -> str | None:
         if k and k in keys[i + 1:]:
             return usable[i]
     return max(usable, key=len)
+
+
+def critique_messages(problem: Problem, source: str, feedback: str) -> list[dict[str, str]]:
+    """Dialogue repair (D1): the other model reviews a failing attempt.
+
+    Unlike critic_messages (one bounded note per problem, injected into a later
+    wave), this review is produced every repair round and handed straight to
+    the author together with the compiler errors — a genuine exchange.
+    """
+
+    system = (
+        "You are an expert Lean 4 / Mathlib prover acting as a reviewer for "
+        "another prover's failed attempt. Be concrete and brief: at most 12 "
+        "lines of plain text. Point to the exact failing step(s), say WHY they "
+        "fail (wrong lemma, missing hypothesis, wrong induction variable, "
+        "type mismatch, unprovable claim), and prescribe the fix: which tactic "
+        "or Mathlib lemma to use, or how to restructure. Do NOT write the full "
+        "proof and do not paste large code."
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Failing attempt:", "```lean", source[:7000], "```", "",
+        "Lean compiler feedback:", "```", feedback[:4000], "```", "",
+        "Write your review now (<=12 lines, no full proof).",
+    ]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
+
+
+def plan_critique_messages(problem: Problem, plan: str) -> list[dict[str, str]]:
+    """Sketch dialogue (D2): the other model critiques an informal proof plan."""
+
+    system = (
+        "You are an expert competition mathematician and Lean 4 / Mathlib prover "
+        "reviewing another prover's informal proof plan before it is formalized. "
+        "In at most 12 lines of plain text: identify any step that is false, "
+        "unjustified, or hard to formalize in Mathlib; suggest the helper lemmas "
+        "that would make the formalization mechanical; and say which existing "
+        "Mathlib results to lean on. Do NOT write Lean code."
+    )
+    user = [
+        f"Problem {problem.id}:", problem.description, "",
+        "Proposed plan:", plan[:6000], "",
+        "Write your critique now (<=12 lines, no Lean code).",
+    ]
+    return [{"role": "system", "content": system},
+            {"role": "user", "content": "\n".join(user)}]
 
 
 def critic_messages(problem: Problem, source: str,
@@ -1781,8 +1840,24 @@ class SubmissionAgent:
                 tb.config.qwen_call_s if model == QWEN else tb.config.gptoss_call_s)
             if not tb.deadline.allows(call_s + 180):
                 return None
-            text = await tb.sample(model, build_messages(format_messages(candidate.messages)),
-                                   kind=call_kind)
+            feedback = format_messages(candidate.messages)
+            # D1 dialogue repair: the other model reviews the failing attempt
+            # first; the author repairs with errors + review. Two calls per
+            # round instead of one — the cost the mechanism must pay for.
+            if tb.config.dialogue_repair and len(tb.models_arm) > 1:
+                reviewer = tb.config.other(model)
+                review_kind = "qwen-think" if reviewer == QWEN else "gptoss-med"
+                review_s = tb.config.scaled(
+                    tb.config.qwen_call_s if reviewer == QWEN else tb.config.gptoss_call_s)
+                if tb.deadline.allows(review_s + call_s + 180):
+                    review = await tb.sample(
+                        reviewer, critique_messages(tb.problem, candidate.source, feedback),
+                        kind=review_kind, max_tokens=1500)
+                    if review and review.strip():
+                        feedback += ("\n\nReview from a second prover (the other model) of this "
+                                     "attempt — use it if it helps:\n" + review.strip()[:3000])
+                        tb.log(stage=stage, dialogue="review", reviewer=review_kind)
+            text = await tb.sample(model, build_messages(feedback), kind=call_kind)
             source = extract_lean(text) if text else None
             guarded = guard(source) if source else None
             if guarded is not None:
@@ -1876,6 +1951,31 @@ class SubmissionAgent:
                 if not available:
                     break
                 sketcher, kind = available[round_index % len(available)]
+                # D2 sketch dialogue: propose a plan, have the other model
+                # critique it, then sketch with plan + critique in hand.
+                if tb.config.dialogue_sketch and len(tb.models_arm) > 1:
+                    other = tb.config.other(sketcher)
+                    other_kind = "qwen-think" if other == QWEN else "gptoss-med"
+                    other_s = tb.config.scaled(
+                        tb.config.qwen_call_s if other == QWEN else tb.config.gptoss_call_s)
+                    own_s = tb.config.scaled(
+                        tb.config.qwen_call_s if sketcher == QWEN else tb.config.gptoss_call_s)
+                    if tb.deadline.allows(other_s + 2 * own_s + 600):
+                        plan_kind = "qwen-fast" if sketcher == QWEN else "gptoss-med"
+                        plan = await tb.sample(
+                            sketcher, plan_messages(tb.problem, tb.challenge),
+                            kind=plan_kind, max_tokens=1200)
+                        if plan and plan.strip():
+                            critique = await tb.sample(
+                                other, plan_critique_messages(tb.problem, plan.strip()),
+                                kind=other_kind, max_tokens=1500)
+                            exchange = "Informal plan you proposed:\n" + plan.strip()[:3000]
+                            if critique and critique.strip():
+                                exchange += ("\n\nCritique of that plan from a second prover "
+                                             "(the other model):\n" + critique.strip()[:3000])
+                            note = (note + "\n\n" if note else "") + exchange
+                            tb.log(stage="S4", dialogue="plan", critic=other_kind,
+                                   critiqued=bool(critique and critique.strip()))
                 text = await tb.sample(
                     sketcher, sketch_messages(tb.problem, tb.challenge, lemma_pool, note), kind=kind)
                 source = extract_lean(text) if text else None
