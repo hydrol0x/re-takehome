@@ -1021,3 +1021,14 @@ and costs nothing in coverage; per-run cost rises from $0.16–0.17 to $0.37
 because the chain spends up to 16 Qwen calls on every unsolved problem.
 p09 inside the controller at 30 min: 2 of 3 seeds with the stage (turns 13
 and 10) vs 0 of 7 without.
+
+#### R1 screening on the dev-16, 20-minute caps, 2 workers (20260902T180115Z, duo + `SUBMISSION_RAW_LOOP=1`, 16 turns, share 0.45)
+
+**13/16, $0.20** (band for the tuned default 11–13; its best seed 13 at
+$0.19–0.25). Three problems were won by the embedded chain (h05 at turn 9,
+m01 at turn 1, m04 at turn 9); the usual sweep/S1/S2 winners are unchanged;
+h02, h04, m06 unsolved as always (chain's best 2–3 errors; the share cap
+fired once, on h04, after 11 turns). So at short caps on custom problems
+the stage is neutral-to-positive at equal cost, and on the kit set it adds
+p09. Held-8 check at 30-minute caps launched 18:55Z (2 workers) before a
+promotion decision.

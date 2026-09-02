@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "set": "custom-problems-dev",
+  "problems": [
+    {
+      "problem_id": "c01_quad_roots",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.002642445,
+      "wall_s": 249.804,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c02_amgm_frac",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.002490995,
+      "wall_s": 250.046,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c03_coprime_linear",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.021337679999999998,
+      "wall_s": 689.572,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c05_pow_sum_div",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 110.539,
+      "models_used": [],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c06_three_pow",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00169005,
+      "wall_s": 152.793,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c08_count_congr",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00402006,
+      "wall_s": 201.414,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "c10_tau_360",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.001384265,
+      "wall_s": 126.966,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "h01_legendre100",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.03126055,
+      "wall_s": 714.478,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "h02_mod23_cycle",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.03290521,
+      "wall_s": 735.278,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- h02_a h02_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "h04_square_shift",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.034818680000000005,
+      "wall_s": 760.036,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- h04_square_shift propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "h05_telescope_prod",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.01027039,
+      "wall_s": 451.391,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m01_dvd13",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.00710463,
+      "wall_s": 218.254,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m02_ord25",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.001713715,
+      "wall_s": 173.831,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m04_sumfact",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.007381269999999999,
+      "wall_s": 371.224,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    },
+    {
+      "problem_id": "m06_factcop",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.04317027,
+      "wall_s": 759.311,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- m06_factcop propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "m08_amgm8",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.0,
+      "wall_s": 138.602,
+      "models_used": [],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 13,
+  "max_points": 16,
+  "actual_cost_usd": 0.20219021,
+  "wall_s_sum": 6103.539,
+  "run_id": "f041317d14ed424693479f969e216bf8",
+  "wall_s": 3061.965,
+  "finished_at": "2026-09-02T18:52:17.126091+00:00"
+}
