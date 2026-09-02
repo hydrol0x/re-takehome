@@ -795,3 +795,13 @@ rmo_2000_2 at 7.4 h, p10/h04 at 2 h) lie outside anything the raw loop can
 attempt as shipped, and no like-for-like raw control at long horizons
 exists. A GPT-OSS raw run at an 8-hour cap on p09 and rmo_2000_2 (letting
 it finish its 25 turns) is queued behind the dialogue screening.
+
+## 2026-09-02 night program (self-paced loop)
+
+Queue: D1 dialogue repair (running) → D2 plan dialogue → D1+D2 → same-day
+default control (all dev-16, 20-min caps, 4 workers); alongside: raw GPT-OSS
+at its full 25-turn budget under an 8-hour cap on p09 + rmo_2000_2 (the
+30-minute runs truncated it at 11–14 turns). Then: a second light-load duo
+seed on held-8; SUBMISSION_SKELETON_KEEP at 2-hour caps on the kit hard4
+(untested at any horizon beyond 20 min); solo-qwen at 8-hour caps on hard4
+(RQ3 attribution: is the long-horizon record duo-specific?).
