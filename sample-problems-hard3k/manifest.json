@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "set": "hard3k",
+  "problems": [
+    {
+      "id": "p09_imo1964",
+      "theorem_names": [
+        "p09_a",
+        "p09_b"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2000_2",
+      "theorem_names": [
+        "rmo_2000_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2001_2",
+      "theorem_names": [
+        "rmo_2001_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    }
+  ]
+}
