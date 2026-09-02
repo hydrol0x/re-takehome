@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "problem_id": "m01_dvd13",
+  "status": "passed",
+  "passed": true,
+  "points": 1,
+  "comparator": {
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 56353,
+    "output": {
+      "passed": true,
+      "exit_code": 0,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (9.8s)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[m01_dvd13, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (8.9s)\nwarning: Solution.lean:12:41: This simp argument is unused:\n  mul_left_comm\n\nHint: Omit it from the simp argument list.\n  s̵i̵m̵p̵ ̵[̵p̵o̵w̵_̵s̵u̵c̵c̵,̵ ̵m̵u̵l̵_̵a̵s̵s̵o̵c̵,̵ ̵m̵u̵l̵_̵c̵o̵m̵m̵,̵ ̵m̵u̵l̵_̵l̵e̵f̵t̵_̵c̵o̵m̵m̵]̵ ̵a̵t̵ ̵h̵k̵ ̵⊢̵s̲i̲m̲p̲ ̲[̲p̲o̲w̲_̲s̲u̲c̲c̲,̲ ̲m̲u̲l̲_̲a̲s̲s̲o̲c̲,̲\n  ̲ ̲ ̲ ̲ ̲ ̲ ̲m̲u̲l̲_̲c̲o̲m̲m̲]̲ ̲a̲t̲ ̲h̲k̲\n  ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲⊢̲\n  ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲-̲-̲ ̲U̲s̲e̲ ̲o̲m̲e̲g̲a̲ ̲t̲o̲ ̲c̲o̲m̲p̲l̲e̲t̲e̲ ̲t̲h̲e̲ ̲d̲i̲v̲i̲s̲i̲b̲i̲l̲i̲t̲y̲ ̲c̲h̲e̲c̲k̲\n  ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲ ̲\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nBuild completed successfully (8656 jobs).\nExporting #[m01_dvd13, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\nRunning Lean default kernel on solution.\nLean default kernel accepts the solution\nYour solution is okay!\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- m01_dvd13 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- m01_dvd13 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.011902865,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 860.996,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen-fast:s1",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:1",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "solved": "sketch:qwen-think:1:filled"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "sketch:qwen-think:1:filled",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240733
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-fast:s1",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240571
+      }
+    ],
+    "wall_s": 800.9
+  }
+}

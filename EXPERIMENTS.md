@@ -811,3 +811,4 @@ seed on held-8; SUBMISSION_SKELETON_KEEP at 2-hour caps on the kit hard4
 | run | mechanism | dev-16 | cost | notes |
 | --- | --- | --- | --- | --- |
 | 20260902T024814Z | D1 dialogue repair (other model reviews each failing attempt; author repairs with errors + review) | **9/16** ($0.218) | 283 Qwen / 13 GPT-OSS calls | review fired 7× across 4 problems only — a GPT-OSS review costs minutes at this cap, so most repair rounds never reach it and those that do lose cycles; missed c03, c10, h01, h02, h04, h05, m06 (band: 11–13; B8 one-way critique: 12) |
+| 20260902T033213Z | D2 plan dialogue (propose → other model critiques → sketch), 20-min caps | 10/16 ($0.211) | 340 Qwen / 5 GPT-OSS calls | **mechanism never fired**: the S4 time gate (critique + two sketch calls + slack) never clears inside a 20-min window, so this run is a default-equivalent datapoint (band 11–13). Rerun at 40-min caps, where S4 has room (default at 40 min: 11/16) |
