@@ -1,1 +1,1 @@
-{"challenge_sha": "696492f15e6a0c33", "s0_done": true, "cycles_done": 0, "lemma_pool": "", "history_notes": [], "pinned_answers": {}}
+{"challenge_sha": "696492f15e6a0c33", "s0_done": true, "cycles_done": 2, "lemma_pool": "lemma bound_x_ge_5 (x y : \u2115) (hx : 0 < x) (hy : 0 < y) (h : x ^ 2 = y ^ 2 + 2 * y + 17) : x \u2265 5 := by nlinarith", "history_notes": ["cycle 1, qwen-fast x9: best had 2 errors; first: No goals to be solved", "cycle 2, qwen-fast x9: best had 3 errors; first: omega could not prove the goal:"], "pinned_answers": {}}
