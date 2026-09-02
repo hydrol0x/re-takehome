@@ -945,3 +945,25 @@ of separate raw runs overstates what concurrent raw loops deliver, and the
 controller's margin on unseen problems is intact. The one thing the pair
 did that the controller never did at 30 minutes is p09 (turn 2), which is
 now research branch R1.
+
+#### Pair arm on the held-out 8, 30-minute caps, 4 workers (20260902T144753Z)
+
+**4/8, $0.22** (c04, c09, m07 at turn 1; h06 by the Qwen loop at turn 18,
+9 min). Unsolved: c07, h03, m03, m05 (Qwen 25 turns each, GPT-OSS 5–8 turns
+to the deadline). Level with the raw Qwen loop alone (4/8) and below every
+scaffolded arm (solo-GPT-OSS 5, solo-Qwen 6, duo 7 and 6): on unseen
+problems the scaffold's margin survives the strongest scaffold-free control.
+
+#### Raw Qwen loop on p09 alone, 30-minute cap (20260902T152550Z, seed A)
+
+**PASSED** at turn 10 ($0.009, 4 min wall, Comparator 52 s). The raw Qwen
+loop is now 3-for-3 on p09 at 30-minute caps (turns 11, 2, 10) against
+0-for-7 controller runs with zero REPL-accepted p09 candidates. Its calls
+carry no reasoning budget (temperature 0.2, ~2–3k completion tokens), so
+the difference is prompt and loop shape, not thinking. Research branch R1
+(`SUBMISSION_RAW_LOOP`) runs that loop verbatim inside the controller at
+cycle 1; p09 pilot (two controller seeds) and a second raw seed follow.
+
+Container-restart note (15:40Z): the session worker restarted and killed
+the 4-hour restarts control (hard3k, 18 min in, no accepted candidate) and
+the pilot chain after its first run; both relaunched at 15:43Z.
