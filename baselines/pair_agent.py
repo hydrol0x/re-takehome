@@ -62,6 +62,7 @@ class _Loop:
         self.accepted = False
         self.stopped = "running"
         self.repl_failures = 0
+        self.call_failures = 0
         self.attempts: list[Attempt] = []
 
     def summary(self) -> dict[str, Any]:
@@ -88,7 +89,9 @@ class PairAgent:
         time_limit_s: float | None = None,
         verify_reserve_s: float | None = None,
         clock: Callable[[], float] = time.monotonic,
+        retry_pause_s: float = 30.0,
     ):
+        self.retry_pause_s = retry_pause_s
         self.models = models
         # One raw-baseline prompt builder per model keeps the loop's prompts
         # byte-identical to the kit baseline's.
@@ -131,7 +134,9 @@ class PairAgent:
             cfg = self.loops_cfg[state.model]
             while True:
                 feedback = ""
-                for turn in range(1, cfg.max_turns + 1):
+                turn = 0
+                while turn < cfg.max_turns:
+                    turn += 1
                     if stop.is_set():
                         state.stopped = "stop"
                         return
@@ -148,10 +153,24 @@ class PairAgent:
                             max_tokens=cfg.max_tokens,
                             temperature=cfg.temperature,
                         )
-                    except (LLMCallError, BudgetExceeded, BudgetAccountingError,
-                            LLMPolicyError) as exc:
+                    except LLMCallError as exc:
+                        # A transport or provider fault. Under the kit as
+                        # shipped the ledger is already closed and the next
+                        # reservation raises BudgetAccountingError below;
+                        # under the dev release policy the loop may go on.
+                        # Retry the same turn after a pause, at most three
+                        # faults in a row.
+                        state.call_failures += 1
+                        if state.call_failures >= 3:
+                            state.stopped = f"error:LLMCallError:{str(exc)[:80]}"
+                            return
+                        await asyncio.sleep(self.retry_pause_s)
+                        turn -= 1  # retry the same turn
+                        continue
+                    except (BudgetExceeded, BudgetAccountingError, LLMPolicyError) as exc:
                         state.stopped = f"error:{type(exc).__name__}"
                         return
+                    state.call_failures = 0
                     state.turns += 1
                     if stop.is_set():
                         # The other loop was accepted while this call was in

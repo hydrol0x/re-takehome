@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "set": "hard2k",
+  "problems": [
+    {
+      "id": "rmo_2000_2",
+      "theorem_names": [
+        "rmo_2000_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    },
+    {
+      "id": "rmo_2001_2",
+      "theorem_names": [
+        "rmo_2001_2"
+      ],
+      "definition_names": [],
+      "numeric_answer_names": []
+    }
+  ]
+}

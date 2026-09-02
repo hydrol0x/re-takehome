@@ -997,3 +997,15 @@ Restarts control (20260902T154147Z, pair + `PAIR_RESTARTS=1`, hard3k, 4 h,
 first chain, $0.039, Comparator 47 s). The raw Qwen loop is now 4-for-5 on
 p09 within a 25-turn chain (turns 11, 2, 10, 24; one miss at 25 turns).
 rmo_2000_2 and rmo_2001_2 continue under restarts.
+
+Restarts control, final (20260902T154147Z): **1/3, $0.82** — p09 as above;
+rmo_2000_2 ✗ (129 min, $0.40: Qwen 193 turns over 8 chains, GPT-OSS 32
+turns over 2, 225 REPL checks, none accepted) and rmo_2001_2 ✗ (123 min,
+$0.37: Qwen 112 turns over 5 chains, GPT-OSS 29 over 2, 141 checks, none
+accepted). Both ended at ~2 h of the 4-h window when transport faults
+(`RemoteProtocolError: peer closed connection ... incomplete chunked read`,
+one `ReadError`; reservations released under the dev policy) hit both
+loops, which the pair agent then treated as terminal. Fixed: a loop now
+retries the same turn after a 30 s pause and gives up only after three
+consecutive faults (unit-tested). Relaunched on rmo_2000_2 + rmo_2001_2
+alone (`sample-problems-hard2k`, 4 h, 2 workers) at 17:53Z.

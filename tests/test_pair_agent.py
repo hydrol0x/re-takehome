@@ -215,3 +215,26 @@ async def test_repl_failure_is_retried_once_then_ends_the_loop():
     assert result.metadata["accepted_by_repl"] is False
     assert result.metadata["loops"][MODEL_A]["stopped"].startswith("error:LeanRuntimeError")
     assert result.metadata["loops"][MODEL_A]["turns"] == 2
+
+
+@pytest.mark.asyncio
+async def test_transient_call_errors_are_retried_then_fatal():
+    from re_harness.llm import LLMCallError
+
+    # Two faults, then a good reply: the loop retries the same turn and wins.
+    llm = FakeLLM({MODEL_A: [LLMCallError("502"), LLMCallError("502"), GOOD],
+                   MODEL_B: [BudgetExceeded("skip")]})
+    services = FakeServices(llm, FakeLean())
+    agent = make_agent(retry_pause_s=0)
+    result = await agent.solve(PROBLEM, services)
+    assert result.metadata["winner"] == MODEL_A
+    assert result.metadata["loops"][MODEL_A]["turns"] == 1
+    assert sum(1 for r in llm.requests if r["model"] == MODEL_A) == 3
+    assert all("Baseline turn: 1/3" in r["messages"][1]["content"]
+               for r in llm.requests if r["model"] == MODEL_A)
+
+    # Three faults in a row end the loop.
+    llm = FakeLLM({MODEL_A: [LLMCallError("x")] * 3, MODEL_B: [BudgetExceeded("skip")]})
+    services = FakeServices(llm, FakeLean())
+    result = await make_agent(retry_pause_s=0).solve(PROBLEM, services)
+    assert result.metadata["loops"][MODEL_A]["stopped"].startswith("error:LLMCallError")
