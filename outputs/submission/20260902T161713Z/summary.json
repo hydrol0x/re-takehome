@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "set": "sample",
+  "problems": [
+    {
+      "problem_id": "p09_imo1964",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.021554975,
+      "wall_s": 459.168,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 1,
+  "max_points": 1,
+  "actual_cost_usd": 0.021554975,
+  "wall_s_sum": 459.168,
+  "run_id": "1d553cfad33b4a8ab4c5f678d698ffad",
+  "wall_s": 459.507,
+  "finished_at": "2026-09-02T16:24:53.107494+00:00"
+}

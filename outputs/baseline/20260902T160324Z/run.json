@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "run_id": "ec8ae4c42e864bffb9f6971bf7076239",
+  "set": "sample",
+  "started_at": "2026-09-02T16:03:24.030116+00:00",
+  "agent": "baselines.simple_agent:create_agent",
+  "agent_name": "baseline",
+  "timestamp": "20260902T160324Z",
+  "n_workers": 1,
+  "budget_usd_per_problem": 1.0,
+  "time_limit_s_per_problem": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "api_key_configured": true,
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v22-x86_64-with-glibc2.39",
+  "finished_at": "2026-09-02T16:17:13.448047+00:00",
+  "wall_s": 829.418,
+  "resumed": false,
+  "resumed_skipped_problems": 0,
+  "executed_problems": 1
+}

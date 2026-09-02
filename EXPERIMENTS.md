@@ -976,3 +976,18 @@ counts 3, 10, 16, 11, 5, 7, 4, 15). Two of the raw loop's three p09 solves
 came at turns 10–11, so the pilot proper runs with
 `SUBMISSION_RAW_LOOP_TURNS=16` (relaunched 15:48Z, two controller seeds
 interleaved with a second raw seed).
+
+#### R1 pilot on p09, 30-minute caps, 1 worker (16 raw-loop turns)
+
+| run | arm | p09 | notes |
+| --- | --- | --- | --- |
+| 20260902T154406Z | duo + `SUBMISSION_RAW_LOOP=1`, 16 turns, seed A | ✗ ($0.046, 19 min) | all 16 turns fired after the S1 wave; 5 rejected by the statement guard (fragments without the theorems, one `sorry`; the raw loop would have "accepted" a theorem-less fragment and stopped), best 1 error at turn 4; S4 then 7 rounds, no fill |
+| 20260902T160324Z | raw Qwen loop, seed B | ✗ ($0.040, 25 turns, 14 min) | raw Qwen is 3-for-4 on p09 at 30 min |
+| 20260902T161713Z | duo + `SUBMISSION_RAW_LOOP=1`, 16 turns, seed B | **PASSED** ($0.022, 8 min; origin `qwen-raw:s1r:t13`, Comparator 51 s) | **the first 30-minute controller solve of p09** (0-for-7 before); accepted at raw turn 13 after error counts 8, 5, 3, 10, 5, 13, 15, 12, 7, 11 |
+
+Reading: the kit's raw loop shape (one chronological chain of whole-file
+rewrites at temperature 0.2 with the previous compiler errors) reaches p09
+where the controller's independent S1 samples + S2 repair rounds do not;
+embedded verbatim as a cycle-1 stage it converts p09 in one of two seeds.
+Kit-16 evaluation at 30-minute caps launched 16:29Z (2 workers, alongside
+the hard3k restarts control).

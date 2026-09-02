@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "problem_id": "p09_imo1964",
+  "status": "passed",
+  "passed": true,
+  "points": 1,
+  "comparator": {
+    "passed": true,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_ms": 50566,
+    "output": {
+      "passed": true,
+      "exit_code": 0,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (7.0s)\nwarning: Challenge.lean:4:8: declaration uses `sorry`\nwarning: Challenge.lean:8:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[p09_a, p09_b, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (10s)\nwarning: Solution.lean:4:23: Variable name `hn` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:52:23: Variable name `hn` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nBuild completed successfully (8656 jobs).\nExporting #[p09_a, p09_b, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\nRunning Lean default kernel on solution.\nLean default kernel accepts the solution\nYour solution is okay!\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- p09_a p09_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- p09_a p09_b propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.021554975,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 459.168,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen-raw:s1r:t13",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1r",
+        "turn": 1,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 2,
+        "errors": 8,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 3,
+        "errors": 5,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 4,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 5,
+        "errors": 10,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 6,
+        "errors": 5,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 7,
+        "errors": 13,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 8,
+        "errors": 15,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 9,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 10,
+        "errors": 12,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 11,
+        "errors": 7,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 12,
+        "errors": 11,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 13,
+        "errors": 0,
+        "accepted": true
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-raw:s1r:t13",
+        "passed": true,
+        "timed_out": false,
+        "duration_ms": 43768
+      }
+    ],
+    "wall_s": 406.6
+  }
+}
