@@ -81,7 +81,7 @@
 <p><b>Reporting conventions.</b> Repeated identical-configuration runs on the dev-16 vary by up to &plusmn;2 problems, driven by three problems whose empirical pass rate across repeated runs is roughly 50%; we therefore report per-problem outcomes wherever a claim depends on them and treat aggregate differences within &plusmn;2 as inconclusive. &ldquo;Cumulative coverage&rdquo; means solved by any run in the stated regime, not a per-run rate.</p>
 
 <h2><span class="sec-num">3</span>System</h2>
-<p>Figure&nbsp;1 shows the controller: a single anytime escalation ladder whose stages are individually switchable, implemented in <span class="tt">submission/agent.py</span> over the kit's services. The two models never exchange messages. They interact through shared artifacts &mdash; candidate files, error histories, proof skeletons &mdash; at a small number of narrow interfaces: independent answer votes (S0.5), pooled sampling (S1), plateau handoff (S3), and alternating sketch duty within decomposition (S4).</p>
+<p>Figure&nbsp;1 shows the controller: a single anytime escalation ladder whose stages are individually switchable, implemented in <span class="tt">submission/agent.py</span> over the kit's services. The two models never exchange messages. They interact through shared artifacts (candidate files, error histories, proof skeletons), at a small number of narrow interfaces: independent answer votes (S0.5), pooled sampling (S1), plateau handoff (S3), and alternating sketch duty within decomposition (S4).</p>
 
 <div class="figure">
   <svg width="545" height="400" viewBox="0 0 640 470" font-family="Liberation Sans, Arial, sans-serif">
