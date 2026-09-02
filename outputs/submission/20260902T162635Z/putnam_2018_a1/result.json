@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "problem_id": "putnam_2018_a1",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 41349,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (10s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[putnam_2018_a1, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n✖ [8655/8656] Building Solution (8.6s)\ntrace: .> LEAN_PATH=/opt/mathlib/.lake/packages/Cli/.lake/build/lib/lean:/opt/mathlib/.lake/packages/batteries/.lake/build/lib/lean:/opt/mathlib/.lake/packages/Qq/.lake/build/lib/lean:/opt/mathlib/.lake/packages/aesop/.lake/build/lib/lean:/opt/mathlib/.lake/packages/proofwidgets/.lake/build/lib/lean:/opt/mathlib/.lake/packages/importGraph/.lake/build/lib/lean:/opt/mathlib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/opt/mathlib/.lake/packages/plausible/.lake/build/lib/lean:/opt/mathlib/.lake/build/lib/lean:/work/project/.lake/build/lib/lean /opt/elan/toolchains/leanprover--lean4---v4.32.0/bin/lean /work/project/Solution.lean -o /work/project/.lake/build/lib/lean/Solution.olean -i /work/project/.lake/build/lib/lean/Solution.ilean -c /work/project/.lake/build/ir/Solution.c --setup /work/project/.lake/build/ir/Solution.setup.json --json\nerror: Solution.lean:9:2: Tactic `rfl` failed: The left-hand side\n  1 / ↑a + 1 / ↑b = 3 / 2018\nis not definitionally equal to the right-hand side\n  (a, b) ∈ {(673, 1358114), (674, 340033), (1009, 2018), (2018, 1009), (340033, 674), (1358114, 673)}\n\na b : ℤ\nh : 0 < a ∧ 0 < b\n⊢ 1 / ↑a + 1 / ↑b = 3 / 2018 ↔\n    (a, b) ∈ {(673, 1358114), (674, 340033), (1009, 2018), (2018, 1009), (340033, 674), (1358114, 673)}\nerror: Lean exited with code 1\nSome required targets logged failures:\n- Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- putnam_2018_a1 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.05605444,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 1410.724,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sweep:rfl",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 5,
+        "rejected": 4
+      },
+      {
+        "stage": "S1r",
+        "turn": 1,
+        "errors": 12,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 2,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 3,
+        "rejected": "statement"
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message bo"
+      },
+      {
+        "stage": "S1r",
+        "turn": 4,
+        "usable": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 5,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 6,
+        "errors": 6,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 7,
+        "errors": 2,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 8,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 9,
+        "errors": 1,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 10,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 11,
+        "errors": 24,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 12,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 13,
+        "usable": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 14,
+        "usable": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 15,
+        "usable": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 16,
+        "usable": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 1365.5
+  }
+}

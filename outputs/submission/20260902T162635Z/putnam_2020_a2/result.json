@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "problem_id": "putnam_2020_a2",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 47587,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (8.6s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[putnam_2020_a2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (7.8s)\nwarning: Solution.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[putnam_2020_a2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- putnam_2020_a2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- putnam_2020_a2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.02347098,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 1144.445,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:qwen-think:0:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1r",
+        "turn": 1,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 2,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 3,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 4,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 5,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 6,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 7,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 8,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 9,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 10,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 11,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 12,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 13,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 14,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S1r",
+        "turn": 15,
+        "errors": 3,
+        "accepted": false
+      },
+      {
+        "stage": "S1r",
+        "turn": 16,
+        "rejected": "statement"
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:qwen-think:0",
+        "holes": 3
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter request failed (reservation released, dev policy): peer closed connection without sending complete message bo"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "sketch:qwen-think:0",
+        "unfilled_decls": [
+          "putnam_2020_a2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "llm",
+        "call_error": "LLMCallError",
+        "detail": "OpenRouter request failed (reservation released, dev policy): "
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 5,
+        "rejected": 2
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 1093.5
+  }
+}

@@ -1009,3 +1009,15 @@ loops, which the pair agent then treated as terminal. Fixed: a loop now
 retries the same turn after a 30 s pause and gives up only after three
 consecutive faults (unit-tested). Relaunched on rmo_2000_2 + rmo_2001_2
 alone (`sample-problems-hard2k`, 4 h, 2 workers) at 17:53Z.
+
+#### R1 on the kit 16, 30-minute caps, 2 workers (20260902T162635Z, duo + `SUBMISSION_RAW_LOOP=1`, 16 turns)
+
+**9/16, $0.37**: p01–p08 by the $0 sweep as usual, **p09 by the embedded
+raw loop at its 10th turn** ($0.042, 20 min); p10 ✗ (raw chain's best
+candidate 1 error at 16 turns, then S4 four rounds), Putnams ✗ (revised
+statements; raw chain best 1 and 3 errors), rmo_* ✗. Against the duo's
+30-minute arms on revised statements (8–9, never p09) the stage adds p09
+and costs nothing in coverage; per-run cost rises from $0.16–0.17 to $0.37
+because the chain spends up to 16 Qwen calls on every unsolved problem.
+p09 inside the controller at 30 min: 2 of 3 seeds with the stage (turns 13
+and 10) vs 0 of 7 without.
