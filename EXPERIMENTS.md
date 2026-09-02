@@ -781,3 +781,17 @@ unlabeled here); solo-qwen 20260823T011539Z (8), 20260823T171620Z (9);
 solo-gptoss 20260823T022516Z (8), 20260823T194338Z (9); raw Qwen
 20260830T201716Z (9); raw GPT-OSS (10, assembled from runs A/B/C). Figure 2
 now shows all seven controller runs and both raw loops.
+
+### Long-horizon raw-loop control: structurally unavailable (2026-09-02)
+
+The kit's reference baseline is hard-capped at 25 turns (`BASELINE_MAX_TURNS`,
+maximum 25), so it cannot use a long window. In the 30-minute raw runs Qwen
+already exhausted all 25 turns on rmo_2000_2 (13 min) and rmo_2001_2
+(25 min) and solved p09 at turn 11; GPT-OSS, latency-bound, completed
+11–22 turns before the 30-minute deadline. An "8-hour raw run" therefore
+adds nothing for Qwen and at most 3–14 turns for GPT-OSS. Consequence for
+the paper: the controller's long-horizon solves (p09 3/3 at 8 h,
+rmo_2000_2 at 7.4 h, p10/h04 at 2 h) lie outside anything the raw loop can
+attempt as shipped, and no like-for-like raw control at long horizons
+exists. A GPT-OSS raw run at an 8-hour cap on p09 and rmo_2000_2 (letting
+it finish its 25 turns) is queued behind the dialogue screening.
