@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "problem_id": "c10_tau_360",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": null,
+    "timed_out": true,
+    "duration_ms": 180658,
+    "output": {
+      "error": "Comparator timed out after 180s"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.002514164,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 954.633,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sweep:rfl",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0.5",
+        "verdict": "agree",
+        "answers": {
+          "c10_answer": "24"
+        },
+        "candidates": [
+          {
+            "c10_answer": "24"
+          },
+          {
+            "c10_answer": "24"
+          }
+        ]
+      },
+      {
+        "stage": "S0",
+        "solved": "sweep:rfl"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "sweep:rfl",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240824
+      }
+    ],
+    "wall_s": 771.4
+  }
+}

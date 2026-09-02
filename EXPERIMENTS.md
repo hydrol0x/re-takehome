@@ -805,3 +805,9 @@ at its full 25-turn budget under an 8-hour cap on p09 + rmo_2000_2 (the
 seed on held-8; SUBMISSION_SKELETON_KEEP at 2-hour caps on the kit hard4
 (untested at any horizon beyond 20 min); solo-qwen at 8-hour caps on hard4
 (RQ3 attribution: is the long-horizon record duo-specific?).
+
+### Dialogue mechanisms (D1/D2), dev-16 at 20-min caps, 4 workers
+
+| run | mechanism | dev-16 | cost | notes |
+| --- | --- | --- | --- | --- |
+| 20260902T024814Z | D1 dialogue repair (other model reviews each failing attempt; author repairs with errors + review) | **9/16** ($0.218) | 283 Qwen / 13 GPT-OSS calls | review fired 7× across 4 problems only — a GPT-OSS review costs minutes at this cap, so most repair rounds never reach it and those that do lose cycles; missed c03, c10, h01, h02, h04, h05, m06 (band: 11–13; B8 one-way critique: 12) |
