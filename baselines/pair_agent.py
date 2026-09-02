@@ -23,6 +23,13 @@ Knobs (all optional):
   VM_TIME_LIMIT_S / VM_VERIFY_RESERVE_S
       the window, read the same way the harness worker derives the agent
       deadline (limit minus min(reserve, limit / 4)).
+  PAIR_GUARD=1
+      reject (with feedback, as a failed turn) any candidate that drops or
+      rewrites a challenge declaration header or adds an import the
+      challenge lacks. The raw loop as shipped stops on the first REPL
+      acceptance, and the warm REPL accepts theorem-less fragments and
+      files whose imports the scoring build cannot see; both were observed
+      to end 4-hour restart runs with a Comparator rejection.
 """
 
 from __future__ import annotations
@@ -48,6 +55,32 @@ from baselines.simple_agent import (
 )
 
 DEFAULT_TURN_GUARD_S = 480.0  # observed raw-call tail (~470 s) + one REPL check
+
+
+def guard_violation(challenge: str, candidate: str) -> str | None:
+    """Why `candidate` cannot score against `challenge`, or None.
+
+    Every declaration header line of the challenge (theorem/lemma/abbrev/def
+    up to and including ':=') must appear verbatim, and the candidate may
+    not import anything the challenge does not.
+    """
+
+    def headers(text: str) -> list[str]:
+        out = []
+        for line in text.splitlines():
+            if line.startswith(("theorem ", "lemma ", "abbrev ", "def ")):
+                out.append(line.split(":=")[0].rstrip())
+        return out
+
+    missing = [h for h in headers(challenge) if h not in candidate]
+    if missing:
+        return f"declaration header changed or missing: {missing[0][:80]}"
+    allowed = {l.strip() for l in challenge.splitlines() if l.strip().startswith("import ")}
+    extra = [l.strip() for l in candidate.splitlines()
+             if l.strip().startswith("import ") and l.strip() not in allowed]
+    if extra:
+        return f"import not available to the scoring build: {extra[0][:80]}"
+    return None
 
 
 class _Loop:
@@ -85,6 +118,7 @@ class PairAgent:
         max_tokens: int | None = None,
         temperature: float | None = None,
         restarts: bool | None = None,
+        guard: bool | None = None,
         turn_guard_s: float | None = None,
         time_limit_s: float | None = None,
         verify_reserve_s: float | None = None,
@@ -105,6 +139,10 @@ class PairAgent:
         self.restarts = (
             restarts if restarts is not None
             else os.environ.get("PAIR_RESTARTS", "").strip() == "1"
+        )
+        self.guard = (
+            guard if guard is not None
+            else os.environ.get("PAIR_GUARD", "").strip() == "1"
         )
         self.turn_guard_s = (
             turn_guard_s if turn_guard_s is not None
@@ -181,6 +219,17 @@ class PairAgent:
                         response.content, fallback=state.candidate or problem.challenge
                     )
                     state.candidate = candidate
+                    if self.guard:
+                        violation = guard_violation(problem.challenge, candidate)
+                        if violation:
+                            state.attempts.append(Attempt(
+                                turn=state.turns, accepted=False, timed_out=False,
+                                message_count=1))
+                            state.error_count = 1 << 20
+                            feedback = ("error: " + violation + ". Keep every theorem "
+                                        "statement and the import lines exactly as in "
+                                        "the challenge; only replace `sorry`.")
+                            continue
                     services.checkpoint(
                         candidate,
                         {"baseline": "pair", "model": state.model,
@@ -246,7 +295,7 @@ class PairAgent:
             solution,
             {
                 "baseline": "pair",
-                "arm": "pair" + ("+restarts" if self.restarts else ""),
+                "arm": "pair" + ("+restarts" if self.restarts else "") + ("+guard" if self.guard else ""),
                 "origin": f"pair:{winner.model}" if winner else "challenge",
                 "winner": winner.model if winner and winner.accepted else None,
                 "accepted_by_repl": bool(winner and winner.accepted),

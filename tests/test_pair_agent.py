@@ -238,3 +238,34 @@ async def test_transient_call_errors_are_retried_then_fatal():
     services = FakeServices(llm, FakeLean())
     result = await make_agent(retry_pause_s=0).solve(PROBLEM, services)
     assert result.metadata["loops"][MODEL_A]["stopped"].startswith("error:LLMCallError")
+
+
+def test_guard_violation_detects_dropped_headers_and_extra_imports():
+    from baselines.pair_agent import guard_violation
+
+    challenge = "import Mathlib\n\ntheorem p : True := by\n  sorry\n"
+    assert guard_violation(challenge, "import Mathlib\n\ntheorem p : True := by\n  trivial\n") is None
+    assert "header" in guard_violation(challenge, "import Mathlib\n\nlemma helper : True := trivial\n")
+    assert "header" in guard_violation(challenge, "import Mathlib\n\ntheorem p : 1 = 1 := by rfl\n")
+    assert "import" in guard_violation(
+        challenge, "import Mathlib\nimport Mathlib.NumberTheory.ArithmeticFunction\n\ntheorem p : True := by\n  trivial\n")
+
+
+@pytest.mark.asyncio
+async def test_guarded_loop_rejects_fragments_instead_of_accepting_them():
+    fragment = "```lean\nimport Mathlib\n\nlemma helper : True := by\n  trivial\n```"
+    llm = FakeLLM({MODEL_A: [fragment, GOOD, GOOD], MODEL_B: [BudgetExceeded("skip")]})
+    services = FakeServices(llm, FakeLean())
+    result = await make_agent(guard=True).solve(PROBLEM, services)
+    assert result.metadata["winner"] == MODEL_A
+    assert result.metadata["arm"] == "pair+guard"
+    assert "header changed or missing" in llm.requests[1]["messages"][1]["content"]
+    # The fragment was never checked or checkpointed.
+    assert all("helper" not in src for src in services.lean.sources)
+    assert all("helper" not in src for src, _ in services.checkpoints)
+
+    # Without the guard the same fragment "wins", as the kit baseline would.
+    llm = FakeLLM({MODEL_A: [fragment, GOOD], MODEL_B: [BudgetExceeded("skip")]})
+    services = FakeServices(llm, FakeLean())
+    result = await make_agent(guard=False).solve(PROBLEM, services)
+    assert "helper" in result.solution and result.metadata["accepted_by_repl"] is True
