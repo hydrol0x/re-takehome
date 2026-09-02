@@ -1032,3 +1032,15 @@ fired once, on h04, after 11 turns). So at short caps on custom problems
 the stage is neutral-to-positive at equal cost, and on the kit set it adds
 p09. Held-8 check at 30-minute caps launched 18:55Z (2 workers) before a
 promotion decision.
+
+#### R1 on the held-out 8, 30-minute caps, 2 workers (20260902T185256Z)
+
+**6/8, $0.17** (c04, c07, c09, h06, m03, m07; h03 and m05 unsolved as in
+every scaffolded run). Identical to solo-Qwen's 6/8 and inside the duo's
+6–7/8, so the stage holds the held-out set stable at equal cost.
+
+**Promotion (19:45Z).** `SUBMISSION_RAW_LOOP` becomes the default
+(`0` disables), 16 turns, share 0.45 of the window bounded at 40 min:
+kit-16 +1 (p09, 2 of 3 seeds at 30 min vs 0 of 7 without) with no
+regressions, dev-16 13/16 at the top of the band at equal cost, held-8 6/8.
+Judge-settings check rerun below.

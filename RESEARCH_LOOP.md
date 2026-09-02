@@ -89,6 +89,7 @@ Held rate 75% ≥ dev 62%: no overfitting signal, promotion stands.
 
 | 6 | 2026-08-26 | mined FILL_SWEEP entries (pow-normalization, pow-mod, sq_sub_sq) | 13 → 11/16 ($0.257, 43 min, `20260826T080252Z`) | kept (already default) | delta = flippers c03/m01 exactly; h01/m04/h05 held; no live structural win this seed — entries stand on their archived-hole evidence, cost bounded to cascade seconds |
 | 7 | 2026-08-26 | `SUBMISSION_SKELETON_KEEP` (resume best partial skeleton) | 13 → 12/16 ($0.185, 45 min, `20260826T084608Z`) | no — stays opt-in | within noise (flippers c03/m01 in, h05 out; structural three unmoved). Its regime is long windows (cross-cycle/restart continuity) — short-cap evals cannot show it; left available for full-cap use |
+| R1 | 2026-09-02 | `SUBMISSION_RAW_LOOP` (kit baseline's chained whole-file repair as a cycle-1 stage, 16 turns) | dev-16 **13/16** ($0.20, `20260902T180115Z`); kit-16 at 30 min 9/16 with p09 (`20260902T162635Z`); held-8 6/8 (`20260902T185256Z`) | **yes — default on** | p09 falls at 30 min in 2 of 3 seeds (0 of 7 before); raw Qwen loop alone 4 of 5 on p09; no regressions on any set |
 | 4 | 2026-08-25 | `SUBMISSION_FILL_REASONING` (16k-thought fills) | 13 → 12/16 ($0.180, 33 min, `20260825T184602Z`) | no | within noise (delta = flipper m01); no structural gain — h02/h04/m06 resist deeper thinks at short caps; costs +16%. The structural three likely need window, not thought budget |
 
 Held-set validation of the fill-breadth promotion (`20260825T183009Z`):
