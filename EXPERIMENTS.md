@@ -1047,3 +1047,19 @@ Judge-settings check rerun below.
 
 `scripts/judge_check.sh` with the promoted default (raw-loop stage on):
 **PASSED** (19:39–19:41Z, p01 by the sweep, $0.00).
+
+#### Restarts control on rmo_2000_2 + rmo_2001_2, 4-hour caps, 2 workers (20260902T175127Z, pair + `PAIR_RESTARTS=1`)
+
+**0/2, $1.00.** Both loops ran without transport faults this time and
+both problems ended on a *false acceptance*: rmo_2000_2 at 116 min (Qwen
+turn 197, 8 chains; 232 REPL checks) with a file consisting of one helper
+lemma and no theorem (the REPL accepts it: no errors, no `sorry`; the
+Comparator fails at line 1), rmo_2001_2 at 183 min (Qwen turn 160, 7
+chains; 229 checks) with a file importing
+`Mathlib.NumberTheory.ArithmeticFunction`, which the warm REPL ignores
+(imports are stripped; all of Mathlib is preloaded) and the scoring build
+cannot resolve. Neither problem produced a genuine proof. These are exactly
+the failure modes the controller's statement guard and import composition
+exist to prevent, and the kit baseline as shipped has neither. Rerun with
+`PAIR_GUARD=1` (headers verbatim, no extra imports; violations fed back as
+errors) launched at 21:05Z for the same 4-hour window.

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "set": "hard2k",
+  "problems": [
+    {
+      "problem_id": "rmo_2000_2",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.38817029600000025,
+      "wall_s": 6986.955,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    },
+    {
+      "problem_id": "rmo_2001_2",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.610038672,
+      "wall_s": 11007.468,
+      "models_used": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nerror: build failed\nuncaught exception: Child exited with 1\n"
+    }
+  ],
+  "total_points": 0,
+  "max_points": 2,
+  "actual_cost_usd": 0.998208968,
+  "wall_s_sum": 17994.423,
+  "run_id": "ee957f1d1fae4040b369d5a92c982c67",
+  "wall_s": 11008.139,
+  "finished_at": "2026-09-02T20:54:55.887057+00:00"
+}
