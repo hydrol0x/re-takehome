@@ -765,3 +765,11 @@ are rerun (attempt 3, `custom-problems-gptoss6`); the other 18 results
 stand. Note that our controller's rails absorb exactly these faults (the
 same provider produced 2 transient errors inside the duo's 8-hour
 putnam_2018_a1 attempt without ending it).
+
+Attempt 3 (20260901T235516Z, light load): c05 ✓ (7 m), c06 ✓ (2 m), c10 ✓
+(1 m), h01 ✗ (genuine, 23 m), c03 and m01 full-window deadline fails — no
+provider faults this time. **Final raw GPT-OSS 30-min custom-24: 9/24**
+(dev-16 **6/16**: c05 c06 c08 c10 m02 m08; held-8 **3/8**: c04 c09 m07),
+assembled from run 2's 18 valid results + attempt 3. Union of the two raw
+loops: 15/24. Controller for comparison: dev-16 11–13 (20-min), held-8 6/8
+×2 (20-min) and 7/8 (30-min, matched light load).
