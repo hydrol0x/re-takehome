@@ -967,3 +967,12 @@ cycle 1; p09 pilot (two controller seeds) and a second raw seed follow.
 Container-restart note (15:40Z): the session worker restarted and killed
 the 4-hour restarts control (hard3k, 18 min in, no accepted candidate) and
 the pilot chain after its first run; both relaunched at 15:43Z.
+
+R1 pilot, first attempt (20260902T152944Z, duo + `SUBMISSION_RAW_LOOP=1`,
+default 8 turns, killed at 11 min by the worker restart): the stage fired
+all 8 turns after the S1 wave with the prompt byte-identical to the raw
+loop's (only "turn t/8" vs "t/25" differs), no accepted candidate (error
+counts 3, 10, 16, 11, 5, 7, 4, 15). Two of the raw loop's three p09 solves
+came at turns 10–11, so the pilot proper runs with
+`SUBMISSION_RAW_LOOP_TURNS=16` (relaunched 15:48Z, two controller seeds
+interleaved with a second raw seed).
