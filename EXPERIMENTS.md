@@ -846,3 +846,20 @@ but both prechecks timed out under four-worker load and final scoring
 failed on the same limit (load artifact; quiet rerun queued); p10 hit a
 REPL import timeout mid-run (invalid). rmo_2001_2: unsolved (220 min,
 $0.52, no accepted candidate), as in every configuration.
+
+
+### Parallel raw pair: the minimal two-model control arm (`baselines/pair_agent.py`)
+
+The kit-set result that two raw loops' *union* (12/16) beats every controller
+run raises the obvious question: is the union an artifact of adding up two
+separate runs, or would the simplest possible coordination, two independent
+raw loops under one budget and one window with the verifier picking the
+first accepted proof, actually score 12? `baselines/pair_agent.py` is that
+arm: the kit's raw loop once per model, run concurrently, byte-identical
+prompts, no shared context; the first REPL-accepted candidate wins and the
+other loop stops cooperatively (an in-flight call is allowed to finish
+because cancelling it would close the shared ledger). `PAIR_RESTARTS=1`
+restarts a loop that exhausted its 25 turns while the window allows, which
+gives the raw loops a long-horizon form for the first time (independent
+restarts). Both forms are controls for the coordination layer: what the
+staged controller adds over them is search organization, not two models.
