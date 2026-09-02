@@ -7,6 +7,7 @@ import pytest
 from baselines.pair_agent import PairAgent
 from re_harness import Problem
 from re_harness.budget import BudgetExceeded
+from re_harness.lean import LeanRuntimeError
 from re_harness.models import MODEL_A, MODEL_B
 
 PROBLEM = Problem(
@@ -183,3 +184,34 @@ async def test_turn_guard_refuses_to_start_a_call_near_the_deadline():
     assert llm.requests == []
     assert result.solution == PROBLEM.challenge
     assert all(loop["stopped"] == "deadline" for loop in result.metadata["loops"].values())
+
+
+@pytest.mark.asyncio
+async def test_repl_failure_is_retried_once_then_ends_the_loop():
+    class FlakyLean(FakeLean):
+        def __init__(self, failures: int):
+            super().__init__()
+            self.failures = failures
+
+        async def check_file(self, source):
+            if self.failures:
+                self.failures -= 1
+                raise LeanRuntimeError("REPL failed to import Mathlib: TIMEOUT after 180s")
+            return await super().check_file(source)
+
+    # One failure: the loop feeds back the outage and carries on to a solve.
+    llm = FakeLLM({MODEL_A: [BAD, GOOD, GOOD], MODEL_B: [BudgetExceeded("skip")]})
+    services = FakeServices(llm, FlakyLean(failures=1))
+    result = await make_agent().solve(PROBLEM, services)
+    assert result.metadata["winner"] == MODEL_A
+    assert "unavailable" in llm.requests[1]["messages"][1]["content"]
+    loop = result.metadata["loops"][MODEL_A]
+    assert loop["turns"] == 2 and loop["attempts"][0]["timed_out"] is True
+
+    # Two in a row: the loop stops and reports the REPL error.
+    llm = FakeLLM({MODEL_A: [BAD, BAD, GOOD], MODEL_B: [BudgetExceeded("skip")]})
+    services = FakeServices(llm, FlakyLean(failures=2))
+    result = await make_agent().solve(PROBLEM, services)
+    assert result.metadata["accepted_by_repl"] is False
+    assert result.metadata["loops"][MODEL_A]["stopped"].startswith("error:LeanRuntimeError")
+    assert result.metadata["loops"][MODEL_A]["turns"] == 2

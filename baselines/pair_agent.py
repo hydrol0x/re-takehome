@@ -35,6 +35,7 @@ from typing import Any, Callable
 
 from re_harness import AgentResult, Problem, Services
 from re_harness.budget import BudgetAccountingError, BudgetExceeded
+from re_harness.lean import LeanRuntimeError
 from re_harness.llm import LLMCallError, LLMPolicyError
 from re_harness.models import MODEL_A, MODEL_B
 
@@ -60,6 +61,7 @@ class _Loop:
         self.restarts = 0
         self.accepted = False
         self.stopped = "running"
+        self.repl_failures = 0
         self.attempts: list[Attempt] = []
 
     def summary(self) -> dict[str, Any]:
@@ -165,7 +167,24 @@ class PairAgent:
                         {"baseline": "pair", "model": state.model,
                          "pair_turn": state.turns, "restarts": state.restarts},
                     )
-                    check = await services.lean.check_file(candidate)
+                    try:
+                        check = await services.lean.check_file(candidate)
+                    except LeanRuntimeError as exc:
+                        # The warm REPL failed (typically a Mathlib import
+                        # timeout under machine load); the client restarts
+                        # it on the next call. Two failures in a row end
+                        # this loop, as in the coordination layer's rail.
+                        state.repl_failures += 1
+                        state.attempts.append(Attempt(
+                            turn=state.turns, accepted=False, timed_out=True,
+                            message_count=0,
+                        ))
+                        if state.repl_failures >= 2:
+                            state.stopped = f"error:LeanRuntimeError:{str(exc)[:80]}"
+                            return
+                        feedback = "Lean was unavailable while checking the previous candidate."
+                        continue
+                    state.repl_failures = 0
                     state.attempts.append(Attempt(
                         turn=state.turns, accepted=check.accepted,
                         timed_out=check.timed_out, message_count=len(check.messages),
@@ -192,7 +211,7 @@ class PairAgent:
             if isinstance(outcome, BaseException):
                 if isinstance(outcome, asyncio.CancelledError):
                     raise outcome
-                state.stopped = f"crash:{type(outcome).__name__}"
+                state.stopped = f"crash:{type(outcome).__name__}:{str(outcome)[:80]}"
 
         winner = next((s for s in loops.values() if s.accepted), None)
         if winner is None:
