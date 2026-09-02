@@ -927,3 +927,21 @@ unit-tested against `baselines/simple_agent.py`) for up to 8 turns at cycle
 1 after the S1 wave, behind the statement guard; an accepted candidate takes
 the normal precheck path. Pilot: p09 at 30 min, 2 seeds, alongside two more
 raw-Qwen p09 seeds to pin the raw rate; kit-16 at 30 min if positive.
+
+#### Pair arm on the held-out 8, 30-minute caps, 4 workers (20260902T144753Z)
+
+**4/8, $0.22**: c04, c09, m07 (Qwen, turn 1) and h06 (Qwen, turn 18, 9 min).
+Unsolved: c07 (the solo raw Qwen run had it), h03, m03, m05. Same total as
+the raw Qwen loop alone (4/8) and the raw union (4/8, now 5/8 counting this
+seed's h06), below solo-Qwen 6/8, solo-GPT-OSS 5/8 and the duo's 7/8 and
+6/8 at the same caps. The held-out scaffold effect therefore survives the
+strongest scaffold-free control: two raw loops in one window add nothing
+over one on these problems, while the same models inside the controller
+add two to three.
+
+**Pair-arm summary.** Kit 16: 9/16 (revised statements), the two raw loops'
+union being 10 there; held-out 8: 4/8 against a raw union of 4–5. The union
+of separate raw runs overstates what concurrent raw loops deliver, and the
+controller's margin on unseen problems is intact. The one thing the pair
+did that the controller never did at 30 minutes is p09 (turn 2), which is
+now research branch R1.

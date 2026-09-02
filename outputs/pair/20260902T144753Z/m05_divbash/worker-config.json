@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "m05_divbash",
+  "description": "# m05_divbash\n\nFind all positive integers $n$ such that $n + 2$ divides $n^2 + 4$. Show that\nthe answer is exactly $n = 2$ and $n = 6$.\n\nProve the theorem `m05_divbash` (an iff). For the forward direction, from\n$(n+2) \\mid n^2 + 4$ and $(n+2) \\mid (n+2)^2 = n^2 + 4n + 4$ deduce\n$(n+2) \\mid 4n$ and then $(n+2) \\mid 8$, which bounds $n \\le 6$; a finite check\nfinishes.\n",
+  "challenge": "import Mathlib\n\n/-- A positive integer `n` satisfies `(n + 2) ∣ n ^ 2 + 4` iff `n = 2` or `n = 6`. -/\ntheorem m05_divbash (n : ℕ) (hn : 0 < n) :\n    (n + 2) ∣ n ^ 2 + 4 ↔ n = 2 ∨ n = 6 := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m05_divbash"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/pair/20260902T144753Z/m05_divbash",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.pair_agent:create_agent",
+  "session_id": "86865ad6fb46414e8794f19068f5bc56"
+}
