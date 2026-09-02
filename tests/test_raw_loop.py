@@ -152,3 +152,18 @@ async def test_stage_stops_at_the_deadline():
     assert await SubmissionAgent(tb.config).stage1r_rawloop(tb) is None
     assert calls == []
     assert tb.stage_log[-1] == {"stage": "S1r", "turn": 1, "stopped": "deadline"}
+
+
+async def test_stage_yields_after_its_share_of_the_window():
+    tb = make_toolbox(make_config(raw_loop=True, raw_loop_turns=5, raw_loop_share=0.0))
+    calls = stub(tb, [BAD, BAD, BAD], norm_num_accepts)
+    assert await SubmissionAgent(tb.config).stage1r_rawloop(tb) is None
+    assert len(calls) == 1  # one turn always runs; the share then stops it
+    assert tb.stage_log[-1] == {"stage": "S1r", "turn": 2, "stopped": "share"}
+
+
+def test_config_raw_loop_share_env(monkeypatch):
+    monkeypatch.setenv("SUBMISSION_RAW_LOOP_SHARE", "0.3")
+    assert Config.from_env().raw_loop_share == 0.3
+    monkeypatch.delenv("SUBMISSION_RAW_LOOP_SHARE")
+    assert Config.from_env().raw_loop_share == 0.45

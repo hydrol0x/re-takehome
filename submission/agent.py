@@ -147,6 +147,10 @@ class Config:
     # produced no accepted p09 candidate (EXPERIMENTS.md, pair arm).
     raw_loop: bool = False
     raw_loop_turns: int = 8
+    # Wall-clock share of the agent window the chain may use before it
+    # yields to S4 (SUBMISSION_RAW_LOOP_SHARE, default 0.45): at short caps
+    # the turn cap alone would starve decomposition.
+    raw_loop_share: float = 0.45
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -211,6 +215,8 @@ class Config:
             # SUBMISSION_RAW_LOOP (research branch R1): default off.
             raw_loop=os.environ.get("SUBMISSION_RAW_LOOP", "").strip() == "1",
             raw_loop_turns=_env_int("SUBMISSION_RAW_LOOP_TURNS", 8, 1, 25),
+            raw_loop_share=min(1.0, max(0.0, float(
+                os.environ.get("SUBMISSION_RAW_LOOP_SHARE", "0.45") or 0.45))),
         )
 
     @property
@@ -1757,10 +1763,15 @@ class SubmissionAgent:
         if QWEN not in tb.models_arm:
             return None
         max_turns = self.config.raw_loop_turns
+        share_s = self.config.raw_loop_share * self.config.agent_time_s
+        stage_started = time.monotonic()
         feedback = ""
         for turn in range(1, max_turns + 1):
             if not tb.deadline.allows(tb.config.scaled(tb.config.qwen_call_s) + 120):
                 tb.log(stage="S1r", turn=turn, stopped="deadline")
+                return None
+            if turn > 1 and time.monotonic() - stage_started > share_s:
+                tb.log(stage="S1r", turn=turn, stopped="share")
                 return None
             text = await tb.sample(
                 QWEN, raw_loop_messages(tb.problem, tb.challenge, feedback=feedback,
