@@ -1079,3 +1079,7 @@ First attempt (20260902T205652Z) was killed by a session-worker restart at
 25 min (rmo_2000_2: 50 replies, 31 checked, 19 guard rejections, 0
 accepted; rmo_2001_2: 38 replies, 29 checked, 9 rejections, 0 accepted).
 Relaunched 21:41Z.
+Second attempt (20260902T214031Z) was killed at 27 min by a container
+reboot (rmo_2000_2: 58 replies, 36 checked, 0 accepted, 2 restarts;
+rmo_2001_2: 42 replies, 30 checked, 0 accepted, 1 restart). Relaunched a
+third time at 22:12Z.
