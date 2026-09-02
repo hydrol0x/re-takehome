@@ -1063,3 +1063,19 @@ the failure modes the controller's statement guard and import composition
 exist to prevent, and the kit baseline as shipped has neither. Rerun with
 `PAIR_GUARD=1` (headers verbatim, no extra imports; violations fed back as
 errors) launched at 21:05Z for the same 4-hour window.
+
+#### Restarts control on the hard two, guarded (`PAIR_RESTARTS=1 PAIR_GUARD=1`, 4 h, 2 workers)
+
+Motivation: the unguarded 4-hour control (20260902T175127Z, 0/2, $1.00)
+ended on false REPL acceptances — rmo_2000_2 at 116 min on a theorem-less
+lemma file (Comparator: "unexpected identifier"), rmo_2001_2 at 183 min on
+a file importing `Mathlib.NumberTheory.ArithmeticFunction`, which the
+scoring build lacks; 232 and 229 REPL checks, no genuine proof. The raw
+loop as shipped stops on the first REPL acceptance, and the warm REPL sees
+neither defect. `PAIR_GUARD=1` feeds such candidates back as errors
+(declaration headers verbatim, no extra imports).
+
+First attempt (20260902T205652Z) was killed by a session-worker restart at
+25 min (rmo_2000_2: 50 replies, 31 checked, 19 guard rejections, 0
+accepted; rmo_2001_2: 38 replies, 29 checked, 9 rejections, 0 accepted).
+Relaunched 21:41Z.
