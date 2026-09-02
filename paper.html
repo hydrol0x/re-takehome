@@ -51,7 +51,7 @@
 
 <div class="abstract">
   <div class="ah">Abstract</div>
-  <b>Problem.</b> Two fixed models, <span class="tt">qwen/qwen3.5-flash-02-23</span> and <span class="tt">openai/gpt-oss-120b</span>, must jointly solve competition-mathematics problems and prove the results in Lean&nbsp;4 under per-problem caps of $1.00 and 8 hours. Submissions are scored by the task's Comparator, a program supplied with the kit that rebuilds each submitted file and checks, at the Lean kernel level, that its proofs are valid and its theorem statements equal the challenge's. <b>Method.</b> We build a verifier-centric staged controller: deterministic tactics, pooled cross-model sampling, shallow compiler-guided repair, cross-model handoff on repair plateaus, sketch-and-fill decomposition, and a <i>comparator precheck</i> that re-checks accepted proofs with the scoring Comparator itself instead of trusting the faster development checker alone. <b>Main controlled result.</b> At identical 30-minute caps on the kit's 16 problems, both raw single-model baselines reach aggregate parity with the controller's arms (raw Qwen 9/16, raw GPT-OSS 10/16, arms 8&ndash;10/16). The two-model system reaches 9&ndash;10/16 with complementary per-problem outcomes across seeds, and the controller's measured value lies in zero-cost deterministic coverage of the easy tier, complementarity, robustness, and verifier-alignment machinery, not in aggregate lift over a cap-matched raw loop. The aggregate gap (+1) sits within our observed run-to-run variation, so we treat per-problem complementarity, not the aggregate, as the primary evidence. On our held-out custom problems the scaffold does separate from the raw loop (duo 7/8, solo-Qwen 6/8, raw Qwen 4/8 at matched caps); the extra duo solve traces to a Qwen sampling wave, not to model interaction. <b>Benchmark audit.</b> Writing reference proofs surfaced two defective kit statements (one false as formalized, one unscorable under the gate's imports) and a definitional shortcut behind every Putnam pass; the kit's maintainers have since corrected the statements. <b>Hard instances.</b> Of the four provable hard problems missed by both original raw baselines, one fell within 30-minute caps; multi-hour decomposition runs solved two more; the fourth remains open. A single-model arm given the same controller and a long horizon reproduced one of the multi-hour solves. Verifier-aligned search infrastructure and search horizon therefore account for more of the gain than model-to-model interaction, with two-family coverage and robustness as smaller, useful additions.
+  <b>Problem.</b> Two fixed models, <span class="tt">qwen/qwen3.5-flash-02-23</span> and <span class="tt">openai/gpt-oss-120b</span>, must jointly solve competition-mathematics problems and prove the results in Lean&nbsp;4 under per-problem caps of $1.00 and 8 hours. Submissions are scored by the task's Comparator, a program supplied with the kit that rebuilds each submitted file and checks, at the Lean kernel level, that its proofs are valid and its theorem statements equal the challenge's. <b>Method.</b> We build a verifier-centric staged controller: deterministic tactics, pooled cross-model sampling, shallow compiler-guided repair, cross-model handoff on repair plateaus, sketch-and-fill decomposition, and a <i>comparator precheck</i> that re-checks accepted proofs with the scoring Comparator itself instead of trusting the faster development checker alone. <b>Main controlled result.</b> On eight held-out problems the controller was never tuned on, at matched 30-minute caps, the raw single-model loops solve 4/8 (Qwen) and 3/8 (GPT-OSS); the same models inside the controller solve 6/8 and 5/8, and the pair 7/8. On the kit's 16 problems, by contrast, the raw loops tie the controller arms at the same caps (raw Qwen 9/16, raw GPT-OSS 10/16, arms 8&ndash;10/16): the kit's easy tier falls to a bare repair loop, and its value there is composition, zero-cost coverage, and verifier alignment rather than aggregate lift. Pairing the two models adds at most one problem over the better solo arm in either setting, within run-to-run variation, and the extra duo solve traces to a Qwen sampling wave, not to model interaction; per-problem complementarity, not the aggregate, is the primary pairing evidence. <b>Benchmark audit.</b> Writing reference proofs surfaced two defective kit statements (one false as formalized, one unscorable under the gate's imports) and a definitional shortcut behind every Putnam pass; the kit's maintainers have since corrected the statements. <b>Hard instances.</b> Of the four provable hard problems missed by both original raw baselines, one fell within 30-minute caps; multi-hour decomposition runs solved two more; the fourth remains open. A single-model arm given the same controller and a long horizon reproduced one of the multi-hour solves. Verifier-aligned search infrastructure and search horizon therefore account for more of the gain than model-to-model interaction, with two-family coverage and robustness as smaller, useful additions.
 </div>
 
 <h2><span class="sec-num">1</span>Introduction</h2>
@@ -182,59 +182,74 @@
 <p><b>Metrics and noise.</b> Primary metric: problems solved under the stated regime's caps, with per-problem outcome grids for any claim that depends on composition. Aggregate differences within the observed &plusmn;2 dev-16 band are reported as inconclusive. Where attribution matters (which stage or model produced the winning proof), we use the per-problem event logs shipped with each run. The cap-matched kit-set evidence is seven full controller runs (three duo, two per solo arm) and one run per raw loop; the two seeds of each arm were run with successive revisions of the controller, and per-problem rate notes draw on further targeted runs of single problems.</p>
 
 <h2><span class="sec-num">5</span>Results</h2>
-<h3>5.1 RQ1: at matched caps the controller ties the raw loops on the kit set and separates on unseen problems</h3>
+<h3>5.1 RQ1: the scaffold adds two to three problems in eight on unseen problems; on the kit set it ties the raw loops</h3>
 <div class="figure">
-  <svg width="570" height="256" viewBox="0 0 600 270" font-family="Liberation Sans, Arial, sans-serif">
-    <g stroke="#ddd" stroke-width="1">
-      <line x1="80" y1="174" x2="580" y2="174"/><line x1="80" y1="122" x2="580" y2="122"/><line x1="80" y1="70" x2="580" y2="70"/><line x1="80" y1="18" x2="580" y2="18"/>
+  <svg width="600" height="268" viewBox="0 0 600 268" font-family="Liberation Sans, Arial, sans-serif">
+    <!-- legend -->
+    <g font-size="9" fill="#333">
+      <rect x="40" y="8" width="10" height="10" fill="#8f8f8a" rx="2"/><text x="54" y="16.5">raw kit repair loop</text>
+      <rect x="150" y="8" width="10" height="10" fill="#7fa8dc" rx="2"/><text x="164" y="16.5">controller, seed 1</text>
+      <rect x="250" y="8" width="10" height="10" fill="#2a78d6" rx="2"/><text x="264" y="16.5">controller, seed 2</text>
+      <rect x="350" y="8" width="10" height="10" fill="#1d5aa6" rx="2"/><text x="364" y="16.5">controller, run 3</text>
     </g>
-    <g font-size="9.5" fill="#555" text-anchor="end">
-      <text x="74" y="229">0</text><text x="74" y="177">4</text><text x="74" y="125">8</text><text x="74" y="73">12</text><text x="74" y="21">16</text>
-    </g>
-    <text x="24" y="130" font-size="10" fill="#333" transform="rotate(-90 24 130)" text-anchor="middle">problems solved / 16</text>
-    <line x1="80" y1="70" x2="580" y2="70" stroke="#888" stroke-width="1" stroke-dasharray="6 3"/>
-    <text x="84" y="65" font-size="9" fill="#666">union of the two raw loops (12)</text>
-    <line x1="80" y1="44" x2="580" y2="44" stroke="#888" stroke-width="1" stroke-dasharray="2 3"/>
-    <text x="84" y="57" font-size="9" fill="#666">scorable ceiling (14, original statements; &#167;5.3&#8211;5.4)</text>
-    <line x1="80" y1="226" x2="580" y2="226" stroke="#444" stroke-width="1.2"/>
+    <!-- panel A: kit set -->
+    <text x="205" y="40" font-size="10" font-weight="bold" text-anchor="middle" fill="#111">Kit set (16 problems), 30-min caps</text>
+    <line x1="40" y1="220" x2="372" y2="220" stroke="#444" stroke-width="1"/>
+    <g stroke="#e2e2df" stroke-width="0.8"><line x1="40" y1="180" x2="372" y2="180"/><line x1="40" y1="140" x2="372" y2="140"/><line x1="40" y1="100" x2="372" y2="100"/><line x1="40" y1="60" x2="372" y2="60"/></g>
+    <g font-size="8.5" fill="#555" text-anchor="end"><text x="36" y="223">0</text><text x="36" y="183">4</text><text x="36" y="143">8</text><text x="36" y="103">12</text><text x="36" y="63">16</text></g>
+    <line x1="40" y1="80" x2="372" y2="80" stroke="#999" stroke-dasharray="3,3"/>
+    <text x="44" y="77" font-size="8" fill="#666">scorable ceiling (14, original statements; &#167;5.3&#8211;5.4)</text>
+    <line x1="40" y1="100" x2="372" y2="100" stroke="#777" stroke-dasharray="6,3"/>
+    <text x="44" y="97" font-size="8" fill="#666">union of the two raw loops (12)</text>
     <g>
-      <rect x="112" y="109" width="38" height="117" rx="2.5" fill="#8f8f8a"/>
-      <rect x="154" y="122" width="38" height="104" rx="2.5" fill="#7fa8dc"/>
-      <rect x="196" y="109" width="38" height="117" rx="2.5" fill="#2a78d6"/>
-      <text x="131" y="103" font-size="9.5" text-anchor="middle" fill="#333">9</text>
-      <text x="173" y="116" font-size="9.5" text-anchor="middle" fill="#333">8</text>
-      <text x="215" y="103" font-size="9.5" text-anchor="middle" fill="#333">9</text>
-      <text x="173" y="243" font-size="10" text-anchor="middle" fill="#111">Qwen only</text>
+      <rect x="52" y="130" width="22" height="90" rx="2" fill="#8f8f8a"/>
+      <text x="63" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <rect x="78" y="140" width="22" height="80" rx="2" fill="#7fa8dc"/>
+      <text x="89" y="136" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <rect x="104" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
+      <text x="115" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="91" y="236" font-size="9.5" text-anchor="middle" fill="#111">Qwen only</text>
+      <rect x="158" y="120" width="22" height="100" rx="2" fill="#8f8f8a"/>
+      <text x="169" y="116" font-size="9" text-anchor="middle" fill="#333">10</text>
+      <rect x="184" y="140" width="22" height="80" rx="2" fill="#7fa8dc"/>
+      <text x="195" y="136" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <rect x="210" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
+      <text x="221" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="197" y="236" font-size="9.5" text-anchor="middle" fill="#111">GPT-OSS only</text>
+      <rect x="264" y="130" width="22" height="90" rx="2" fill="#7fa8dc"/>
+      <text x="275" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <rect x="290" y="120" width="22" height="100" rx="2" fill="#2a78d6"/>
+      <text x="301" y="116" font-size="9" text-anchor="middle" fill="#333">10</text>
+      <rect x="316" y="130" width="22" height="90" rx="2" fill="#1d5aa6"/>
+      <text x="327" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="303" y="236" font-size="9.5" text-anchor="middle" fill="#111">Duo</text>
     </g>
+    <text x="205" y="256" font-size="8.5" fill="#666" text-anchor="middle">Raw loops tie the controller arms; Putnam passes use the definitional route (&#167;5.4).</text>
+    <!-- panel B: held-out custom problems -->
+    <text x="497" y="40" font-size="10" font-weight="bold" text-anchor="middle" fill="#111">Held-out custom problems (8), 30-min caps</text>
+    <line x1="410" y1="220" x2="586" y2="220" stroke="#444" stroke-width="1"/>
+    <g stroke="#e2e2df" stroke-width="0.8"><line x1="410" y1="180" x2="586" y2="180"/><line x1="410" y1="140" x2="586" y2="140"/><line x1="410" y1="100" x2="586" y2="100"/><line x1="410" y1="60" x2="586" y2="60"/></g>
+    <g font-size="8.5" fill="#555" text-anchor="end"><text x="406" y="223">0</text><text x="406" y="183">2</text><text x="406" y="143">4</text><text x="406" y="103">6</text><text x="406" y="63">8</text></g>
     <g>
-      <rect x="272" y="96" width="38" height="130" rx="2.5" fill="#8f8f8a"/>
-      <rect x="314" y="122" width="38" height="104" rx="2.5" fill="#7fa8dc"/>
-      <rect x="356" y="109" width="38" height="117" rx="2.5" fill="#2a78d6"/>
-      <text x="291" y="90" font-size="9.5" text-anchor="middle" fill="#333">10</text>
-      <text x="333" y="116" font-size="9.5" text-anchor="middle" fill="#333">8</text>
-      <text x="375" y="103" font-size="9.5" text-anchor="middle" fill="#333">9</text>
-      <text x="333" y="243" font-size="10" text-anchor="middle" fill="#111">GPT-OSS only</text>
+      <rect x="418" y="140" width="26" height="80" rx="2" fill="#8f8f8a"/>
+      <text x="431" y="136" font-size="9" text-anchor="middle" fill="#333">4</text>
+      <rect x="448" y="100" width="26" height="120" rx="2" fill="#2a78d6"/>
+      <text x="461" y="96" font-size="9" text-anchor="middle" fill="#333">6</text>
+      <text x="446" y="236" font-size="9.5" text-anchor="middle" fill="#111">Qwen</text>
+      <rect x="484" y="160" width="26" height="60" rx="2" fill="#8f8f8a"/>
+      <text x="497" y="156" font-size="9" text-anchor="middle" fill="#333">3</text>
+      <rect x="514" y="120" width="26" height="100" rx="2" fill="#2a78d6"/>
+      <text x="527" y="116" font-size="9" text-anchor="middle" fill="#333">5</text>
+      <text x="512" y="236" font-size="9.5" text-anchor="middle" fill="#111">GPT-OSS</text>
+      <rect x="550" y="80" width="26" height="140" rx="2" fill="#2a78d6"/>
+      <text x="563" y="76" font-size="9" text-anchor="middle" fill="#333">7</text>
+      <text x="563" y="236" font-size="9.5" text-anchor="middle" fill="#111">Duo</text>
     </g>
-    <g>
-      <rect x="453" y="109" width="38" height="117" rx="2.5" fill="#7fa8dc"/>
-      <rect x="495" y="96" width="38" height="130" rx="2.5" fill="#2a78d6"/>
-      <rect x="537" y="109" width="38" height="117" rx="2.5" fill="#1d5aa6"/>
-      <text x="472" y="103" font-size="9.5" text-anchor="middle" fill="#333">9</text>
-      <text x="514" y="90" font-size="9.5" text-anchor="middle" fill="#333">10</text>
-      <text x="556" y="103" font-size="9.5" text-anchor="middle" fill="#333">9</text>
-      <text x="514" y="243" font-size="10" text-anchor="middle" fill="#111">Duo</text>
-    </g>
-    <g font-size="9.2" fill="#333">
-      <rect x="84" y="26" width="10" height="10" fill="#8f8f8a" rx="2"/><text x="98" y="34.5">raw kit baseline</text>
-      <rect x="184" y="26" width="10" height="10" fill="#7fa8dc" rx="2"/><text x="198" y="34.5">controller, seed 1</text>
-      <rect x="288" y="26" width="10" height="10" fill="#2a78d6" rx="2"/><text x="302" y="34.5">controller, seed 2</text>
-      <rect x="392" y="26" width="10" height="10" fill="#1d5aa6" rx="2"/><text x="406" y="34.5">controller, run 3 (duo only)</text>
-    </g>
-    <text x="80" y="262" font-size="8.6" fill="#666">Kit set (16 problems). Raw baselines: kit single-model repair loop at the arms' 30-min caps. All Putnam passes are definitional (&#167;5.4).</text>
+    <text x="497" y="256" font-size="8.5" fill="#666" text-anchor="middle">Same models inside the controller: +2, +2, and +3 problems.</text>
   </svg>
-  <div class="caption"><b>Figure 2:</b> Cap-matched regime: same controller, model set switched, identical 30-minute caps, two seeds per arm plus a third duo run. Raw bars: the kit's single-model repair loop at the same 30-minute caps. Putnam passes in every bar use the definitional route of &sect;5.4.</div>
+  <div class="caption"><b>Figure 2:</b> The scaffold effect at matched 30-minute caps. Left, the kit's 16 problems: the raw single-model repair loops tie the controller arms (two seeds per arm, three duo runs). Right, the eight held-out custom problems the controller was never tuned on: the raw loops solve 4 (Qwen) and 3 (GPT-OSS); the same models inside the controller solve 6 and 5, and the pair 7. Three of the eight (m03, h06, h03) were solved only with the scaffold.</div>
 </div>
-<p>At the arms' 30-minute caps the raw Qwen loop scores <b>9/16</b>: parity with the controller's solo-Qwen arm (8&ndash;9), and its passes include p09, which no controller arm solved at 30 minutes. The raw GPT-OSS loop scores <b>10/16</b>, at or above its own controller arm (8&ndash;9) and level with the duo's better seed, within the &plusmn;2 band; it passes the seven easy problems, both Putnams (definitional route, &sect;5.4), and p10, which the controller arms passed once in eight 30-minute attempts. Both raw loops are also cheap ($0.24 and $0.21 per 16-problem run). On the custom benchmark the picture differs. At 30-minute caps the raw Qwen loop scored 12/24 (dev-16 8/16, held-8 4/8) and the raw GPT-OSS loop 9/24 (dev 6/16, held 3/8; union 15/24), whereas the controller reached 11&ndash;13/16 on dev-16 at 20-minute caps and, on the held-out 8, 6/8 twice at 20 minutes and 7/8 at 30 minutes (a solo-Qwen arm: 6/8, the same set). On unseen problems the scaffold adds coverage over the raw loop (m03, h06); both miss m05. What survives at matched caps on the kit set: the free S0 sweep covers 6/16 at $0 where the raw loop spends model calls on every problem; the per-problem compositions differ (the raw Qwen loop misses p05, p10, and putnam_2020_a2, while the controller covers p05 deterministically and reached p10, &sect;5.3); and the controller carries the reliability rails and comparator precheck whose measured value appears at longer horizons (&sect;6.2). In fact the <i>union</i> of the two raw loops covers 12/16, more than any single controller run: cross-family complementarity exists at the raw level, and one controller window realizes only part of it (&sect;5.2).</p>
+<p>The controlled gain shows on problems the controller was never tuned on (Fig.&nbsp;2, right). On the held-out 8 at matched 30-minute caps the raw Qwen loop solves 4/8 and the raw GPT-OSS loop 3/8; the same models inside the controller solve 6/8 (solo-Qwen) and 5/8 (solo-GPT-OSS), and the pair 7/8 (6/8 in both earlier 20-minute checks). Three of the eight (m03, h06, h03) fell only with the scaffold; h06 fell in every scaffolded run, m03 in most, h03 once. The development set shows a larger gap (raw 8/16 and 6/16 versus 11&ndash;13/16 for the controller at shorter 20-minute caps), but that set informed development, so the held-out 8 is the number to trust. On the kit set, by contrast, the scaffold adds nothing in aggregate (Fig.&nbsp;2, left). At the arms' 30-minute caps the raw Qwen loop scores <b>9/16</b>, parity with the controller's solo-Qwen arm (8&ndash;9), and its passes include p09, which no controller arm solved at 30 minutes; the raw GPT-OSS loop scores <b>10/16</b>, level with the duo's better seed, passing the seven easy problems, both Putnams (definitional route, &sect;5.4), and p10. Both raw loops are cheap ($0.24 and $0.21 per 16-problem run). What survives at matched caps on the kit set is composition: the free S0 sweep covers 6/16 at $0 where the raw loop spends model calls on every problem; the per-problem sets differ (the raw Qwen loop misses p05, p10, and putnam_2020_a2, while the controller covers p05 deterministically and reached p10, &sect;5.3); and the controller carries the reliability rails and comparator precheck whose measured value appears at longer horizons (&sect;6.2). In fact the <i>union</i> of the two raw loops covers 12/16, more than any single controller run: cross-family complementarity exists at the raw level, and one controller window realizes only part of it (&sect;5.2). Why the kit set and the custom set differ is visible in their composition: the kit's easy tier falls to a few standard tactics that a bare repair loop also finds, and its Putnam items had a shortcut, whereas the custom problems reward the multi-round repair and decomposition the raw loop lacks.</p>
 
 <h3>5.2 RQ2: pairing adds coverage through complementary outcomes; the aggregate gain is small</h3>
 <p>The duo scored one problem above the best solo arm on both seeds (9 vs. 8; 10 vs. 9) at one-half to one-third of solo-Qwen's cost per run ($0.16&ndash;0.17 vs. $0.40&ndash;0.45), and in each seed it matched the union of that seed's two solo arms; a third duo run scored 9. Because the aggregate difference sits within the &plusmn;2 run-to-run band we observed on repeated identical configurations, we do not treat the +1 as strong evidence by itself; and since the two raw loops' union (12/16, &sect;5.1) exceeds the duo's best run (10/16), one window of pairing captures the families' complementarity only partially. The per-problem grid (Table&nbsp;2) is the more informative result: the solo arms show complementary per-problem <i>outcomes</i> across both seeds, and additional seeds show the headline asymmetries are rate differences, not absolute ones (Table&nbsp;2 notes). A three-arm replication on the held-out 8 at 30-minute caps points the same way: duo 7/8, solo-Qwen 6/8, solo-GPT-OSS 5/8, raw Qwen 4/8. The duo's extra problem (h03, its first solve in four duo runs) came from a Qwen sampling wave in a late cycle (88 Qwen calls, 3 GPT-OSS calls). It is a coverage event under the scaffold, not a cross-model artifact; on these problems the pairing effect is at most one problem and the scaffold effect dominates.</p>
@@ -361,7 +376,7 @@
 <p>Sample sizes are small (16 kit problems, 24 custom) and the dev-16 varies by &plusmn;2 across identical runs, so we avoid significance claims and report per-problem outcomes; the RQ2 aggregate difference (+1 on both seeds) is within that band and the complementarity pattern of Table&nbsp;2 is the sturdier finding. The long-horizon solo control (4 h) is shorter than the duo's full-cap runs (8 h). Single-seed results (the raw p09 and p10 solves) are reported as such. All 24 custom challenges import full Mathlib, so the custom benchmark cannot exhibit the import-surface gap of &sect;5.4, and the long-horizon evidence on the revised statements is one seed. All runs were made on a shared development machine; load-affected runs were rerun under light load, and every incident is documented in the experiment log. Finally, these are two fixed mid-scale models: the demonstrated range (full easy/medium tier, several hard instances, olympiad-final tier unsolved) is consistent with published results for comparable backbones [6, 14, 25, 26].</p>
 
 <h2><span class="sec-num">9</span>Conclusion</h2>
-<p>When proof correctness is externally verifiable, most of the value of a multi-LLM theorem-proving system in our setting lay in verifier-aligned search infrastructure and complementary candidate coverage, not in conversational coordination. Both raw loops reach aggregate parity with the controller's arms at 30 minutes on the kit set, which places the controller's demonstrated value in zero-cost deterministic coverage, per-problem complementarity, robustness, its verifier-alignment machinery, and, on the held-out custom problems, where the raw loop scores 4/8 against the scaffolded arms' 6&ndash;7/8, search organization itself. The same reference-proof discipline doubled as a benchmark audit (&sect;5.4). Two model families added smaller but real benefits: per-problem coverage the aggregate understates, one consensus decision with a concrete case (p07), an observed cross-family proof structure, and robustness to a provider outage that would have zeroed a single-model configuration. Among the remaining structural instances, systematic success appeared only at long horizons under decomposition; none fell to the short-window prompting variants we screened. Within the mechanisms and budgets we tested, that ordering &mdash; controller, then coverage, then horizon &mdash; is the paper's main empirical claim, and no model-to-model dialogue was needed to reach it.</p>
+<p>When proof correctness is externally verifiable, most of the value of a multi-LLM theorem-proving system in our setting lay in verifier-aligned search infrastructure and complementary candidate coverage, not in conversational coordination. On held-out problems the scaffold raises each model by two problems in eight and the pair by three; on the kit set the raw loops tie it at 30 minutes, and there its demonstrated value is zero-cost deterministic coverage, per-problem complementarity, robustness, and its verifier-alignment machinery. The same reference-proof discipline doubled as a benchmark audit (&sect;5.4). Two model families added smaller but real benefits: per-problem coverage the aggregate understates, one consensus decision with a concrete case (p07), an observed cross-family proof structure, and robustness to a provider outage that would have zeroed a single-model configuration. Among the remaining structural instances, systematic success appeared only at long horizons under decomposition; none fell to the short-window prompting variants we screened. Within the mechanisms and budgets we tested, that ordering &mdash; controller, then coverage, then horizon &mdash; is the paper's main empirical claim, and no model-to-model dialogue was needed to reach it.</p>
 
 <div class="footer-note">
 <b>Reproducibility and disclosure.</b> The repository contains the controller, the custom benchmark with Comparator-validated reference proofs, per-run artifacts and event logs for every result above, and <span class="tt">RUNBOOK.md</span>; <span class="tt">scripts/judge_check.sh</span> passes on the submitted configuration. Appendices: <span class="tt">RESEARCH.md</span>, <span class="tt">PART2.md</span>, <span class="tt">EXPERIMENTS.md</span>, <span class="tt">RESEARCH_LOOP.md</span>. This submission was developed with substantial assistance from Claude (Anthropic): code, experiments, analysis, and writing, as disclosed in the submission form.
