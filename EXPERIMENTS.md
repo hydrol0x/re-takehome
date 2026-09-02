@@ -863,3 +863,19 @@ restarts a loop that exhausted its 25 turns while the window allows, which
 gives the raw loops a long-horizon form for the first time (independent
 restarts). Both forms are controls for the coordination layer: what the
 staged controller adds over them is search organization, not two models.
+
+
+### Skeleton persistence at 2-hour caps on the kit hard four (20260902T120042Z, duo, `SUBMISSION_SKELETON_KEEP=1`)
+
+**1/4, $0.50** (p10 ✓ at 91 min; p09, rmo_2000_2, rmo_2001_2 ✗ with no
+REPL-accepted candidate in 101–102 min). p10's pass needed a rescore: its
+six REPL-accepted proofs arrived while three other heavy workers were
+active, both in-run prechecks timed out (240 s) and the final Comparator
+timed out (181 s); on the quiet machine the same solution passes in 59 s
+(evaluator rerun; the same load artifact as p09 in the solo-Qwen 4-hour
+run). The mechanism itself fired once per problem (a stalled skeleton was
+kept and resumed) and converted nothing: p10 falls at short caps without it,
+and the other three are the problems that yield only at 4–8 hours (p09,
+rmo_2000_2) or never (rmo_2001_2). With the 20-minute dev screen (13 → 12)
+and the 60-minute hard-four run (0/4), skeleton persistence is now tested at
+three horizons with no gain at any; it stays opt-in.

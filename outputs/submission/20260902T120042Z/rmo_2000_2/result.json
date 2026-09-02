@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2000_2",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 77736,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (17s)\nwarning: Challenge.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (12s)\nwarning: Solution.lean:3:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2000_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2000_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.1554932900000001,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 6063.464,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen:s4-skeleton:r1",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:gptoss-high:1",
+        "holes": 6
+      },
+      {
+        "stage": "S4",
+        "sorrified": "3 lines kept"
+      },
+      {
+        "stage": "S4",
+        "sorrified": "1 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:gptoss-high:1",
+        "unfilled_decls": [
+          "diff_eq_two_solution"
+        ]
+      },
+      {
+        "stage": "S4",
+        "kept": "sketch:gptoss-high:1:stalled",
+        "kept_holes": 1
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 2,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:kept:0",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "sketch:kept:0",
+        "unfilled_decls": [
+          "diff_eq_two_solution"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r1"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r1",
+        "holes": 1
+      },
+      {
+        "stage": "S4",
+        "unfilled": 1,
+        "sketch": "qwen:s4-skeleton:r1",
+        "unfilled_decls": [
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 7
+      },
+      {
+        "stage": "S4",
+        "unfilled": 6,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "diff_eq_one_impossible",
+          "diff_eq_three_impossible",
+          "diff_eq_two_implies_solution",
+          "diff_le_three",
+          "diff_pos",
+          "rmo_2000_2"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 5981.7
+  }
+}

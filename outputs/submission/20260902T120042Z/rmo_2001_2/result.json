@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "problem_id": "rmo_2001_2",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 96719,
+    "output": {
+      "passed": false,
+      "exit_code": 1,
+      "stdout": "Building Challenge\n⚠ [8655/8656] Built Challenge (13s)\nwarning: Challenge.lean:5:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Challenge\nBuilding Solution\n⚠ [8655/8656] Built Solution (45s)\nwarning: Solution.lean:11:25: Variable name `hle` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\ninfo: Solution.lean:17:2: Try this:\n  [apply] exact Prime.pos hp\ninfo: Solution.lean:21:2: Try this:\n  [apply] exact Prime.two_le hp\nwarning: Solution.lean:25:3: Variable name `hp` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:25:22: Variable name `hq` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:32:3: Variable name `hp` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:32:22: Variable name `hq` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solution.lean:42:26: This simp argument is unused:\n  sub_self\n\nHint: Omit it from the simp argument list.\n  simp ̵[̵s̵u̵b̵_̵s̵e̵l̵f̵]̵\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solution.lean:39:10: this tactic is never executed\n\nNote: This linter can be disabled with `set_option linter.unreachableTactic false`\nwarning: Solution.lean:39:10: 'ring_nf' tactic does nothing\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\nwarning: Solution.lean:45:27: Variable name `hp` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\ninfo: Solution.lean:60:2: Try this:\n  [apply] exact case_3_11\nwarning: Solution.lean:81:6: declaration uses `sorry`\nwarning: Solution.lean:89:6: declaration uses `sorry`\nwarning: Solution.lean:93:8: declaration uses `sorry`\nBuild completed successfully (8656 jobs).\nExporting #[rmo_2001_2, propext, Classical.choice, Quot.sound, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList] from Solution\n",
+      "stderr": "WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Challenge\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Challenge -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec lake build Solution\nWARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING exec /opt/comparator/.lake/packages/lean4export/.lake/build/bin/lean4export Solution -- rmo_2001_2 propext Classical.choice Quot.sound Nat.add Nat.sub Nat.mul Nat.pow Nat.gcd Nat.div Nat.mod Nat.beq Nat.ble Nat.land Nat.lor Nat.xor Nat.shiftLeft Nat.shiftRight String.ofList\nuncaught exception: Illegal axiom detected: 'sorryAx'\n"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.144159825,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 6124.201,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "sketch:kept:0:partial",
+    "accepted_by_repl": false,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 13
+      },
+      {
+        "stage": "S4",
+        "sorrified": "3 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 4,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "check_case_bounds",
+          "divisor_analysis",
+          "rmo_2001_2",
+          "unequal_primes_only_cases"
+        ]
+      },
+      {
+        "stage": "S4",
+        "kept": "qwen:s4-skeleton:r2:stalled",
+        "kept_holes": 4
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 2
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:kept:0",
+        "holes": 4
+      },
+      {
+        "stage": "S4",
+        "sorrified": "2 lines kept"
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "sketch:kept:0",
+        "unfilled_decls": [
+          "divisor_analysis",
+          "rmo_2001_2",
+          "unequal_primes_only_cases"
+        ]
+      },
+      {
+        "stage": "S4",
+        "kept": "sketch:kept:0:stalled",
+        "kept_holes": 3
+      },
+      {
+        "stage": "S4",
+        "sketch": "sketch:kept:1",
+        "holes": 3
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "sketch:kept:1",
+        "unfilled_decls": [
+          "divisor_analysis",
+          "rmo_2001_2",
+          "unequal_primes_only_cases"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 7,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "wave": "gptoss-med",
+        "planned": 2,
+        "usable": 0,
+        "rejected": 0
+      },
+      {
+        "stage": "S2",
+        "solved": false
+      }
+    ],
+    "wall_s": 6022.8
+  }
+}

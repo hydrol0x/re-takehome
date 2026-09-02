@@ -63,11 +63,26 @@ lemma case_11_3 :
 lemma check_case_bounds (p q : ℕ) (hp : Nat.Prime p) (hq : Nat.Prime q) :
   (p = 3 ∧ q = 11) ∨ (p = 11 ∧ q = 3) ∨ p = q →
   ∃ m : ℕ, p^2 + 7*p*q + q^2 = m^2 := by
-  sorry
+  intro h
+  cases h with
+  | inl h => 
+    rcases h with ⟨rfl, rfl⟩
+    exact case_3_11
+  | inr h => 
+    cases h with
+    | inl h => 
+      rcases h with ⟨rfl, rfl⟩
+      exact case_11_3
+    | inr h => 
+      subst h
+      exact case_p_eq_q _ hp
 
 -- Auxiliary: analyzing divisor possibilities of 5*p*q
 lemma divisor_analysis (a b : ℕ) (hab : a * b = 5*p*q) :
   a = 1 ∨ a = 5 ∨ a = p ∨ a = q ∨ a = 5*p ∨ a = 5*q ∨ a = p*q ∨ a = 5*p*q := by
+  have h₁ : a ∣ 5 * p * q := by
+    use b
+    linarith
   sorry
 
 -- Auxiliary: when p ≠ q, bound constraints lead to specific solutions
