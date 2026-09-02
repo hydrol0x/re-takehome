@@ -991,3 +991,9 @@ where the controller's independent S1 samples + S2 repair rounds do not;
 embedded verbatim as a cycle-1 stage it converts p09 in one of two seeds.
 Kit-16 evaluation at 30-minute caps launched 16:29Z (2 workers, alongside
 the hard3k restarts control).
+
+Restarts control (20260902T154147Z, pair + `PAIR_RESTARTS=1`, hard3k, 4 h,
+3 workers), interim: **p09 PASSED at 16 min** (Qwen loop, turn 24 of its
+first chain, $0.039, Comparator 47 s). The raw Qwen loop is now 4-for-5 on
+p09 within a 25-turn chain (turns 11, 2, 10, 24; one miss at 25 turns).
+rmo_2000_2 and rmo_2001_2 continue under restarts.
