@@ -834,3 +834,15 @@ repair scored 10/16 with 24 reviews (9/16 at 20 min where it rarely fired).
 The earlier one-way critique (B8) scored 12. None of the three converted a
 problem the tuned default misses, and both two-way mechanisms cost 40–50%
 more per run. Verdict: neutral at best at short horizons; not promoted.
+
+
+### Solo-Qwen on the kit hard four at 4-hour caps (20260902T081939Z) — RQ3 attribution
+
+**1/4, $1.36: rmo_2000_2 PASSED** (220 min, $0.484, Qwen only) — the problem
+the duo solved once in three 8-hour runs. With the earlier 4-hour solo-Qwen
+p09 pass, two of the three multi-hour kit solves reproduce under the same
+scaffold with a single model. p09 here produced six REPL-accepted proofs
+but both prechecks timed out under four-worker load and final scoring
+failed on the same limit (load artifact; quiet rerun queued); p10 hit a
+REPL import timeout mid-run (invalid). rmo_2001_2: unsolved (220 min,
+$0.52, no accepted candidate), as in every configuration.

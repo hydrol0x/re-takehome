@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "problem_id": "p10_factorial_pow",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": null,
+    "timed_out": true,
+    "duration_ms": 180767,
+    "output": {
+      "error": "Comparator timed out after 180s"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.06663826000000002,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 2484.005,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "qwen",
+    "origin": "qwen-fast:s1",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0.5",
+        "verdict": "agree",
+        "answers": {
+          "p10_answer": "6"
+        },
+        "candidates": [
+          {
+            "p10_answer": "6"
+          },
+          {
+            "p10_answer": "6"
+          }
+        ]
+      },
+      {
+        "stage": "S0",
+        "solved": false
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 11,
+        "usable": 10,
+        "rejected": 1
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-fast:s1",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240812
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 11,
+        "usable": 11,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-fast:s1",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240715
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 11,
+        "usable": 11,
+        "rejected": 0
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 5
+      },
+      {
+        "stage": "S4",
+        "unfilled": 2,
+        "sketch": "qwen:s4-skeleton:r2",
+        "unfilled_decls": [
+          "helper_ge_7_implies_not_lt",
+          "helper_inductive_step"
+        ]
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r4"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r4",
+        "holes": 3
+      },
+      {
+        "stage": "lean",
+        "error": "REPL failed to import Mathlib: TIMEOUT after 180s",
+        "consecutive": 1
+      },
+      {
+        "stage": "lean",
+        "error": "REPL failed to import Mathlib: TIMEOUT after 180s",
+        "consecutive": 2
+      },
+      {
+        "stage": "S4",
+        "unfilled": 3,
+        "sketch": "qwen:s4-skeleton:r4",
+        "unfilled_decls": [
+          "helper_geq_7",
+          "helper_inductive_step",
+          "p10_factorial_pow"
+        ]
+      },
+      {
+        "stage": "S4",
+        "solved": false
+      }
+    ],
+    "wall_s": 2303.1
+  }
+}
