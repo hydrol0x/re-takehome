@@ -1849,7 +1849,9 @@ class SubmissionAgent:
                 review_kind = "qwen-think" if reviewer == QWEN else "gptoss-med"
                 review_s = tb.config.scaled(
                     tb.config.qwen_call_s if reviewer == QWEN else tb.config.gptoss_call_s)
-                if tb.deadline.allows(review_s + call_s + 180):
+                # Gate on a typical review duration, not the worst-case call
+                # timeout, so the exchange can happen inside short windows.
+                if tb.deadline.allows(min(review_s, 420.0) + call_s + 180):
                     review = await tb.sample(
                         reviewer, critique_messages(tb.problem, candidate.source, feedback),
                         kind=review_kind, max_tokens=1500)
@@ -1960,7 +1962,10 @@ class SubmissionAgent:
                         tb.config.qwen_call_s if other == QWEN else tb.config.gptoss_call_s)
                     own_s = tb.config.scaled(
                         tb.config.qwen_call_s if sketcher == QWEN else tb.config.gptoss_call_s)
-                    if tb.deadline.allows(other_s + 2 * own_s + 600):
+                    # Gate: one critique call plus the sketch call plus slack
+                    # (a stricter gate never cleared inside 20- and 40-minute
+                    # windows, so the mechanism went untested at those caps).
+                    if tb.deadline.allows(min(other_s, 420.0) + own_s + 240.0):
                         plan_kind = "qwen-fast" if sketcher == QWEN else "gptoss-med"
                         plan = await tb.sample(
                             sketcher, plan_messages(tb.problem, tb.challenge),

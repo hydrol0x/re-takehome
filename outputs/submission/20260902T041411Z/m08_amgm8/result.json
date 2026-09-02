@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "problem_id": "m08_amgm8",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": null,
+    "timed_out": true,
+    "duration_ms": 180807,
+    "output": {
+      "error": "Comparator timed out after 180s"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.007517639999999999,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 762.931,
+  "models_used": [
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": false,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen-fast:s1",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0",
+        "solved": "sweep:nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "sweep:nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240776
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen-fast:s1",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240778
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      }
+    ],
+    "wall_s": 579.6
+  }
+}
