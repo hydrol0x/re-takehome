@@ -1044,3 +1044,6 @@ every scaffolded run). Identical to solo-Qwen's 6/8 and inside the duo's
 kit-16 +1 (p09, 2 of 3 seeds at 30 min vs 0 of 7 without) with no
 regressions, dev-16 13/16 at the top of the band at equal cost, held-8 6/8.
 Judge-settings check rerun below.
+
+`scripts/judge_check.sh` with the promoted default (raw-loop stage on):
+**PASSED** (19:39–19:41Z, p01 by the sweep, $0.00).
