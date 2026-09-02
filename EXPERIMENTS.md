@@ -1083,3 +1083,20 @@ Second attempt (20260902T214031Z) was killed at 27 min by a container
 reboot (rmo_2000_2: 58 replies, 36 checked, 0 accepted, 2 restarts;
 rmo_2001_2: 42 replies, 30 checked, 0 accepted, 1 restart). Relaunched a
 third time at 22:12Z.
+Third attempt (20260902T221055Z) was killed at 12 min by another reboot
+(rmo_2000_2: 18 replies, 12 checked; rmo_2001_2: 15 replies, 10 checked;
+0 accepted). **Closed (22:30Z):** the environment now reboots every 12–27
+minutes, so the 4-hour guarded control cannot complete. Cumulative guarded
+raw-loop time per problem across the three attempts: 64 min (rmo_2000_2:
+126 replies, 79 REPL checks; rmo_2001_2: 95 replies, 69 checks), zero
+accepted candidates under the guard. The unguarded 4-hour control stands
+as the long-horizon raw control, with the false-acceptance caveat above.
+
+**Night program summary (12:00–22:30Z, ≈$4.1 of API spend; all logged
+runs ≈$28.7 of the $50 budget).** Skeleton persistence at 2 h: no gain.
+Parallel raw pair: kit 9/16, held-8 4/8. Raw Qwen loop 4 of 5 on p09 at
+short windows → raw-chain stage R1 built, screened (kit 9/16 with p09,
+dev-16 13/16, held-8 6/8), promoted to default; judge check passed.
+Restarts control: p09 at 16 min, hard two unsolved. p09/p10 load artifacts
+resolved by quiet rescoring (solo-Qwen 4 h p09 passes in 51 s; skeleton-keep
+p10 in 59 s); solo-Qwen p10 rerun passes at 14 min.
