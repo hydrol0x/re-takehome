@@ -138,15 +138,17 @@ class Config:
     # fresh S4 sketch, the sketcher proposes an informal plan, the other model
     # critiques it, and the sketcher writes the skeleton given plan + critique.
     dialogue_sketch: bool = False
-    # SUBMISSION_RAW_LOOP (research branch R1, default off): at cycle 1, after
-    # the S1 wave, run the kit baseline's own loop verbatim for Qwen — one
-    # chronological chain of whole-file rewrites at temperature 0.2 with the
-    # previous attempt's compiler errors, byte-identical prompt — for up to
-    # SUBMISSION_RAW_LOOP_TURNS turns. Motivation: the raw Qwen loop solved
-    # p09 in both 30-minute runs that tried it while seven controller runs
-    # produced no accepted p09 candidate (EXPERIMENTS.md, pair arm).
-    raw_loop: bool = False
-    raw_loop_turns: int = 8
+    # SUBMISSION_RAW_LOOP (research branch R1; promoted default, "0" disables):
+    # at cycle 1, after the S1 wave, run the kit baseline's own loop verbatim
+    # for Qwen — one chronological chain of whole-file rewrites at temperature
+    # 0.2 with the previous attempt's compiler errors, byte-identical prompt —
+    # for up to SUBMISSION_RAW_LOOP_TURNS turns (default 16). Motivation and
+    # evidence (EXPERIMENTS.md): the raw Qwen loop solved p09 in four of five
+    # short-window runs while seven controller runs produced no accepted p09
+    # candidate; with the stage, p09 fell in two of three 30-minute runs,
+    # kit-16 9/16 (no regressions), dev-16 13/16 (top of band), held-8 6/8.
+    raw_loop: bool = True
+    raw_loop_turns: int = 16
     # Wall-clock share of the agent window the chain may use before it
     # yields to S4 (SUBMISSION_RAW_LOOP_SHARE, default 0.45): at short caps
     # the turn cap alone would starve decomposition.
@@ -212,9 +214,9 @@ class Config:
             # Dialogue mechanisms (research branches D1/D2): default off.
             dialogue_repair=os.environ.get("SUBMISSION_DIALOGUE_REPAIR", "").strip() == "1",
             dialogue_sketch=os.environ.get("SUBMISSION_DIALOGUE_SKETCH", "").strip() == "1",
-            # SUBMISSION_RAW_LOOP (research branch R1): default off.
-            raw_loop=os.environ.get("SUBMISSION_RAW_LOOP", "").strip() == "1",
-            raw_loop_turns=_env_int("SUBMISSION_RAW_LOOP_TURNS", 8, 1, 25),
+            # SUBMISSION_RAW_LOOP (research branch R1): promoted default; "0" disables.
+            raw_loop=os.environ.get("SUBMISSION_RAW_LOOP", "1").strip() != "0",
+            raw_loop_turns=_env_int("SUBMISSION_RAW_LOOP_TURNS", 16, 1, 25),
             raw_loop_share=min(1.0, max(0.0, float(
                 os.environ.get("SUBMISSION_RAW_LOOP_SHARE", "0.45") or 0.45))),
         )
@@ -1763,7 +1765,9 @@ class SubmissionAgent:
         if QWEN not in tb.models_arm:
             return None
         max_turns = self.config.raw_loop_turns
-        share_s = self.config.raw_loop_share * self.config.agent_time_s
+        # Bounded in absolute terms too: at judge caps the turn cap, not the
+        # share, should end the chain (observed solves came within 20 min).
+        share_s = min(self.config.raw_loop_share * self.config.agent_time_s, 2400.0)
         stage_started = time.monotonic()
         feedback = ""
         for turn in range(1, max_turns + 1):

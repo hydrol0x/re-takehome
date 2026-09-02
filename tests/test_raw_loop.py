@@ -74,18 +74,20 @@ def norm_num_accepts(source):
 # ---- Config --------------------------------------------------------------
 
 
-def test_config_raw_loop_default_off(monkeypatch):
+def test_config_raw_loop_default_on(monkeypatch):
     monkeypatch.delenv("SUBMISSION_RAW_LOOP", raising=False)
     monkeypatch.delenv("SUBMISSION_RAW_LOOP_TURNS", raising=False)
     cfg = Config.from_env()
-    assert cfg.raw_loop is False and cfg.raw_loop_turns == 8
+    assert cfg.raw_loop is True and cfg.raw_loop_turns == 16
 
 
-def test_config_raw_loop_env_on(monkeypatch):
-    monkeypatch.setenv("SUBMISSION_RAW_LOOP", "1")
+def test_config_raw_loop_env_off_and_turns(monkeypatch):
+    monkeypatch.setenv("SUBMISSION_RAW_LOOP", "0")
     monkeypatch.setenv("SUBMISSION_RAW_LOOP_TURNS", "5")
     cfg = Config.from_env()
-    assert cfg.raw_loop is True and cfg.raw_loop_turns == 5
+    assert cfg.raw_loop is False and cfg.raw_loop_turns == 5
+    monkeypatch.setenv("SUBMISSION_RAW_LOOP", "1")
+    assert Config.from_env().raw_loop is True
 
 
 # ---- prompt and feedback parity with the kit baseline --------------------
