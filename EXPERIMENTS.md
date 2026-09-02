@@ -887,3 +887,8 @@ Comparator in 51 s on the quiet machine** (evaluator rerun, mechanical
 re-check of the existing solution). The run is therefore 2/4 on the proof
 itself (p09, rmo_2000_2), with the in-window verdict for p09 lost to load:
 p09 has now been solved by solo-Qwen at 4 hours in both runs that tried it.
+
+**p10 rerun (20260902T134847Z, solo-Qwen, 2-hour cap, 1 worker, light load).**
+Replaces the import-timeout loss above: **PASSED in 14 min, $0.039**, via
+an S4 skeleton fill (round 3); precheck 45 s, final Comparator 57 s. p10
+remains a short-cap problem under the scaffold for either model set.

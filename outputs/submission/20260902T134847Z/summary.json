@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "set": "p10-only",
+  "problems": [
+    {
+      "problem_id": "p10_factorial_pow",
+      "status": "passed",
+      "passed": true,
+      "points": 1,
+      "actual_cost_usd": 0.03852868500000001,
+      "wall_s": 847.286,
+      "models_used": [
+        "qwen/qwen3.5-flash-02-23"
+      ],
+      "failure_reason": null
+    }
+  ],
+  "total_points": 1,
+  "max_points": 1,
+  "actual_cost_usd": 0.038528685,
+  "wall_s_sum": 847.286,
+  "run_id": "410a3da83961432f9866253bd06205e5",
+  "wall_s": 847.82,
+  "finished_at": "2026-09-02T14:02:55.382890+00:00"
+}
