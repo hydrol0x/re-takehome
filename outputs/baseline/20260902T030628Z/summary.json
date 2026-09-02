@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "set": "sample",
+  "problems": [
+    {
+      "problem_id": "p09_imo1964",
+      "status": "failed",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.06841822200000001,
+      "wall_s": 7653.789,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "Comparator timed out after 180s"
+    },
+    {
+      "problem_id": "rmo_2000_2",
+      "status": "harness_error",
+      "passed": false,
+      "points": 0,
+      "actual_cost_usd": 0.043870395000000006,
+      "wall_s": 4753.329,
+      "models_used": [
+        "openai/gpt-oss-120b"
+      ],
+      "failure_reason": "REPL failed to import Mathlib: TIMEOUT after 180s"
+    }
+  ],
+  "total_points": 0,
+  "max_points": 2,
+  "actual_cost_usd": 0.112288617,
+  "wall_s_sum": 12407.118,
+  "run_id": "66f3578e538c4d66abc30ca05d183d2e",
+  "wall_s": 7654.123,
+  "finished_at": "2026-09-02T05:14:02.812880+00:00"
+}

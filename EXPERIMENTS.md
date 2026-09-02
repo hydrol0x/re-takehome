@@ -812,3 +812,12 @@ seed on held-8; SUBMISSION_SKELETON_KEEP at 2-hour caps on the kit hard4
 | --- | --- | --- | --- | --- |
 | 20260902T024814Z | D1 dialogue repair (other model reviews each failing attempt; author repairs with errors + review) | **9/16** ($0.218) | 283 Qwen / 13 GPT-OSS calls | review fired 7× across 4 problems only — a GPT-OSS review costs minutes at this cap, so most repair rounds never reach it and those that do lose cycles; missed c03, c10, h01, h02, h04, h05, m06 (band: 11–13; B8 one-way critique: 12) |
 | 20260902T033213Z | D2 plan dialogue (propose → other model critiques → sketch), 20-min caps | 10/16 ($0.211) | 340 Qwen / 5 GPT-OSS calls | **mechanism never fired**: the S4 time gate (critique + two sketch calls + slack) never clears inside a 20-min window, so this run is a default-equivalent datapoint (band 11–13). Rerun at 40-min caps, where S4 has room (default at 40 min: 11/16) |
+
+### Raw GPT-OSS at its full 25-turn budget, 8-hour cap (20260902T030628Z)
+
+p09: ✗ after all 25 turns (128 min, $0.068, 0 accepted checks).
+rmo_2000_2: ✗ through 21 turns (79 min, $0.044, 0 accepted) when a provider
+transport fault ended the rail-less loop. Given the whole turn budget the
+raw GPT-OSS loop still does not reach either problem; its limit here is the
+25-turn cap, not wall-clock, so no long-horizon raw control is possible
+with the kit baseline as shipped (see §5.3).
