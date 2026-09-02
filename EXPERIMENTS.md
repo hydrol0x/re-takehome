@@ -892,3 +892,20 @@ p09 has now been solved by solo-Qwen at 4 hours in both runs that tried it.
 Replaces the import-timeout loss above: **PASSED in 14 min, $0.039**, via
 an S4 skeleton fill (round 3); precheck 45 s, final Comparator 57 s. p10
 remains a short-cap problem under the scaffold for either model set.
+
+#### Pair arm on the kit 16, 30-minute caps, 4 workers (20260902T134450Z, revised statements)
+
+**9/16, $0.46** (p01–p09; per-loop cost of the two raw loops run separately was
+$0.24 + $0.21). Winners: Qwen on p01–p04, p06, p08 (turn 1) and p09 (turn 2,
+4 min); GPT-OSS on p05 (turn 8) and p07 (turn 4). Unsolved: p10 (Qwen 25
+turns, GPT-OSS 6), both Putnams (revised statements, no definitional route),
+rmo_2000_2, rmo_2000_3, rmo_2000_6, rmo_2001_2 (`cost_unknown`: a Qwen call
+started at 1358 s ran 375 s and was still in flight at the 1680 s agent
+deadline; raw calls reach 440–470 s in this run, so the 300 s turn guard was
+too short and is raised to 480 s). On revised statements the two raw loops'
+union is 10 (p01–p10); one 30-minute window of the pair realizes 9 of those
+10 in one budget, level with the controller's 30-minute arms (8–9 on revised
+statements) and above them on p09, which no controller arm solved at 30
+minutes in seven runs (zero REPL-accepted p09 candidates in all seven),
+while the raw Qwen loop is now 2-for-2 on p09 at short caps (11 turns in the
+solo raw run, 2 turns here; both proofs pass the Comparator in 26–49 s).

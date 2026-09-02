@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "baseline": "pair",
+    "arm": "pair",
+    "origin": "pair:qwen/qwen3.5-flash-02-23",
+    "winner": "qwen/qwen3.5-flash-02-23",
+    "accepted_by_repl": true,
+    "elapsed_s": 104.1,
+    "loops": {
+      "qwen/qwen3.5-flash-02-23": {
+        "model": "qwen/qwen3.5-flash-02-23",
+        "turns": 1,
+        "restarts": 0,
+        "accepted": true,
+        "stopped": "accepted",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": true,
+            "timed_out": false,
+            "message_count": 3
+          }
+        ]
+      },
+      "openai/gpt-oss-120b": {
+        "model": "openai/gpt-oss-120b",
+        "turns": 1,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "stop",
+        "attempts": []
+      }
+    }
+  }
+}

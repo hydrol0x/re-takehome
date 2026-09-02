@@ -16,7 +16,7 @@ Knobs (all optional):
       a loop that exhausts its turns without acceptance starts over with a
       fresh conversation while the window allows (long-horizon control:
       "independent restarts", the simplest possible use of a long window).
-  PAIR_TURN_GUARD_S (default 300)
+  PAIR_TURN_GUARD_S (default 480)
       a loop starts a new turn only if at least this many seconds remain
       before the agent deadline, so a call is never cut off by the harness
       (a cancelled call closes the shared ledger for both loops).
@@ -47,7 +47,7 @@ from baselines.simple_agent import (
     _format_messages,
 )
 
-DEFAULT_TURN_GUARD_S = 300.0  # one raw call (<=180 s read timeout) + one REPL check
+DEFAULT_TURN_GUARD_S = 480.0  # observed raw-call tail (~470 s) + one REPL check
 
 
 class _Loop:

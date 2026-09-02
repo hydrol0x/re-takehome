@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "baseline": "pair",
+    "arm": "pair",
+    "origin": "pair:qwen/qwen3.5-flash-02-23",
+    "winner": "qwen/qwen3.5-flash-02-23",
+    "accepted_by_repl": true,
+    "elapsed_s": 104.8,
+    "loops": {
+      "qwen/qwen3.5-flash-02-23": {
+        "model": "qwen/qwen3.5-flash-02-23",
+        "turns": 11,
+        "restarts": 0,
+        "accepted": true,
+        "stopped": "accepted",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 2,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 3,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 4,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 5,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 6,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 3
+          },
+          {
+            "turn": 7,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 8,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 9,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 10,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 11,
+            "accepted": true,
+            "timed_out": false,
+            "message_count": 0
+          }
+        ]
+      },
+      "openai/gpt-oss-120b": {
+        "model": "openai/gpt-oss-120b",
+        "turns": 2,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "stop",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 2
+          }
+        ]
+      }
+    }
+  }
+}
