@@ -726,9 +726,10 @@ was the load-induced final-scoring timeout diagnosed above.
 | 20260901T212748Z | solo-qwen (30-min) | **6/8** ($0.165) | c04 c07 c09 h06 m03 m07 (identical to the duo's two 6/8 checks) | light (baseline only, load ≈0.5–1.5) |
 | 20260901T220258Z | solo-gptoss (30-min) | 5/8 ($0.066) | c04 c07 c09 h06 m07 | light (baseline only) |
 | 20260901T223706Z | **duo rerun (30-min)** | **7/8** ($0.144) | c04 c07 c09 h03 h06 m03 m07 — **h03_invsq_sum first-ever solve** (winning proof: a qwen-fast S1 sample in a later cycle after S4/S2 rounds; 88 Qwen / 3 GPT-OSS calls; precheck passed in 40 s) | light (baseline only, matched with the solo arms) |
+| 20260902T075141Z | duo, seed 2 (30-min, light load) | 6/8 ($0.091) | c04 c07 c09 h06 m03 m07 (same set as solo-qwen; h03 and m05 missed) | light (idle machine) |
 
-Cross-run duo tally on held-8 (four runs): c04 4/4, c09 4/4, m07 4/4, h06
-4/4, c07 3/4, m03 3/4, h03 1/4, m05 0/4. Under matched light load at 30-min
+Cross-run duo tally on held-8 (five runs): c04 5/5, c09 5/5, m07 5/5, h06
+5/5, c07 4/5, m03 4/5, h03 1/5, m05 0/5. Under matched light load at 30-min
 caps the ordering is duo 7/8 > solo-qwen 6/8 > solo-gptoss 5/8 > raw Qwen
 4/8; the duo's extra problem (h03) was a Qwen-wave coverage event, not a
 cross-model artifact — consistent with the paper's scaffold-then-coverage
