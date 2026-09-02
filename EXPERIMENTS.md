@@ -879,3 +879,11 @@ and the other three are the problems that yield only at 4–8 hours (p09,
 rmo_2000_2) or never (rmo_2001_2). With the 20-minute dev screen (13 → 12)
 and the 60-minute hard-four run (0/4), skeleton persistence is now tested at
 three horizons with no gain at any; it stays opt-in.
+
+**Addendum (rescore, 2026-09-02 13:47Z).** The p09 solution from this
+solo-Qwen 4-hour run (origin `qwen-fast:s1`, REPL-accepted, final
+Comparator timed out at 181 s under four-worker load) **passes the
+Comparator in 51 s on the quiet machine** (evaluator rerun, mechanical
+re-check of the existing solution). The run is therefore 2/4 on the proof
+itself (p09, rmo_2000_2), with the in-window verdict for p09 lost to load:
+p09 has now been solved by solo-Qwen at 4 hours in both runs that tried it.
