@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "baseline": "pair",
+    "arm": "pair+restarts",
+    "origin": "pair:qwen/qwen3.5-flash-02-23",
+    "winner": null,
+    "accepted_by_repl": false,
+    "elapsed_s": 1052.0,
+    "loops": {
+      "qwen/qwen3.5-flash-02-23": {
+        "model": "qwen/qwen3.5-flash-02-23",
+        "turns": 20,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "error:LLMCallError",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 20
+          },
+          {
+            "turn": 2,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 4
+          },
+          {
+            "turn": 3,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 6
+          },
+          {
+            "turn": 4,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 23
+          },
+          {
+            "turn": 5,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 27
+          },
+          {
+            "turn": 6,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 14
+          },
+          {
+            "turn": 7,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 17
+          },
+          {
+            "turn": 8,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 25
+          },
+          {
+            "turn": 9,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 6
+          },
+          {
+            "turn": 10,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 5
+          },
+          {
+            "turn": 11,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 6
+          },
+          {
+            "turn": 12,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 14
+          },
+          {
+            "turn": 13,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 6
+          },
+          {
+            "turn": 14,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 12
+          },
+          {
+            "turn": 15,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 16,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 12
+          },
+          {
+            "turn": 17,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 18,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 9
+          },
+          {
+            "turn": 19,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 24
+          },
+          {
+            "turn": 20,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 6
+          }
+        ]
+      },
+      "openai/gpt-oss-120b": {
+        "model": "openai/gpt-oss-120b",
+        "turns": 2,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "error:LLMCallError",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 15
+          },
+          {
+            "turn": 2,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 20
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "baseline": "pair",
+    "arm": "pair+restarts",
+    "origin": "pair:qwen/qwen3.5-flash-02-23",
+    "winner": null,
+    "accepted_by_repl": false,
+    "elapsed_s": 1052.0,
+    "loops": {
+      "qwen/qwen3.5-flash-02-23": {
+        "model": "qwen/qwen3.5-flash-02-23",
+        "turns": 15,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "error:LLMCallError",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 12
+          },
+          {
+            "turn": 2,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 3,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 4,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 15
+          },
+          {
+            "turn": 5,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 2
+          },
+          {
+            "turn": 6,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 3
+          },
+          {
+            "turn": 7,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 8,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 9,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 17
+          },
+          {
+            "turn": 10,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 16
+          },
+          {
+            "turn": 11,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 10
+          },
+          {
+            "turn": 12,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 13,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 9
+          },
+          {
+            "turn": 14,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 9
+          },
+          {
+            "turn": 15,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 4
+          }
+        ]
+      },
+      "openai/gpt-oss-120b": {
+        "model": "openai/gpt-oss-120b",
+        "turns": 8,
+        "restarts": 0,
+        "accepted": false,
+        "stopped": "error:LLMCallError",
+        "attempts": [
+          {
+            "turn": 1,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 49
+          },
+          {
+            "turn": 2,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 49
+          },
+          {
+            "turn": 3,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 4,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 1
+          },
+          {
+            "turn": 5,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 7
+          },
+          {
+            "turn": 6,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 34
+          },
+          {
+            "turn": 7,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 34
+          },
+          {
+            "turn": 8,
+            "accepted": false,
+            "timed_out": false,
+            "message_count": 34
+          }
+        ]
+      }
+    }
+  }
+}
