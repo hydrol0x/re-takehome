@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "problem_id": "m02_ord25",
+  "status": "failed",
+  "passed": false,
+  "points": 0,
+  "comparator": {
+    "passed": false,
+    "exit_code": null,
+    "timed_out": true,
+    "duration_ms": 180860,
+    "output": {
+      "error": "Comparator timed out after 180s"
+    }
+  },
+  "answer_shape": {
+    "passed": true,
+    "errors": []
+  },
+  "budget": {
+    "limit_usd": 1.0,
+    "spent_usd": 0.014397025,
+    "reserved_usd": 0,
+    "accounting_complete": true
+  },
+  "within_time": true,
+  "wall_s": 982.938,
+  "models_used": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.5-flash-02-23"
+  ],
+  "both_required_models_used": true,
+  "agent_error": null,
+  "agent_metadata": {
+    "agent": "coordination-v2",
+    "arm": "duo",
+    "origin": "qwen-fast:s1",
+    "accepted_by_repl": true,
+    "stages": [
+      {
+        "stage": "S0.5",
+        "verdict": "single",
+        "answers": {
+          "m02_answer": "20"
+        },
+        "candidates": [
+          {
+            "m02_answer": "20"
+          },
+          null
+        ]
+      },
+      {
+        "stage": "S0",
+        "solved": "sweep:decide"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "sweep:decide",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240844
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 8,
+        "rejected": 1
+      },
+      {
+        "stage": "S4-skeleton",
+        "dialogue": "review",
+        "reviewer": "gptoss-med"
+      },
+      {
+        "stage": "S4-skeleton",
+        "dialogue": "review",
+        "reviewer": "gptoss-med"
+      },
+      {
+        "stage": "S4-skeleton",
+        "solved": "qwen:s4-skeleton:r2"
+      },
+      {
+        "stage": "S4",
+        "sketch": "qwen:s4-skeleton:r2",
+        "holes": 0
+      },
+      {
+        "stage": "S4",
+        "solved": "qwen:s4-skeleton:r2:filled"
+      },
+      {
+        "stage": "S5-precheck",
+        "origin": "qwen:s4-skeleton:r2:filled",
+        "passed": false,
+        "timed_out": true,
+        "duration_ms": 240950
+      },
+      {
+        "stage": "S1",
+        "wave": "qwen-fast",
+        "planned": 9,
+        "usable": 9,
+        "rejected": 0
+      },
+      {
+        "stage": "S1",
+        "solved": "qwen-fast:s1"
+      }
+    ],
+    "wall_s": 799.8
+  }
+}

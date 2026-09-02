@@ -814,6 +814,7 @@ seed on held-8; SUBMISSION_SKELETON_KEEP at 2-hour caps on the kit hard4
 | 20260902T033213Z | D2 plan dialogue (propose → other model critiques → sketch), 20-min caps | 10/16 ($0.211) | 340 Qwen / 5 GPT-OSS calls | **mechanism never fired**: the S4 time gate (critique + two sketch calls + slack) never clears inside a 20-min window, so this run is a default-equivalent datapoint (band 11–13). Rerun at 40-min caps, where S4 has room (default at 40 min: 11/16) |
 | 20260902T041411Z | D2 at 40-min caps, original gate | 9/16 ($0.373; m02 invalid — REPL import timeout) | S4 reached in 9 problems, **0 exchanges** | the gate (worst-case GPT-OSS timeout + two sketch calls + slack) never clears even at 40 min; effectively a default run at 40-min caps under moderate load (earlier default at 40 min: 11/16). Gates re-sized on typical review duration; rerun follows |
 | 20260902T053118Z | **D2 plan dialogue at 40-min caps, working gate** | **12/16** ($0.375) | 17 exchanges across 10 problems (all 10 that reached S4); 493 Qwen / 34 GPT-OSS calls | inside the band (40-min default: 11; 20-min band 11–13); the structural three (h02, h04, m06) still missed, plus m02; ≈+50% cost over a default 40-min run. Reads as neutral: the critiques are substantive (e.g. rejecting a norm_num plan for 2^2025 in favour of Int.ModEq.pow) but do not convert any problem the default misses |
+| 20260902T064728Z | **D1 dialogue repair at 40-min caps, working gate** | 10/16 ($0.357) | 24 reviews across 7 problems; 396 Qwen / 41 GPT-OSS calls | at the low edge of the band with ≈+45% cost; missed c03, h01, h02, h04, m02, m06 |
 
 ### Raw GPT-OSS at its full 25-turn budget, 8-hour cap (20260902T030628Z)
 
@@ -823,3 +824,12 @@ transport fault ended the rail-less loop. Given the whole turn budget the
 raw GPT-OSS loop still does not reach either problem; its limit here is the
 25-turn cap, not wall-clock, so no long-horizon raw control is possible
 with the kit baseline as shipped (see §5.3).
+
+**Dialogue conclusion.** Two genuine two-model exchanges were built and
+tested at the screening protocol's caps (20 min, then 40 min so that the
+exchanges actually fire): plan dialogue before sketching scored 12/16 with
+17 exchanges (band 11–13; prior 40-min default 11), and review-informed
+repair scored 10/16 with 24 reviews (9/16 at 20 min where it rarely fired).
+The earlier one-way critique (B8) scored 12. None of the three converted a
+problem the tuned default misses, and both two-way mechanisms cost 40–50%
+more per run. Verdict: neutral at best at short horizons; not promoted.
