@@ -73,6 +73,19 @@ Checkpoint after meaningful improvements. It atomically updates
 `solution.lean`, so the outer runner can retain it if the agent process is
 killed at the wall-clock deadline.
 
+## Optional services
+
+Two attributes on `Services` are optional and may be `None`; agents should
+use `getattr(services, "compare", None)` and `getattr(services, "state_dir", None)`.
+
+- `services.compare(source, timeout_s=240)` runs the kit's real Comparator on
+  a candidate in a fresh container and returns
+  `{"passed", "timed_out", "duration_ms", "reason"}`. The warm REPL cannot
+  observe cold-build kernel cost, so this lets an agent verify a candidate
+  against the actual scoring gate before returning it.
+- `services.state_dir` is the problem's output directory, a durable scratch
+  location for search state.
+
 ## Concurrency
 
 `--n-workers` belongs to the outer runner and schedules different problems.
