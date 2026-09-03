@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "problem_id": "c07_order_three",
+  "description": "# c07_order_three\n\nFind the least positive integer $n$ such that $11$ divides $3^n - 1$ (the multiplicative\norder of $3$ modulo $11$).\n\nFill in `c07_answer` with a numeric literal and prove the theorem. `IsLeast S a`\nmeans `a ∈ S` and `a` is a lower bound of `S`, so the proof has two parts:\nyour `n` works, and nothing smaller does.\n",
+  "challenge": "import Mathlib\n\n/-- The least positive integer `n` such that `11` divides `3 ^ n - 1`.\nMust be a numeric literal. -/\nabbrev c07_answer : ℕ := sorry\n\n/-- `c07_answer` is the least element of the set of positive `n` with `11 ∣ 3 ^ n - 1`. -/\ntheorem c07_order_three :\n    IsLeast {n : ℕ | 0 < n ∧ 11 ∣ 3 ^ n - 1} c07_answer := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "c07_order_three"
+  ],
+  "definition_names": [
+    "c07_answer"
+  ],
+  "numeric_answer_names": [
+    "c07_answer"
+  ],
+  "out_dir": "outputs/baseline/20260903T030314Z/c07_order_three",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "a06fd50264af419ebcca72752659b9c5"
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "problem_id": "m03_recip9",
+  "description": "# m03_recip9\n\nLet $x$ and $y$ be positive real numbers with $x + y = 1$. Prove that\n$$\\left(1 + \\frac{1}{x}\\right)\\left(1 + \\frac{1}{y}\\right) \\ge 9,$$\nwith equality when $x = y = \\tfrac12$.\n\nProve the theorem `m03_recip9`. After clearing denominators the inequality\nreduces to $9xy \\le (x+1)(y+1) = xy + 2$, i.e. $4xy \\le 1 = (x+y)^2$, which is\n$(x-y)^2 \\ge 0$.\n",
+  "challenge": "import Mathlib\n\n/-- If `x` and `y` are positive reals with `x + y = 1`, then\n`(1 + 1/x) * (1 + 1/y) ≥ 9`. -/\ntheorem m03_recip9 (x y : ℝ) (hx : 0 < x) (hy : 0 < y) (h : x + y = 1) :\n    9 ≤ (1 + 1 / x) * (1 + 1 / y) := by\n  sorry\n",
+  "problem_metadata": {},
+  "theorem_names": [
+    "m03_recip9"
+  ],
+  "definition_names": [],
+  "numeric_answer_names": [],
+  "out_dir": "outputs/baseline/20260903T030314Z/m03_recip9",
+  "budget_usd": 1.0,
+  "time_limit_s": 1800.0,
+  "lean_image": "ghcr.io/verifiedmechanisms/re-takehome-lean@sha256:ee48287cd31c0a7df572093a879ed7289c2f01fec6c7af8716c605fc8c670c39",
+  "lean_check_timeout_s": 120,
+  "comparator_timeout_s": 180,
+  "verify_reserve_s": 120,
+  "agent": "baselines.simple_agent:create_agent",
+  "session_id": "8c67992323b04145b46a735783d977c6"
+}
