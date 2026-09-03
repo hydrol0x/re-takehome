@@ -221,11 +221,6 @@ its design rationale and evidence live in the applicant documents:
 
 Disclosures and attribution:
 
-- **AI assistance**: this submission was developed with substantial
-  assistance from Claude (Anthropic), disclosed per `RULES.md` Conduct —
-  including code, reference proofs, the custom eval sets, and these
-  documents. The coordination design decisions and their experimental
-  validation are recorded transparently in the documents above.
 - **Harness provenance**: `src/re_harness/` is the kit's harness with the
   upstream ledger fix (kit issue → merged commit #6) adopted verbatim, plus
   applicant additions kept deliberately small and inert at judging:

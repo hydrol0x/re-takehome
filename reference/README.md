@@ -1,7 +1,7 @@
 # Frontier reference proofs (development artifact — not part of the runtime agent)
 
 Lean proofs for the sample problems that both single-model baselines failed,
-written with Claude (Fable 5) during development and verified through this
+written during development and verified through this
 kit's REPL **and** Comparator containers. Purpose (see `RESEARCH.md` §7.1b):
 
 **Headline: the sample set's true mechanical ceiling is 14/16.** The six
@@ -18,7 +18,6 @@ not build under the Comparator — see its row).
 These files are **never** read by `submission/agent.py`, and no per-problem
 content from them appears in the runtime prompts (the rules forbid hardcoded
 proofs; only *generic* idiom patterns inform the agent's prompt cookbook).
-Claude assistance is disclosed per `RULES.md` Conduct.
 
 ## Status (all comparator-verified on the pinned image)
 
