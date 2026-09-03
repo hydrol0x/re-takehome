@@ -187,11 +187,8 @@
   <svg width="600" height="268" viewBox="0 0 600 268" font-family="Liberation Sans, Arial, sans-serif">
     <!-- legend -->
     <g font-size="9" fill="#333">
-      <rect x="40" y="8" width="10" height="10" fill="#8f8f8a" rx="2"/><text x="54" y="16.5">raw kit repair loop</text>
-      <rect x="150" y="8" width="10" height="10" fill="#7fa8dc" rx="2"/><text x="164" y="16.5">controller, seed 1</text>
-      <rect x="250" y="8" width="10" height="10" fill="#2a78d6" rx="2"/><text x="264" y="16.5">controller, seed 2</text>
-      <rect x="350" y="8" width="10" height="10" fill="#1d5aa6" rx="2"/><text x="364" y="16.5">controller, run 3</text>
-      <rect x="450" y="8" width="10" height="10" fill="#4a4a46" rx="2"/><text x="464" y="16.5">raw pair, one window</text>
+      <rect x="40" y="8" width="10" height="10" fill="#8f8f8a" rx="2"/><text x="54" y="16.5">no scaffold: the kit's plain compile-and-repair loop</text>
+      <rect x="318" y="8" width="10" height="10" fill="#2a78d6" rx="2"/><text x="332" y="16.5">with scaffold: our controller (one bar per full run)</text>
     </g>
     <!-- panel A: kit set -->
     <text x="205" y="40" font-size="10" font-weight="bold" text-anchor="middle" fill="#111">Kit set (16 problems), 30-min caps</text>
@@ -199,66 +196,79 @@
     <g stroke="#e2e2df" stroke-width="0.8"><line x1="40" y1="180" x2="372" y2="180"/><line x1="40" y1="140" x2="372" y2="140"/><line x1="40" y1="100" x2="372" y2="100"/><line x1="40" y1="60" x2="372" y2="60"/></g>
     <g font-size="8.5" fill="#555" text-anchor="end"><text x="36" y="223">0</text><text x="36" y="183">4</text><text x="36" y="143">8</text><text x="36" y="103">12</text><text x="36" y="63">16</text></g>
     <line x1="40" y1="80" x2="372" y2="80" stroke="#999" stroke-dasharray="3,3"/>
-    <text x="44" y="77" font-size="8" fill="#666">scorable ceiling (14, original statements; &#167;5.3&#8211;5.4)</text>
+    <text x="44" y="77" font-size="8" fill="#666">14 of 16 scorable under the original statements (&#167;5.3&#8211;5.4)</text>
     <line x1="40" y1="100" x2="372" y2="100" stroke="#777" stroke-dasharray="6,3"/>
-    <text x="44" y="97" font-size="8" fill="#666">union of the two raw loops (12)</text>
+    <text x="44" y="97" font-size="8" fill="#666">solved by at least one plain loop across runs (12)</text>
     <g>
-      <rect x="48" y="130" width="22" height="90" rx="2" fill="#8f8f8a"/>
-      <text x="59" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
-      <rect x="74" y="140" width="22" height="80" rx="2" fill="#7fa8dc"/>
-      <text x="85" y="136" font-size="9" text-anchor="middle" fill="#333">8</text>
-      <rect x="100" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
-      <text x="111" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
-      <text x="85" y="236" font-size="9.5" text-anchor="middle" fill="#111">Qwen only</text>
-      <rect x="140" y="120" width="22" height="100" rx="2" fill="#8f8f8a"/>
-      <text x="151" y="116" font-size="9" text-anchor="middle" fill="#333">10</text>
-      <rect x="166" y="140" width="22" height="80" rx="2" fill="#7fa8dc"/>
-      <text x="177" y="136" font-size="9" text-anchor="middle" fill="#333">8</text>
-      <rect x="192" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
-      <text x="203" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
-      <text x="177" y="236" font-size="9.5" text-anchor="middle" fill="#111">GPT-OSS only</text>
-      <rect x="232" y="130" width="22" height="90" rx="2" fill="#7fa8dc"/>
-      <text x="243" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
-      <rect x="258" y="120" width="22" height="100" rx="2" fill="#2a78d6"/>
-      <text x="269" y="116" font-size="9" text-anchor="middle" fill="#333">10</text>
-      <rect x="284" y="130" width="22" height="90" rx="2" fill="#1d5aa6"/>
-      <text x="295" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
-      <text x="269" y="236" font-size="9.5" text-anchor="middle" fill="#111">Duo</text>
-      <rect x="330" y="130" width="22" height="90" rx="2" fill="#4a4a46"/>
-      <text x="341" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
-      <text x="341" y="236" font-size="9.5" text-anchor="middle" fill="#111">Raw pair</text>
+      <rect x="52" y="130" width="22" height="90" rx="2" fill="#8f8f8a"/>
+      <text x="63.0" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="63.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">raw</text>
+      <rect x="78" y="140" width="22" height="80" rx="2" fill="#2a78d6"/>
+      <text x="89.0" y="136" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <text x="89.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 1</text>
+      <rect x="104" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
+      <text x="115.0" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="115.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 2</text>
+      <text x="89.0" y="247" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#111">Qwen alone</text>
+      <rect x="146" y="120" width="22" height="100" rx="2" fill="#8f8f8a"/>
+      <text x="157.0" y="116" font-size="9" text-anchor="middle" fill="#333">10</text>
+      <text x="157.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">raw</text>
+      <rect x="172" y="140" width="22" height="80" rx="2" fill="#2a78d6"/>
+      <text x="183.0" y="136" font-size="9" text-anchor="middle" fill="#333">8</text>
+      <text x="183.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 1</text>
+      <rect x="198" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
+      <text x="209.0" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="209.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 2</text>
+      <text x="183.0" y="247" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#111">GPT-OSS alone</text>
+      <rect x="240" y="130" width="22" height="90" rx="2" fill="#8f8f8a"/>
+      <text x="251.0" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="251.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">raw pair</text>
+      <rect x="266" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
+      <text x="277.0" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="277.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 1</text>
+      <rect x="292" y="120" width="22" height="100" rx="2" fill="#2a78d6"/>
+      <text x="303.0" y="116" font-size="9" text-anchor="middle" fill="#333">10</text>
+      <text x="303.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 2</text>
+      <rect x="318" y="130" width="22" height="90" rx="2" fill="#2a78d6"/>
+      <text x="329.0" y="126" font-size="9" text-anchor="middle" fill="#333">9</text>
+      <text x="329.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 3</text>
+      <text x="290.0" y="247" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#111">Both models</text>
     </g>
-    <text x="205" y="256" font-size="8.5" fill="#666" text-anchor="middle">Raw loops and the raw pair tie the controller arms (Putnam passes: definitional route, &#167;5.4).</text>
     <!-- panel B: held-out custom problems -->
     <text x="497" y="40" font-size="10" font-weight="bold" text-anchor="middle" fill="#111">Held-out custom problems (8), 30-min caps</text>
     <line x1="410" y1="220" x2="586" y2="220" stroke="#444" stroke-width="1"/>
     <g stroke="#e2e2df" stroke-width="0.8"><line x1="410" y1="180" x2="586" y2="180"/><line x1="410" y1="140" x2="586" y2="140"/><line x1="410" y1="100" x2="586" y2="100"/><line x1="410" y1="60" x2="586" y2="60"/></g>
     <g font-size="8.5" fill="#555" text-anchor="end"><text x="406" y="223">0</text><text x="406" y="183">2</text><text x="406" y="143">4</text><text x="406" y="103">6</text><text x="406" y="63">8</text></g>
     <g>
-      <rect x="412" y="140" width="18" height="80" rx="2" fill="#8f8f8a"/>
-      <text x="421" y="136" font-size="9" text-anchor="middle" fill="#333">4</text>
-      <rect x="432" y="100" width="18" height="120" rx="2" fill="#2a78d6"/>
-      <text x="441" y="96" font-size="9" text-anchor="middle" fill="#333">6</text>
-      <text x="431" y="236" font-size="9.5" text-anchor="middle" fill="#111">Qwen</text>
-      <rect x="458" y="160" width="18" height="60" rx="2" fill="#8f8f8a"/>
-      <text x="467" y="156" font-size="9" text-anchor="middle" fill="#333">3</text>
-      <rect x="478" y="120" width="18" height="100" rx="2" fill="#2a78d6"/>
-      <text x="487" y="116" font-size="9" text-anchor="middle" fill="#333">5</text>
-      <text x="477" y="236" font-size="9.5" text-anchor="middle" fill="#111">GPT-OSS</text>
-      <rect x="504" y="80" width="18" height="140" rx="2" fill="#7fa8dc"/>
-      <text x="513" y="76" font-size="9" text-anchor="middle" fill="#333">7</text>
-      <rect x="524" y="100" width="18" height="120" rx="2" fill="#2a78d6"/>
-      <text x="533" y="96" font-size="9" text-anchor="middle" fill="#333">6</text>
-      <text x="523" y="236" font-size="9.5" text-anchor="middle" fill="#111">Duo</text>
-      <rect x="552" y="140" width="18" height="80" rx="2" fill="#4a4a46"/>
-      <text x="561" y="136" font-size="9" text-anchor="middle" fill="#333">4</text>
-      <text x="561" y="236" font-size="9.5" text-anchor="middle" fill="#111">Pair</text>
+      <rect x="414" y="140" width="18" height="80" rx="2" fill="#8f8f8a"/>
+      <text x="423.0" y="136" font-size="9" text-anchor="middle" fill="#333">4</text>
+      <text x="423.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">raw</text>
+      <rect x="436" y="100" width="18" height="120" rx="2" fill="#2a78d6"/>
+      <text x="445.0" y="96" font-size="9" text-anchor="middle" fill="#333">6</text>
+      <text x="445.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 1</text>
+      <text x="434.0" y="247" font-size="9" font-weight="bold" text-anchor="middle" fill="#111">Qwen</text>
+      <rect x="470" y="160" width="18" height="60" rx="2" fill="#8f8f8a"/>
+      <text x="479.0" y="156" font-size="9" text-anchor="middle" fill="#333">3</text>
+      <text x="479.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">raw</text>
+      <rect x="492" y="120" width="18" height="100" rx="2" fill="#2a78d6"/>
+      <text x="501.0" y="116" font-size="9" text-anchor="middle" fill="#333">5</text>
+      <text x="501.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 1</text>
+      <text x="490.0" y="247" font-size="9" font-weight="bold" text-anchor="middle" fill="#111">GPT-OSS</text>
+      <rect x="526" y="140" width="18" height="80" rx="2" fill="#8f8f8a"/>
+      <text x="535.0" y="136" font-size="9" text-anchor="middle" fill="#333">4</text>
+      <text x="535.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">pair</text>
+      <rect x="548" y="80" width="18" height="140" rx="2" fill="#2a78d6"/>
+      <text x="557.0" y="76" font-size="9" text-anchor="middle" fill="#333">7</text>
+      <text x="557.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 1</text>
+      <rect x="570" y="100" width="18" height="120" rx="2" fill="#2a78d6"/>
+      <text x="579.0" y="96" font-size="9" text-anchor="middle" fill="#333">6</text>
+      <text x="579.0" y="232" font-size="7.5" text-anchor="middle" fill="#555">run 2</text>
+      <text x="557.0" y="247" font-size="9" font-weight="bold" text-anchor="middle" fill="#111">Both models</text>
     </g>
-    <text x="497" y="256" font-size="8.5" fill="#666" text-anchor="middle">Controller: +2, +2, +2 to +3; raw pair: +0.</text>
   </svg>
-  <div class="caption"><b>Figure 2:</b> The scaffold effect at matched 30-minute caps. Left, the kit's 16 problems: the raw single-model repair loops tie the controller arms (two seeds per arm, three duo runs). Right, the eight held-out custom problems the controller was never tuned on: the raw loops solve 4 (Qwen) and 3 (GPT-OSS); the same models inside the controller solve 6 and 5, and the duo 7 and 6 over two seeds. Dark grey: both raw loops run concurrently in one window (parallel raw pair). m03 and h03 were solved only with the scaffold.</div>
+  <div class="caption"><b>Figure 2:</b> Scaffold effect at matched 30-minute caps. Grey: no scaffold, the kit's plain compile-and-repair loop run with the named model (for both models, two such loops in parallel; the first accepted proof wins). Blue: the same models inside our controller, one bar per full run. Left, the kit's 16 problems: the scaffold ties the plain loops, and no run reaches the set of problems solved by at least one plain loop (dashed, 12). Right, eight held-out custom problems the controller was never tuned on: the scaffold adds two problems per model and two to three for both models; m03 and h03 were solved only with the scaffold.</div>
 </div>
-<p>The controlled gain shows on problems the controller was never tuned on (Fig.&nbsp;2, right). On the held-out 8 at matched 30-minute caps the raw Qwen loop solves 4/8 and the raw GPT-OSS loop 3/8; the same models inside the controller solve 6/8 (solo-Qwen) and 5/8 (solo-GPT-OSS), and the duo 7/8 and 6/8 over two seeds. Two of the eight (m03, h03) fell only with the scaffold, m03 in most scaffolded runs and h03 once in five; h06 fell in every scaffolded run and in one raw run of three. The development set shows a larger gap (raw 8/16 and 6/16 versus 11&ndash;13/16 for the controller at shorter 20-minute caps), but that set informed development, so the held-out 8 is the number to trust. On the kit set, by contrast, the scaffold adds nothing in aggregate (Fig.&nbsp;2, left). At the arms' 30-minute caps the raw Qwen loop scores <b>9/16</b>, parity with the controller's solo-Qwen arm (8&ndash;9), and its passes include p09, which no controller arm solved at 30 minutes; the raw GPT-OSS loop scores <b>10/16</b>, level with the duo's better seed, passing the seven easy problems, both Putnams (definitional route, &sect;5.4), and p10. What survives at matched caps on the kit set is composition: the free S0 sweep covers 6/16 at $0 where the raw loop spends model calls on every problem; the per-problem sets differ (the raw Qwen loop misses p05, p10, and putnam_2020_a2, which the controller covers); and the controller carries the reliability rails and comparator precheck whose measured value appears at longer horizons (&sect;6.2). The <i>union</i> of the two raw loops' passes is 12/16, more than any controller run, but a union of separate runs is not a system. Run as one, two independent raw loops under one budget and one window with the verifier taking the first accepted proof (the least coordination that uses both models; Fig.&nbsp;2, dark bars), the pair scores 9/16 on the revised statements, level with the controller's 30-minute arms, and 4/8 on the held-out set against the scaffolded arms' 5&ndash;7. Concurrent loops realize less than a union of separate runs, and the scaffold's margin on unseen problems survives this control. The one thing the pair did that no controller arm did at 30 minutes is p09, at its second turn (&sect;6.1).</p>
+<p>The controlled gain shows on problems the controller was never tuned on (Fig.&nbsp;2, right). On the held-out 8 at matched 30-minute caps the raw Qwen loop solves 4/8 and the raw GPT-OSS loop 3/8; the same models inside the controller solve 6/8 (solo-Qwen) and 5/8 (solo-GPT-OSS), and the duo 7/8 and 6/8 over two seeds. Two of the eight (m03, h03) fell only with the scaffold, m03 in most scaffolded runs and h03 once in five; h06 fell in every scaffolded run and in one raw run of three. The development set shows a larger gap (raw 8/16 and 6/16 versus 11&ndash;13/16 for the controller at shorter 20-minute caps), but that set informed development, so the held-out 8 is the number to trust. On the kit set, by contrast, the scaffold adds nothing in aggregate (Fig.&nbsp;2, left). At the arms' 30-minute caps the raw Qwen loop scores <b>9/16</b>, parity with the controller's solo-Qwen arm (8&ndash;9), and its passes include p09, which no controller arm solved at 30 minutes; the raw GPT-OSS loop scores <b>10/16</b>, level with the duo's better seed, passing the seven easy problems, both Putnams (definitional route, &sect;5.4), and p10. What survives at matched caps on the kit set is composition: the free S0 sweep covers 6/16 at $0 where the raw loop spends model calls on every problem; the per-problem sets differ (the raw Qwen loop misses p05, p10, and putnam_2020_a2, which the controller covers); and the controller carries the reliability rails and comparator precheck whose measured value appears at longer horizons (&sect;6.2). The <i>union</i> of the two raw loops' passes is 12/16, more than any controller run, but a union of separate runs is not a system. Run as one, two independent raw loops under one budget and one window with the verifier taking the first accepted proof (the least coordination that uses both models; Fig.&nbsp;2, the grey bar under both models), the pair scores 9/16 on the revised statements, level with the controller's 30-minute arms, and 4/8 on the held-out set against the scaffolded arms' 5&ndash;7. Concurrent loops realize less than a union of separate runs, and the scaffold's margin on unseen problems survives this control. The one thing the pair did that no controller arm did at 30 minutes is p09, at its second turn (&sect;6.1).</p>
 
 <h3>5.2 RQ2: pairing adds coverage through complementary outcomes; the aggregate gain is small</h3>
 <p>The duo scored one problem above the best solo arm on both seeds (9 vs. 8; 10 vs. 9) at one-half to one-third of solo-Qwen's cost per run ($0.16&ndash;0.17 vs. $0.40&ndash;0.45), and in each seed it matched the union of that seed's two solo arms; a third duo run scored 9. Because the aggregate difference sits within the &plusmn;2 run-to-run band we observed on repeated identical configurations, we do not treat the +1 as strong evidence by itself; and the parallel raw pair (9/16, &sect;5.1) shows that one window realizes less of the families' complementarity than a union of separate runs suggests. The per-problem grid (Table&nbsp;2) is the more informative result: the solo arms show complementary per-problem <i>outcomes</i> across both seeds, and additional seeds show the headline asymmetries are rate differences, not absolute ones (Table&nbsp;2 notes). A three-arm replication on the held-out 8 at 30-minute caps points the same way: duo 7/8 and 6/8, solo-Qwen 6/8, solo-GPT-OSS 5/8, raw Qwen 4/8, raw pair 4/8. The duo's extra problem in its better seed (h03, its only solve in five duo runs) came from a Qwen sampling wave in a late cycle. It is a coverage event under the scaffold, not a cross-model artifact: on these problems the scaffold effect dominates.</p>
